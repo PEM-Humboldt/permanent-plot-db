@@ -1,13 +1,134 @@
 ---
-title: 'Parcelas permnentes: alcances'
+title: 'Base de datos para las parcelas permanentes de vegetación'
+subtitle: "Objetivos, ventajas y desafíos"
 author: "Marius Bottin"
-date: "`r Sys.Date()`"
-output: pdf_document
+date: "2024-08-27"
+lang: es
+output: 
+  bookdown::github_document2:
+    number_sections: true
+bibliography: ./biblio.bib
+    
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Uno de los objetivos de la Gerencia de Información Científica del Instituto Alexander von Humboldt es proveer sistemas de información que facilitan tanto el manejo de datos para la investigación como el almacenamiento y la publicación de esos mismos datos en los catálogos institucionales.
+Los Sistemas Gestores de Bases de Datos permiten diseñar bases de datos para este doble objetivo.
+Sin embargo, requieren un trabajo de diseño, arquitectura y modelos de datos que sean adaptados para su integración en los procesos de gestión de la investigación y de la información científica.
+En este documento, documentaremos los objetivos y retos de un ejemplo de tal desarrollo para los datos específicos que provienen del muestreo en parcelas permanentes de vegetación.
+Se trata de encontrar una solución adaptada para los proyectos que utilizan este tipo de métodos de recolección de datos, pero también de tener un ejemplo de desarrollo que se pueda declinar para otros métodos de recolección de datos en el instituto.
+En el futuro, el desarrollo modular de soluciones adaptadas a varias metodologías científicas podrá dar lugar a la creación de un sistema más genérico, incluyendo la gran diversidad de las fuentes de datos utilizados en el instituto.
 
 
+# Generalidades
+
+## Parcelas permanentes de vegetación
+Las parcelas permanentes de vegetación son una metodología de muestreo de datos, principalmente biológicos, que permite seguir la evolución de una comunidad vegetal en el tiempo. 
+El muestreo se hace de manera estructurada, y con una frecuencia de repetición temporal que depende de las preguntas de investigación.
+Usualmente, todas las ramas de tamaño suficiente según las características del estudio están identificadas por un “tag”, que permite seguir su estado en el tiempo en términos de crecimiento, mortalidad, etc.
+
+El uso de parcelas permanentes responde a una necesidad creciente en la ecología moderna: el estudio de patrones ecológicos a largo plazo.
+En un libro publicado por el instituto Humboldt, @VallejoJoyas2005b exponen las necesidades de los estudios de largo plazo para entender la dinámica y la función de los ecosistemas, el rol particular que tienen las parcelas permanentes en este marco y el compromiso del instituto Humboldt para desarrollar este tipo de estudios.
+
+
+## Darwin Core
+
+Los datos publicados en los catálogos institucionales (CEIBA para los datos biologicos) se publican también en el Sistema de Información Biológico (SIB) y en GBIF.
+La norma utilizada para los datos biológicos en esos sistemas es la norma DarwinCore (DwC).
+Entonces, es importante que todos los modelos de datos utilizados en el instituto sean compatibles con esta norma.
+
+La norma DwC data del año 1998, y fue pensada para facilitar el intercambio de datos de biodiversidad, en el marco de las normas Dublin Core.
+En sus primeras versiones, las normas DwC fueron muy orientadas a las observaciones puntuales de especies. Poco a poco, las estructuras de datos incluyeron campos para las metodologías de muestreo sistemático.
+En los casos de muestreo sistemáticos, la estructura general de la norma DwC consiste en separar 2 tablas principales que son la tablas de eventos de muestreo y la tabla de registros biológicos.
+Aunque sea posible de integrar muchos campos que permiten manejar las especificidades de las parcelas permanentes de vegetación, es importante resaltar que la norma DwC no ha estado pensada para este tipo de muestreo desde el principio, y que la compatibilidad de la norma con este tipo de metodología no está optima todavía.
+En particular, la definición de los tags (identificadores de ramas) es complicada, porque implica seguir una unidad definida a una escala más fina que la escala del individuo (registro) a una escala (parcela) más larga que la unidad del evento.
+
+# Insumos en el instituto Humboldt
+Para poder desarrollar una base de datos para las parcelas, tenemos dos proyectos anteriores, necesarios
+de tomar en cuenta para respetar una cierta continuidad del desarrollo de los sistemas de información del
+instituto.
+
+En el final de 2021 / principio de 2022, se trabajó con Natalia Norden, Roy Gonzalez y Marius Bottin sobre un sistema de base de datos, para manejar datos de vegetación, incluyendo las parcelas permanentes de la red de bosque seco tropical de Colombia (Convenio No. 21-270).
+Los resultados principales de este proyecto están en <https://github.com/PEM-Hum  boldt/sibPlot>.
+
+En el final de 2022, se trabajó con Bibiana Gomez, Adriana Restrepo y Marius Bottin sobre un sistema integrado de base de datos para el proyecto de linea base de biodiversidad en Puerto Wilches.
+Esa base de datos permitió tener un sistema de gestión y consulta de los datos para varios grupos biológicos.
+Los datos fueron integrados desde los archivos DwC del proyecto para varios grupos biológicos/métodos de recolección (Mariposas,
+escarabajos, Hormigas, Colembolos, herpetos, peces, aves, mamíferos, botánica, fitoplancton, macrofitas, macroinvertebrados, perifiton, zooplancton).
+La base de datos permite transferir datos, organizados en una manera adecuada para consultas con objetivos de investigación, sistemas taxonómicos y indicadores, hacía tablas principales del formato DwC (no existe todavía un sistema para crear los archivos de metadatos DwC desde la base de datos).
+El convenio fue “Convenio de Financiación 21-238 suscrito con National Geographic Society / Microsoft Corporation”.
+La mayoría de los resultados y códigos están en el repositorio
+<https://github.com/PEM-Humboldt/biodiversity-puerto-wilches>.
+
+# Datos disponibles
+El equipo del Centro de Estudios Socioecologicos y Cambio Global del instituto Humboldt tiene un juego de datos de parcelas permanentes en asociación con la red de Bosques Secos Tropicales de Colombia (Red BST-Col).
+En el marco de la Red BST-Col, los investigadores se acordaron sobre un modelo de datos relacionales y plantillas para la red.
+Actualmente, Natalia Norden y su equipo están limpiando un juego de datos que podríamos utilizar para probar las funcionalidades de la base de datos.
+
+# Objetivos 
+## Una base de datos funcional para los estudios de largo plazo
+Dado la importancia de los estudios de largo plazo para la ecología, es importante proponer una estructura de datos y herramientas asociadas que pueda facilitar la consulta, el almacenamiento y la exportación de tablas para el trabajo investigativo.
+También es importante facilitar la integración de esos datos en los sistemas de publicación de datos como la I2D, el SIB colombia, y las bases de datos internacionales como GBIF
+
+## Un ejemplo de desarrollo
+Ademas de los objetivos concretos y específicos para un tipo de datos particulares, se trata de explorar, con este ejemplo, el desarrollo modular de bases de datos para la investigación sobre temas de biodiversidad en Colombia, y en el instituto Humboldt.
+En particular, nos permitirá explorar las dificultades potenciales de implementar tales herramientas para el uso institucional y, más allá, para la comunidad científica colombiana.
+
+Tener una herramienta finalizada de gestión de datos utilizando una base de datos relacional ayudará también la comunicación sobre las posibilidad y las ventajas de tales sistemas.
+Asimismo, la idea es tener un ejemplo concreto para ilustrar discusiones sobre la oportunidad de desarrollar esas herramientas en proyectos específicos y sistemas de información más completos.
+
+## Integración transversal de los datos
+
+Uno de los objetivos importantes para la Gerencia de Información Científica es integrar los datos de los tres componentes principales que se manejan en el sistema de información institucional: biológico, geográfico y socioecologico.
+Aunque no conozcamos ejemplos de datos socioecologicos asociados a las parcelas permanentes de vegetación, es importante que la arquitectura de la base de datos permita la integración de todos los componentes.
+Eso implica tener una idea muy clara de los principios teóricos de organización de los datos que puedan funcionar para todos los tipos de datos colectados en los proyectos del instituto Humboldt.
+
+
+# Desafíos
+
+## Complejidad de los modelos de datos
+
+Siguiendo un criterio de desarrollo modular de los modelos de datos para el instituto Humboldt, se vuelve muy importante tomar en cuenta las estructuras que se desarrollaron para proyectos previos.
+También es importante considerar otros tipos de datos potenciales que podrían ser el enfoque de desarrollos futuros (por ejemplo, datos socioecologicos), para asegurarse una estabilidad relativa de los modelos de datos, y facilitar la compatibilidad de los modelos a largo plazo.
+Sin embargo, el riesgo de este desarrollo modular es que la complejidad aumente gradualmente cada vez que un nuevo tipo de datos está añadido en el sistema.
+El desafío principal reside entonces en diseñar una estructura basada en principios que se puedan declinar para los componentes biologicos, geograficos y socioecologicos, mientras se desarrolle un modelo de datos que pueda abarcar cada campo especifico y concreto del metodo de muestreo que estamos trabajando.
+
+![Modelo de datos y relaciones entre tablas para el proyecto de estudio de linea base de biodiversidad de Puerto Wilches](../../../2022_fracking/biodiversity-puerto-wilches/database/Fig/estructBase_tablasPrincipales_all-1.png){width=90% #fig:modDatPW}
+
+En el caso de esta base de datos, los insumos concretos que tenemos son:
+
+* la base de datos multi-taxon del proyecto de linea base de biodiversidad de Puerto Wilches
+* la estructura de datos del proyecto de paquete R sibplot (<https://github.com/PEM-Humboldt/sibPlot/blob/main/devDocs/dataModel.Rmd>)
+* las normas DarwinCore, y las plantillas utilizadas en el instituto Humboldt para publicar datos en la infraestrura de datos institucional I2D y el Sistema de Información Biologica (SIB Colombia)
+* plantillas y formatos de datos utilizados en la red BST-Col
+
+Es un reto considerable crear una arquitectura de base de datos que sea compatible con todos esos elementos.
+Sin embargo, un trabajo de organización basado en la separación de "niveles de organización" del trabajo de muestreo (proyecto > evento > registro > tag ; taxonomía > determinación > registro etc.) debería permitir una organización eficiente de los datos, compatible con cualquier formato de datos.
+
+En la figura \@ref(fig:modDatPW), se puede ver que la estructura de los datos biológicos puede ser relativamente compleja, sin todavía integrar los datos geograficos o socioecologicos potenciales.
+Asimismo, un trabajo de compatibilidad y de simplificación es necesario en cada etapa de desarrollo de las bases de datos para el instituto.
+
+
+
+## Herramientas de importación y exportación
+
+Dado la complejidad de las estructuras de datos potenciales (ver figura \@ref(fig:modDatPW)), es importante pensar, desde el desarrollo de las bases de datos, en herramientas que puedan facilitar la integración de los datos para los usuarios.
+Se trata de poder extraer, organizar y integrar los datos a la base de datos desde las plantillas que los investigadores están acostumbrados a utilizar.
+Uno de los desafíos particulares asociado a esa necesidad es la integración de un sistema de validación que sea lo más automático posible pero que permita una validación final humana, para asegurarse que las personas encargadas de la calidad de los datos en el instituto puedan controlar los datos que entran y salen de la base de datos.
+En el mismo orden de idea, la base de datos debería poder integrar los datos de parcelas permanentes que ya se integraron en los catálogos institucionales o el SIB de manera facilitada.
+
+Los motores de bases de datos permiten también exportar datos en una forma diferente de la forma que se utiliza para almacenarlas.
+Asimismo, si los investigadores utilizan tablas especificas para sus software de análisis de información, es necesario crear herramientas internas a la base de datos que permiten exportar las tablas en el formato adecuado.
+De la misma forma, es importante organizar la información y las herramientas de exportación para facilitar la publicación en los catálogos de la I2D.
+
+El desafío principal asociado a esas herramientas de importación y exportación de datos es asegurarse que todas las herramientas útiles para los usuarios y creadores de los datos estén desarrolladas, para que la base de datos sea realmente útil. 
+Sin esas herramientas, es muy probable que este tipo de proyecto aumente la dificultad de gestión del ciclo de vida de los datos en lugar de simplificarla.
+Vale la pena resaltar que cada herramienta debe ser documentada de manera precisa y simple.
+
+El diseño de las herramientas de importación y exportación implica instaurar un dialogo con todos los investigadores que son usuarios potenciales de la base de datos (tanto del lado del manejo de datos y catálogos como del lado de la investigación sobre patrones de vegetación a largo plazo), y catalogar todos los usos que se hacen de los datos, para que las herramientas de importación y exportación puedan cumplir con todas las necesidades de los usuarios.
+
+
+# Referencias
