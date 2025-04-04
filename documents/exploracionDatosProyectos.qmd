@@ -1,0 +1,95 @@
+---
+title: "Exploración de ejemplos de datos en formato RDS"
+author: "Marius Bottin"
+lang: es
+format: 
+  gfm:
+    df-print: kable
+---
+
+El equipo de investigación del Centro de Estudios Socio-ecológicos y Cambio Global utiliza un formato interno de R (formato RDS) para almacenar los datos de parcelas permanentes según un esquema de bases de datos relacionales.
+Si bien el lenguaje R no permite directamente imponer reglas de relaciones entre tablas, la lógica interna es la misma que en una base de datos en SQL, con llaves primarias y foráneas.
+
+En este documento, vamos a explorar algunos ejemplos de esos archivos para entender sus estructuras y analizar sus contenidos.
+
+
+## Reading the files:
+
+En la carpeta compartida, hay varios archivos RDS:
+
+```{r}
+dirRDS<-"../../data_google/4.rdsProyectos/"
+dir(dirRDS)
+```
+
+Cargamos los datos de los archivos gracias a las funciones `lapply` y `readRDS`
+
+```{r}
+allRDSData<-lapply(paste(dirRDS,dir(dirRDS,pattern="rds$"),sep="/"),readRDS)
+names(allRDSData)<-gsub("\\.rds$","",dir(dirRDS,pattern="rds$"))
+```
+
+Cuando miramos los datos, podemos ver que no todos los archivos corresponden a datos clasicos de parcelas permanentes en formato RDS (únicamente los archivos que contienen elementos como "taxonomy" y "censuses"):
+
+```{r}
+(n_ard<-lapply(allRDSData,names))
+names(allRDSData)[sapply(n_ard,function(x)"censuses" %in% x | "taxonomy" %in% x)]
+```
+
+Cuantos eventos de muestreos (censuses) contienen los juegos de datos:
+
+```{r}
+lapply(allRDSData,function(x){
+  if("censuses" %in% names(x))
+  {return(names(x$censuses))}else{return(NA)}
+  })
+```
+
+Parece que "dataQuimbo" tiene varios eventos de muestreo, de otro lado "dataRedBSTCol" y "dataCerrejon" solo contienen un "census0".
+Sin embargo, esperabamos encontrar censuses en la forma de census0, census1, census2 etc.
+
+Para entender mejor la estructura de esos archivos de datos, exploraremos en más detalles los juegos de datos:
+
+## Quimbo
+
+```{r}
+quimbo <- allRDSData$dataQuimbo
+names(quimbo)
+```
+
+### Descripción de cada elemento
+#### Taxonomy
+
+La tabla taxonomy contiene:
+
+* 1 codigo para cada especie
+* los niveles familia, genero y especie de cada taxon
+* el nombre común de las especies
+
+```{r}
+head(quimbo$taxonomy)
+```
+
+Los codigos de taxón son siempre unicos, y no son faltantes
+
+```{r}
+sum(duplicated(quimbo$taxonomy$code))
+sum(is.na(quimbo$taxonomy$code))
+```
+
+Todos los elementos parecen ser obligatorios y no faltan valores:
+
+```{r}
+apply(quimbo$taxonomy,2,function(x)sum(is.na(x)|x==""))
+```
+
+Quimbo contiene `r nrow(quimbo$taxonomy)` especies.
+
+#### dates
+
+Descripción de los eventos de muestreos de quimbo
+
+```{r}
+quimbo$dates[order(quimbo$dates$measuringDate),]
+```
+
