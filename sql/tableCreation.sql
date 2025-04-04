@@ -1,17 +1,6 @@
 CREATE SCHEMA main;
 
 
--- does not make sense in the generic model, the relations with spatial zones should be made as a spatial relation with zones
-CREATE TABLE main.platform
-(
-    cd_plat serial PRIMARY KEY,
-    platform text UNIQUE NOT NULL
-);
-SELECT AddGeometryColumn('main', 'platform', 'zona_geom', 3116, 'POLYGON', 2);
-SELECT AddGeometryColumn('main', 'platform', 'plat_geom', 3116, 'POLYGON', 2);
-CREATE INDEX platform_zona_geom_geog_idx ON main.platform USING GIST( zona_geom );
-CREATE INDEX platform_plat_geom_geog_idx ON main.platform USING GIST( plat_geom );
-
 
 -- it should be called sites and have the possibility to get real coordinates or spatial data
 CREATE TABLE main.punto_referencia
