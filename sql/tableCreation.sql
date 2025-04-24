@@ -1,16 +1,34 @@
 CREATE SCHEMA main;
+CREATE SCHEMA external;
 
-
+CREATE TABLE main.def_location_type(
+	cd_loc_type integer PRIMARY KEY NOT NULL,
+	location_type text UNIQUE NOT NULL,
+	geom_type text NOT NULL,
+	comment text
+	);
+INSERT INTO main.location_type
+VALUES
+	(1,'Site point','POINT','Should represent the whole location, prefer the centroid than the first or last sampling location'),
+	(2,'Permanent plot polygon','POLYGON','Polygon containing the whole sampling site'),
+	(3,'Transect','MULTILINESTRING','Follow the sampling path of the transect, the order of the geometry is important');
 
 -- it should be called sites and have the possibility to get real coordinates or spatial data
-CREATE TABLE main.punto_referencia
+CREATE TABLE main.location
 (
-    cd_pt_ref serial PRIMARY KEY,
-    name_pt_ref varchar(10) UNIQUE NOT NULL,
-    --cd_plat int REFERENCES main.platform(cd_plat) ON DELETE SET NULL ON UPDATE CASCADE,
-    num_anh integer UNIQUE
+    cd_loc serial PRIMARY KEY,
+    location varchar(50) UNIQUE NOT NULL,
+    other_location_name text[],
+    cd_loc_type integer REFERENCES main.def_location_type(cd_loc_type)
 )
 ;
+SELECT AddGeometryColumn('main', 'location', 'pt_geom', 3116, 'POINT', 2);
+SELECT AddGeometryColumn('main', 'location', 'pol_geom', 3116, 'MULTIPOLYGON', 2);
+SELECT AddGeometryColumn('main', 'location', 'li_geom', 3116, 'MULTILINESTRING', 2);
+CREATE INDEX main_location_pt_geom_spat_idx ON main.location USING GIST(pt_geom);
+CREATE INDEX main_location_pol_geom_spat_idx ON main.location USING GIST(pol_geom);
+CREATE INDEX main_location_li_geom_spat_idx ON main.location USING GIST(li_geom);
+
 --CREATE INDEX punto_referencia_cd_plat_key ON main.punto_referencia(cd_plat);
 
 
@@ -63,12 +81,12 @@ VALUES
     ('time'),
     ('distance'),
     ('density'),
-    ('number of traps'),
-    ('number of individuals'),
+    ('mass'),
+    ('number'),
     ('presence/absence'),
     ('longitude'),
     ('volume'),
-    ('number concentration'),
+    ('number concentration (density)'),
     ('mass concentration'),
     ('volume concentration'),
     ('percentage')
@@ -86,7 +104,36 @@ CREATE TABLE main.def_unit
     factor double precision NOT NULL,
     UNIQUE (cd_measurement_type,unit)
 );
-
+CREATE TABLE main.def_organisation_level
+(
+	cd_org_lev serial PRIMARY KEY,
+	org_lev text UNIQUE NOT NULL,
+	pkey_field text UNIQUE NOT NULL,
+	main_table text NOT NULL,
+	other_tables text[]
+);
+INSERT INTO main.def_organisation_level
+VALUES
+	('sub-individual',,,),
+	('individual',,,),
+	('register',,,),
+	('event',,,),
+	('event group',,,),
+	('project',,,),
+	('determination',,,),
+	('taxon',,,);
+CREATE TABLE main.def_var
+(
+	cd_var serial PRIMARY KEY,
+	cd_unit int REFERENCES main.def_unit(cd_unit),
+	cd_org_lev int NOT NULL REFERENCES main.def_organisation_level(cd_org_lev),
+	gp_var int REFERENCES main.def_gp_var(cd_gp_var),
+	name_var text NOT NULL,
+	type_var varchar(25) NOT NULL,
+	repeatable boolean default false,
+	CHECK (type_var IN ('categories','text','integer','double precision','boolean') 
+);
+/*
 CREATE TABLE main.def_var_samp_eff -- a variable is a definition more precise than measurement type, for example concentration of oxygen is a variable, while concentration is a measurement type
 (
     cd_var_samp_eff smallserial PRIMARY KEY,
@@ -96,16 +143,7 @@ CREATE TABLE main.def_var_samp_eff -- a variable is a definition more precise th
     type_variable varchar(25),
     CHECK (type_variable IN ('int', 'double precision'))
 );
-
-CREATE TABLE main.def_var_ind_qt
-(
-    cd_var_ind_qt smallserial PRIMARY KEY,
-    var_qt_ind text UNIQUE NOT NULL,
-    var_qt_ind_spa text,
-    cd_unit smallint REFERENCES main.def_unit(cd_unit) ON DELETE SET NULL ON UPDATE CASCADE NOT NULL,
-    type_variable varchar(20),
-    CHECK (type_variable IN ('int', 'double precision'))
-);
+*/
 
 /*
 CREATE TABLE main.def_categ
@@ -118,22 +156,22 @@ CREATE TABLE main.def_categ
 );
 */
 
-CREATE TABLE main.def_protocol
+CREATE TABLE main.def_method
 (
-    cd_protocol smallserial PRIMARY KEY,
-    protocol text UNIQUE NOT NULL,
-    protocol_spa text,
-    cd_var_samp_eff_1 smallint REFERENCES main.def_var_samp_eff(cd_var_samp_eff),
+    cd_method smallserial PRIMARY KEY,
+    method text UNIQUE NOT NULL,
+    method_spa text,
+/*    cd_var_samp_eff_1 smallint REFERENCES main.def_var_samp_eff(cd_var_samp_eff),
     samp_eff_1_implicit boolean,
     cd_var_samp_eff_2 smallint REFERENCES main.def_var_samp_eff(cd_var_samp_eff),
-    samp_eff_2_implicit boolean,
-    cd_var_ind_qt smallint REFERENCES main.def_var_ind_qt(cd_var_ind_qt) NOT NULL,
+    samp_eff_2_implicit boolean,*/
+    cd_var_ind_qt smallint REFERENCES main.def_var(cd_var) NOT NULL,
+    cd_var_samp_effort REFERENCES main.def_var(cd_var),
+    other_samp_effort int[],
     description_spa text,
-    description text
+    description text,
+    required_var int[]
 );
-CREATE INDEX def_protocol_cd_var_samp_eff_1_fkey ON main.def_protocol(cd_var_samp_eff_1);
-CREATE INDEX def_protocol_cd_var_samp_eff_2_fkey ON main.def_protocol(cd_var_samp_eff_2);
-CREATE INDEX def_protocol_cd_var_ind_qt_fkey ON main.def_protocol(cd_var_ind_qt);
 
 
 
