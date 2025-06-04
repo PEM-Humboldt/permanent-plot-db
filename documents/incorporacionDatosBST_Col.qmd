@@ -1,0 +1,55 @@
+---
+title: "Ejemplo de incorporación de datos a la base de datos: Red BST-Col"
+author: "Marius Bottin"
+lang: es
+format: 
+  gfm:
+    df-print: kable
+---
+
+El equipo de investigación del Centro de Estudios Socio-ecológicos y Cambio Global utiliza un formato interno de R (formato RDS) para almacenar los datos de parcelas permanentes según un esquema de bases de datos relacionales.
+Si bien el lenguaje R no permite directamente imponer reglas de relaciones entre tablas, la lógica interna es la misma que en una base de datos en SQL, con llaves primarias y foráneas.
+
+En este documento, vamos a explorar los datos de la red BST-Col para mostrar como incorporar esos datos a una base de datos relacional en SQL
+
+
+## Leer los archivos
+
+En la carpeta compartida, hay varios archivos RDS:
+
+```{r}
+dirRDS<-"../../data_google/4.rdsProyectos/"
+dir(dirRDS)
+```
+
+Vamos a enforcarnos acá en los datos de la red de Bosques Secos Tropicales de Colombia (BST-Col). 
+
+```{r}
+rdsBST<-readRDS("../../data_google/4.rdsProyectos/dataRedBSTCol.rds")
+```
+
+```{r}
+names(rdsBST)
+rdsBST$metadata[[1]]
+rdsBST$dates[[1]]
+allDates<-data.frame(
+  pp=rep(names(rdsBST$dates),sapply(rdsBST$dates,nrow)),
+  Reduce(rbind,rdsBST$dates)
+)
+head(allDates)
+rdsBST$members[[1]]
+allMembers<-data.frame(
+  pp=rep(names(rdsBST$members),sapply(rdsBST$members,nrow)),
+  Reduce(rbind,rdsBST$members)
+)
+head(allMembers)
+```
+
+# Tags
+
+```{r}
+names(rdsBST)
+rdsBST$censuses$census0$AltoSanJorgeInicial
+rdsBST$taxonomy$AltoSanJorgeInicial
+```
+

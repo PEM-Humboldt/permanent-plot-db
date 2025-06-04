@@ -1,16 +1,35 @@
+BEGIN;
 CREATE SCHEMA main;
 CREATE SCHEMA external;
 
+CREATE TABLE main.def_organisation_level
+(
+	cd_org_lev serial PRIMARY KEY,
+	org_lev text UNIQUE NOT NULL,
+	pkey_field text UNIQUE NOT NULL,
+	main_table text NOT NULL,
+	other_tables text[]
+);
+INSERT INTO main.def_organisation_level(org_lev,pkey_field,main_table)
+VALUES
+	('sub-individual','cd_subind','sub_individual'),
+	('individual','cd_ind','individual'),
+	('register','cd_reg','register'),
+	('event','cd_event','event'),
+	('event group','cd_gp_event','gp_event'),
+	('project','cd_project','project'),
+	('identification','cd_ident','identification'),
+	('taxon','cd_tax','taxon');
 CREATE TABLE main.def_location_type(
 	cd_loc_type integer PRIMARY KEY NOT NULL,
 	location_type text UNIQUE NOT NULL,
 	geom_type text NOT NULL,
 	comment text
 	);
-INSERT INTO main.location_type
+INSERT INTO main.def_location_type
 VALUES
 	(1,'Site point','POINT','Should represent the whole location, prefer the centroid than the first or last sampling location'),
-	(2,'Permanent plot polygon','POLYGON','Polygon containing the whole sampling site'),
+	(2,'Plot polygon','POLYGON','Polygon containing the whole sampling site'),
 	(3,'Transect','MULTILINESTRING','Follow the sampling path of the transect, the order of the geometry is important');
 
 -- it should be called sites and have the possibility to get real coordinates or spatial data
@@ -19,15 +38,17 @@ CREATE TABLE main.location
     cd_loc serial PRIMARY KEY,
     location varchar(50) UNIQUE NOT NULL,
     other_location_name text[],
-    cd_loc_type integer REFERENCES main.def_location_type(cd_loc_type)
+    cd_loc_type integer REFERENCES main.def_location_type(cd_loc_type),
+    parent_loc integer REFERENCES main.location(cd_loc),
+    cd_org_lev integer REFERENCES main.def_organisation_level(cd_org_lev)
 )
 ;
 SELECT AddGeometryColumn('main', 'location', 'pt_geom', 3116, 'POINT', 2);
 SELECT AddGeometryColumn('main', 'location', 'pol_geom', 3116, 'MULTIPOLYGON', 2);
 SELECT AddGeometryColumn('main', 'location', 'li_geom', 3116, 'MULTILINESTRING', 2);
-CREATE INDEX main_location_pt_geom_spat_idx ON main.location USING GIST(pt_geom);
-CREATE INDEX main_location_pol_geom_spat_idx ON main.location USING GIST(pol_geom);
-CREATE INDEX main_location_li_geom_spat_idx ON main.location USING GIST(li_geom);
+-- CREATE INDEX main_location_pt_geom_spat_idx ON main.location USING GIST(pt_geom);
+-- CREATE INDEX main_location_pol_geom_spat_idx ON main.location USING GIST(pol_geom);
+-- CREATE INDEX main_location_li_geom_spat_idx ON main.location USING GIST(li_geom);
 
 --CREATE INDEX punto_referencia_cd_plat_key ON main.punto_referencia(cd_plat);
 
@@ -104,107 +125,179 @@ CREATE TABLE main.def_unit
     factor double precision NOT NULL,
     UNIQUE (cd_measurement_type,unit)
 );
-CREATE TABLE main.def_organisation_level
+CREATE TABLE main.def_var_gp
 (
-	cd_org_lev serial PRIMARY KEY,
-	org_lev text UNIQUE NOT NULL,
-	pkey_field text UNIQUE NOT NULL,
-	main_table text NOT NULL,
-	other_tables text[]
+	cd_var_gp serial PRIMARY KEY,
+	var_gp text UNIQUE NOT NULL,
+	description text
 );
-INSERT INTO main.def_organisation_level
-VALUES
-	('sub-individual',,,),
-	('individual',,,),
-	('register',,,),
-	('event',,,),
-	('event group',,,),
-	('project',,,),
-	('determination',,,),
-	('taxon',,,);
+
 CREATE TABLE main.def_var
 (
 	cd_var serial PRIMARY KEY,
 	cd_unit int REFERENCES main.def_unit(cd_unit),
 	cd_org_lev int NOT NULL REFERENCES main.def_organisation_level(cd_org_lev),
-	gp_var int REFERENCES main.def_gp_var(cd_gp_var),
+	cd_var_gp int REFERENCES main.def_var_gp(cd_var_gp),
 	name_var text NOT NULL,
+	description text,
+	var_comment text,
+	extra_var boolean default true, -- is the var in the extra tables, which means not indexable?
+	name_dwc text,
+	extension_dwc text,
 	type_var varchar(25) NOT NULL,
 	repeatable boolean default false,
-	CHECK (type_var IN ('categories','text','integer','double precision','boolean') 
+	CHECK (type_var IN ('categories','text','integer','double precision','boolean') )
 );
-/*
-CREATE TABLE main.def_var_samp_eff -- a variable is a definition more precise than measurement type, for example concentration of oxygen is a variable, while concentration is a measurement type
+CREATE TABLE main.controlled_vocab
 (
-    cd_var_samp_eff smallserial PRIMARY KEY,
-    var_samp_eff text UNIQUE NOT NULL,
-    var_samp_eff_spa text,
-    cd_unit smallint REFERENCES main.def_unit(cd_unit) ON DELETE SET NULL ON UPDATE CASCADE NOT NULL ,--this is the reference unit it allows to determine both the reference unit and the measurement type
-    type_variable varchar(25),
-    CHECK (type_variable IN ('int', 'double precision'))
+	cd_categ serial PRIMARY KEY,
+	cd_var int REFERENCES main.def_var(cd_var),
+	categ text NOT NULL,
+	description text
 );
-*/
-
-/*
-CREATE TABLE main.def_categ
-(
-    cd_categ serial PRIMARY KEY,
-    cd_var int REFERENCES main.def_variable,
-    categ text,
-    description text,
-    UNIQUE (cd_var,categ)
-);
-*/
 
 CREATE TABLE main.def_method
 (
     cd_method smallserial PRIMARY KEY,
     method text UNIQUE NOT NULL,
     method_spa text,
-/*    cd_var_samp_eff_1 smallint REFERENCES main.def_var_samp_eff(cd_var_samp_eff),
-    samp_eff_1_implicit boolean,
-    cd_var_samp_eff_2 smallint REFERENCES main.def_var_samp_eff(cd_var_samp_eff),
-    samp_eff_2_implicit boolean,*/
-    cd_var_ind_qt smallint REFERENCES main.def_var(cd_var) NOT NULL,
-    cd_var_samp_effort REFERENCES main.def_var(cd_var),
-    other_samp_effort int[],
+    cd_var_ind_qt smallint REFERENCES main.def_var(cd_var),
     description_spa text,
     description text,
     required_var int[]
 );
 
-
-
-CREATE TABLE main.institution
+CREATE TABLE main.organization_type
 (
-    cd_inst smallserial PRIMARY KEY,
-    name text
+	cd_org_type smallserial PRIMARY KEY,
+	org_type text UNIQUE NOT NULL,
+	org_type_spa text,
+	comments text
+);
+
+
+INSERT INTO main.organization_type(org_type,org_type_spa)
+VALUES
+	('public institution','institución publica'),
+	('private institution','institución privada'),
+	('non-governemental organization','organización no gubernamental'),
+	('fundation','fundación'),
+	('social organization','organización social'),
+	('professional union','gremio'),
+	('communication media','medio de comunicación'),
+	('non-profit organization','organización sin Ánimo de lucro'),
+	('indigeneous reservation','resguardo indigena'),
+	('Person','persona independiente'),
+	('Association','asociación'),
+	('network','red de actores')
+;
+
+CREATE TABLE main.organization
+(
+    cd_org smallserial PRIMARY KEY,
+    org_name text,
+    cd_org_type smallint REFERENCES main.organization_type
+);
+
+CREATE TABLE main.def_org_rel
+(
+	cd_org_rel smallserial PRIMARY KEY,
+	org_relation_type text,
+	description text
+);
+INSERT INTO main.def_org_rel(org_relation_type, description)
+VALUES
+	('Institutional part of','Organization 1 is an institutional part of organization 2'),
+	('Part of','Organization 1 is part of organization 2, but there is no institutional dependency')
+;
+CREATE TABLE main.organization_relationship
+(
+	cd_org1 smallint REFERENCES main.organization(cd_org),
+	cd_org2 smallint REFERENCES  main.organization(cd_org),
+	cd_rel_org smallint REFERENCES main.def_org_rel(cd_org_rel)/*,
+	here we should add a reference to a project to fill only when the relationship between institutions is only for a particular project*/
 );
 
 CREATE TABLE main.people
 (
     cd_person smallserial PRIMARY KEY,
     verbatim_person text UNIQUE NOT NULL,
-    first_name text,
-    family_name text,
-    initials varchar(5),
-    mail text,
-    cd_inst smallint REFERENCES main.institution(cd_inst)
+    first_name1 text,
+    first_name2 text,
+    family_name1 text,
+    family_name2 text,
+    gender char(1),
+    birth date,
+    declared_identity text[]
 );
+
+CREATE TABLE main.people_role
+(
+	cd_people_role serial PRIMARY KEY,
+	cd_person smallint REFERENCES main.people(cd_person),
+	cd_org smallint REFERENCES main.organization(cd_org) NOT NULL,
+	role text NOT NULL,
+	date_apply date,
+	date_begin date,
+	date_end date/*,
+	here we should add a reference to a project to fill only when the role for a particular project*/
+);
+
+CREATE TABLE main.role_directory
+(
+	cd_people_role int PRIMARY KEY REFERENCES main.people_role(cd_people_role),
+	email text,
+	phone_number text,
+	adress text,
+	city text,
+	country text
+);
+
+
+
+CREATE TABLE main.project
+(
+	cd_project serial PRIMARY KEY,
+	project text UNIQUE,
+	project_description text,
+	type_project text,
+	cd_loc int REFERENCES main.location(cd_loc)
+);
+ALTER TABLE main.organization_relationship ADD COLUMN cd_project int REFERENCES main.project(cd_project);
+ALTER TABLE main.people_role ADD COLUMN cd_project int REFERENCES main.project(cd_project);
+
+CREATE TABLE main.proj_rel_type  -- On the long term we will be able to document project types and the different relationships between projects such as funding relationships, differenciating data projects which only exists in terms of data management from metaprojects having an institutional structures etc. That is why we do not only use a simple foreign key to a parent project.
+(
+	cd_proj_rel_type smallserial PRIMARY KEY,
+	proj_rel_type text UNIQUE NOT NULL,
+	description text
+);
+INSERT INTO main.proj_rel_type(proj_rel_type,description)
+VALUES
+	('part_of','Proj1 is part of proj2');
+CREATE TABLE main.project_relationship
+(
+	cd_proj1 int REFERENCES main.project (cd_project),
+	cd_proj2 int REFERENCES main.project (cd_project),
+	cd_proj_rel_type smallint REFERENCES main.proj_rel_type
+);
+
 
 CREATE TABLE main.gp_event
 (
     cd_gp_event serial PRIMARY KEY,
-    cd_pt_ref integer REFERENCES main.punto_referencia(cd_pt_ref) ON DELETE SET NULL ON UPDATE CASCADE,
+    cd_project int REFERENCES main.project (cd_project),
+    cd_loc integer REFERENCES main.location(cd_loc) ON DELETE SET NULL ON UPDATE CASCADE,
     cd_gp_biol char(4) REFERENCES main.def_gp_biol(cd_gp_biol) ON DELETE CASCADE NOT NULL,
-    cd_protocol int REFERENCES main.def_protocol(cd_protocol) ON DELETE SET NULL ON UPDATE CASCADE ,
+    cd_method int REFERENCES main.def_method(cd_method),
+    --cd_protocol int REFERENCES main.def_protocol(cd_protocol) ON DELETE SET NULL ON UPDATE CASCADE ,
     campaign_nb int NOT NULL,
     subpart varchar(10),
-    UNIQUE(cd_pt_ref,cd_gp_biol,cd_protocol,campaign_nb,subpart)
+    UNIQUE(cd_loc,cd_gp_biol,cd_method,campaign_nb,subpart)
 );
-CREATE INDEX gp_event_cd_punto_ref_fkey ON main.gp_event(cd_pt_ref);
-CREATE INDEX gp_event_cd_gp_biol_fkey ON main.gp_event(cd_gp_biol);
-CREATE INDEX gp_event_cd_protocol_fkey ON main.gp_event(cd_protocol);
+-- CREATE INDEX gp_event_cd_punto_ref_fkey ON main.gp_event(cd_pt_ref);
+-- CREATE INDEX gp_event_cd_gp_biol_fkey ON main.gp_event(cd_gp_biol);
+-- CREATE INDEX gp_event_cd_protocol_fkey ON main.gp_event(cd_protocol);
 
 
 
@@ -218,22 +311,15 @@ CREATE TABLE main.event
     date_time_begin timestamp,
     date_time_end timestamp,
     locality_verb text,
-    samp_effort_1 double precision,
-    samp_effort_2 double precision,
     event_remarks text,
     cds_creator integer[] ,-- note: we can't use foreign keys because more than  one person might have created the event, otherwise we need to make more tables.
     created date,
+    cd_loc int REFERENCES main.location(cd_loc),
     UNIQUE (cd_gp_event, num_replicate),
     CHECK (date_time_begin<date_time_end OR date_time_begin IS NULL OR date_time_end IS NULL)
 )
 ;
-CREATE INDEX event_cd_gp_event_fkey ON main.event(cd_gp_event);
-SELECT AddGeometryColumn('main', 'event', 'pt_geom', 3116, 'POINT', 2);
-CREATE INDEX event_pt_geom_idx ON main.event USING GIST(pt_geom);
-SELECT AddGeometryColumn('main', 'event', 'li_geom', 3116, 'LINESTRING', 2);
-CREATE INDEX event_li_geom_idx ON main.event USING GIST(li_geom);
-SELECT AddGeometryColumn('main', 'event', 'pol_geom', 3116, 'POLYGON', 2);
-CREATE INDEX event_pol_geom_idx ON main.event USING GIST(pol_geom);
+-- CREATE INDEX event_cd_gp_event_fkey ON main.event(cd_gp_event);
 
 CREATE TABLE main.def_tax_rank
 (
@@ -293,13 +379,12 @@ CREATE TABLE main.taxo
         END
         )
 );
-CREATE INDEX taxo_cd_parent_key ON main.taxo(cd_parent);
-CREATE INDEX taxo_cd_rank_key ON main.taxo(cd_rank);
+-- CREATE INDEX taxo_cd_parent_key ON main.taxo(cd_parent);
+-- CREATE INDEX taxo_cd_rank_key ON main.taxo(cd_rank);
 
 CREATE TABLE main.morfo_taxo
 (
     cd_morfo serial PRIMARY KEY,
-    cd_gp_biol char(4) REFERENCES main.def_gp_biol,
     cd_tax int REFERENCES main.taxo(cd_tax) ON DELETE CASCADE ON UPDATE CASCADE,
     name_morfo text NOT NULL,
     verbatim_taxon text,
@@ -307,415 +392,179 @@ CREATE TABLE main.morfo_taxo
     --min_level int REFERENCES main.def_nivel_taxo(cd_niv_taxo),
     --max_level int REFERENCES main.def_nivel_taxo(cd_niv_taxo),
     pseudo_rank varchar(6) REFERENCES main.def_tax_rank(cd_rank) ON DELETE SET NULL ON UPDATE CASCADE,
-    cds_tax_possibilities integer[],
-    UNIQUE(cd_tax,cd_gp_biol,name_morfo)
+    cds_tax_possibilities integer[]
 );
-CREATE INDEX morfo_taxo_cd_gp_biol_key ON main.morfo_taxo(cd_gp_biol);
-CREATE INDEX morfo_taxo_cd_tax_key ON main.morfo_taxo(cd_tax);
-CREATE INDEX morfo_taxo_pseudo_rank_key ON main.morfo_taxo(pseudo_rank);
+-- CREATE INDEX morfo_taxo_cd_gp_biol_key ON main.morfo_taxo(cd_gp_biol);
+-- CREATE INDEX morfo_taxo_cd_tax_key ON main.morfo_taxo(cd_tax);
+-- CREATE INDEX morfo_taxo_pseudo_rank_key ON main.morfo_taxo(pseudo_rank);
 
-CREATE TABLE main.registros
+CREATE TABLE main.register
 (
     cd_reg serial PRIMARY KEY,
     cd_event int REFERENCES main.event(cd_event) ON DELETE CASCADE NOT NULL,
     cds_recorded_by int[],
     date_time timestamp,
     locality_verb text,
-    organism_id text,
-    cd_tax integer REFERENCES main.taxo(cd_tax),
-    cd_morfo integer REFERENCES main.morfo_taxo(cd_morfo),
-    date_ident date,
-    cds_identified_by int[],-- note: we can't use foreign keys because more than  one person might have created the event, otherwise we need to make more tables.
     qt_int integer,
     qt_double double precision,
     remarks text,
     occurrence_id text UNIQUE,
-    UNIQUE (cd_event,organism_id)
+    cd_loc int REFERENCES main.location(cd_loc),
+    UNIQUE (cd_event,occurrence_id)
 );
-SELECT AddGeometryColumn('main', 'registros', 'the_geom', 3116, 'POINT', 2);
-CREATE INDEX registros_cd_event_idx ON main.registros USING GIST(the_geom);
-CREATE INDEX registros_cd_event_fkey ON main.registros(cd_event);
-CREATE INDEX registros_cd_tax_fkey ON main.registros(cd_tax);
-CREATE INDEX registros_cd_morfo_fkey ON main.registros(cd_morfo);
+-- CREATE INDEX registros_cd_event_idx ON main.registros USING GIST(the_geom);
+-- CREATE INDEX registros_cd_event_fkey ON main.registros(cd_event);
+-- CREATE INDEX registros_cd_tax_fkey ON main.registros(cd_tax);
+-- CREATE INDEX registros_cd_morfo_fkey ON main.registros(cd_morfo);
 
-CREATE TABLE main.def_organ
+CREATE TABLE main.identification -- note that in the case of identification reporting to individuals that are present in various registers, we have the problem of needing to go through the registers to apply these identification to the individuals. It will be complicated, but it actually represents better the reality of the data. It is particularly messy in the cases where there are various identifications through time: we will need to resolve the multiple registers + multiple identification mess before knowing the identity of the individual, let's add that sometimes there is a parent identification, and you got a very difficult problem to manage.
 (
-    cd_organ smallserial PRIMARY KEY,
-    organ text UNIQUE NOT NULL,
-    organ_spa text UNIQUE
-)
-;
-
-CREATE TABLE main.def_var_biometry
-(
-    cd_var_biometry smallserial PRIMARY KEY,
-    var_biometry text UNIQUE,
-    cd_unit smallint REFERENCES main.def_unit(cd_unit) NOT NULL,--this is the reference unit it allows to determine both the reference unit and the measurement type
-    cd_organ smallint REFERENCES main.def_organ(cd_organ),
-    comp_ind boolean,
-    var_biometry_comment text,
-    CHECK (comp_ind OR cd_organ IS NOT NULL)
+	cd_identif serial PRIMARY KEY,
+	cd_reg int REFERENCES main.register(cd_reg),
+	cd_tax int REFERENCES main.taxo(cd_tax),
+	cd_morfo int REFERENCES main.morfo_taxo (cd_morfo),
+	parent_identif int REFERENCES main.identification(cd_identif), --I am not completely convinced here but having a parent identification allows to manage the fact that sometimes the identification based on a register applies to all the registers that have been noted as the same species
+	date_identif date,
+	identified_by int[],
+	remarks_identif text,
+	catalog text,
+	voucher text
 );
 
-CREATE TABLE main.biometry
+CREATE TABLE main.individual
 (
-    cd_biometry serial PRIMARY KEY,
-    cd_reg int REFERENCES main.registros(cd_reg) NOT NULL,
-    cd_var_biometry int REFERENCES main.def_var_biometry(cd_var_biometry) NOT NULL,
-    cd_unit smallint REFERENCES main.def_unit(cd_unit), --poner FOREIGN KEY NOT NULL
-    valor_biometry double precision NOT NULL,
-    UNIQUE (cd_reg, cd_var_biometry)
+	cd_ind serial PRIMARY KEY,
+    organism_id text,
+	uniq_in_project int REFERENCES main.project(cd_project),
+	uniq_in_gp_event int REFERENCES main.gp_event(cd_gp_event),
+	uniq_in_event int REFERENCES main.event(cd_event),
+	uniq_in_register int REFERENCES main.register(cd_reg),
+	tag text,
+	UNIQUE(uniq_in_project,uniq_in_gp_event,uniq_in_event,uniq_in_register,tag)
 );
 
 
-CREATE TABLE main.catalog
+CREATE TABLE main.def_subindividual_part
 (
-    cd_catalog serial PRIMARY KEY,
-    catalog_tag text NOT NULL,
-    principal boolean default true NOT NULL,
-    complete_ind boolean default false NOT NULL,
-    cd_organ smallint REFERENCES main.def_organ(cd_organ),
-    cd_reg int REFERENCES main.registros(cd_reg) NOT NULL,
-    --cd_name_catalog REFERENCES main.def_catalog(cd_name_catalog),
-    name_catalog text,
-    CHECK (complete_ind OR cd_organ IS NOT NULL)
+    cd_part smallserial PRIMARY KEY,
+    part text,
+    cd_gp_biol char(4) REFERENCES main.def_gp_biol(cd_gp_biol),
+    UNIQUE(part, cd_gp_biol)
 );
 
-CREATE TABLE main.def_multimedia_type
+CREATE TABLE main.subindividual
 (
-    cd_type_multimedia smallserial PRIMARY KEY,
-    multimedia_type_spa text,
-    multimedia_type_en text
+	cd_subind serial PRIMARY KEY,
+	cd_ind int REFERENCES main.individual REFERENCES main.individual (cd_ind),
+	cd_part smallint REFERENCES main.def_subindividual_part(cd_part),
+	part_number int,
+	parent_cd_subind int REFERENCES main.subindividual(cd_subind),
+	uniq_in_project int REFERENCES main.project(cd_project),
+	uniq_in_gp_event int REFERENCES main.gp_event(cd_gp_event),
+	uniq_in_event int REFERENCES main.event(cd_event),
+	uniq_in_register int REFERENCES main.register(cd_reg),
+	tag text,
+	UNIQUE(cd_ind,cd_part,part_number)
 );
 
-CREATE TABLE main.multimedia
-(
-    cd_multimedia serial PRIMARY KEY,
-    cd_type_multimedia int REFERENCES main.def_multimedia_type(cd_type_multimedia),
-    cd_event smallint REFERENCES main.event(cd_event),
-    cd_reg int REFERENCES main.registros(cd_reg),
-    name_file text,
-    extension varchar(8),
-    cds_creator int[],-- es realmente una referencia a las personas, pero como más de una persona puede estar aca, no se puede utilizar
-    CHECK (cd_event IS NOT NULL OR cd_reg IS NOT NULL)
-);
-CREATE TABLE main.def_var_ind_charac
-(
-    cd_var_ind_char smallserial PRIMARY KEY,
-    var_ind_char text UNIQUE,
-    cd_unit smallint REFERENCES main.def_unit(cd_unit),--this is the reference unit it allows to determine both the reference unit and the measurement type
-    type_var varchar(20),
-    var_ind_char_spa text,
-    var_ind_char_comment text,
-    CHECK (type_var IN ('integer', 'double precision', 'categorial', 'free text')),
-    CHECK (type_var IN ('categorial', 'free text') OR cd_unit IS NOT NULL)
-);
-CREATE TABLE main.def_ind_charac_categ
-(
-    cd_categ serial PRIMARY KEY,
-    categ text NOT NULL,
-    cd_var_ind_char smallint REFERENCES main.def_var_ind_charac(cd_var_ind_char),
-    categ_spa text,
-    order_categ int,
-    comment_categ text,
-    UNIQUE (cd_var_ind_char,categ)
-    --it might be useful to work a unique constraint and/or index on (cd_var, order_categ) but since order_categ might be null, that's not trivial
-);
-/*
-CREATE TABLE main.def_gender
-(
-    cd_gender smallserial PRIMARY KEY,
-    gender_spa varchar(20) UNIQUE NOT NULL,
-    gender_en varchar(20) UNIQUE NOT NULL
-);
-INSERT INTO main.def_sex(sex_spa,sex_en)
-    VALUES ('Hembra','Female'),
-        ('Macho', 'Male'),
-        ('Indeterminado', 'Undetermined');
-
-CREATE TABLE main.def_lifestage
-(
-    cd_lifestage smallserial PRIMARY KEY,
-    lifestage_spa text UNIQUE NOT NULL,
-    lifestage_en UNIQUE NOT NULL
-);
-CREATE TABLE main.def_behaviour
-(
-    cd_behaviour smallserial PRIMARY KEY,
-    behaviour_spa text UNIQUE NOT NULL,
-    behaviour_en text UNIQUE,
-    cds_gp_biol smallint[]
-);
-*/
 CREATE TABLE main.individual_characteristics
 (
-    cd_reg int REFERENCES main.registros(cd_reg),
-    cd_var_ind_char smallint REFERENCES main.def_var_ind_charac,
-    cd_categ integer REFERENCES main.def_ind_charac_categ,
+    cd_reg int REFERENCES main.register(cd_reg),
+    cd_ind int REFERENCES main.individual(cd_ind),
+    cd_var smallint REFERENCES main.def_var,
     ind_char_int integer,
-    ind_char_double integer,
-    CHECK( ((cd_categ IS NOT NULL)::integer + (ind_char_int IS NOT NULL)::integer + (ind_char_int IS NOT NULL)::integer)=1)
+    ind_char_double double precision,
+    ind_char_text text,
+    ind_char_categ integer REFERENCES main.controlled_vocab(cd_categ),
+    ind_char_bool boolean,
+    CHECK( ((ind_char_categ IS NOT NULL)::integer + (ind_char_int IS NOT NULL)::integer + (ind_char_int IS NOT NULL)::integer + (ind_char_categ IS NOT NULL)::integer + ind_char_bool::integer)=1)
     --UNIQUE (cd_reg,cd_var_ind_char,COALESCE(cd_categ::double,ind_char_int::double,ind_char_double))
     --might be useful to create more specific constraints depending on whether it is an integer, double or categorial variable.
 );
 
-CREATE TABLE main.individual_tag
-(
-    cd_tag serial PRIMARY KEY,
-    cd_gp_biol char(4) REFERENCES main.def_gp_biol(cd_gp_biol),
-    cd_pt_ref smallint REFERENCES main.punto_referencia(cd_pt_ref),
-    tag text,
-    individual bigint,--in the case the tag might be the mean to define the individual: in case of trees, often the ramifications are given tags, but the individual may be recognised from the tag because the tag is in two parts: the first part is the number of the individual and the second part is the ramification.
-    UNIQUE (cd_gp_biol, cd_pt_ref, tag)
-);
-CREATE TABLE main.assign_individual_tag
-(
-    cd_reg int PRIMARY KEY REFERENCES main.registros(cd_reg),
-    cd_tag int REFERENCES main.individual_tag(cd_tag)
-);
 
-CREATE TABLE main.def_var_habitat
+CREATE TABLE main.subindividual_characteristics
 (
-    cd_var_habitat smallserial PRIMARY KEY,
-    var_habitat text UNIQUE,
-    cd_unit smallint REFERENCES main.def_unit(cd_unit),--this is the reference unit it allows to determine both the reference unit and the measurement type
-    type_var varchar(20),
-    var_habitat_spa text,
-    var_habitat_comment text,
-    CHECK (type_var IN ('integer', 'double precision', 'categorial', 'free text')),
-    CHECK (type_var IN ('categorial', 'free text') OR cd_unit IS NOT NULL)
-);
-
-CREATE TABLE main.def_categ_habitat
-(
-    cd_categ serial PRIMARY KEY,
-    categ text NOT NULL,
-    cd_var_habitat smallint REFERENCES main.def_var_habitat(cd_var_habitat) NOT NULL,
-    categ_spa text,
-    order_categ int,
-    UNIQUE (cd_var_habitat, categ)
-    --it might be useful to work a unique constraint and/or index on (cd_var, order_categ) but since order_categ might be null, that's not trivial
-);
-
-CREATE TABLE main.habitat
-(
-    cd_habitat serial PRIMARY KEY,
-    cd_pt_ref int REFERENCES main.punto_referencia(cd_pt_ref),
-    cd_gp_event int REFERENCES main.gp_event(cd_gp_event),
-    cd_event int REFERENCES main.event(cd_event),
-    cd_reg int REFERENCES main.registros(cd_reg),
-    cd_var_habitat smallint REFERENCES main.def_var_habitat(cd_var_habitat),
-    cd_categ int REFERENCES main.def_categ_habitat(cd_categ),
-    value_int int,
-    value_double double precision,
-    CHECK ( ( (cd_pt_ref IS NOT NULL)::integer + (cd_gp_event IS NOT NULL)::integer + (cd_event IS NOT NULL)::integer + (cd_reg IS NOT NULL)::integer )=1),
-    CHECK (((cd_categ IS NOT NULL)::integer + (value_int IS NOT NULL)::integer + (value_double IS NOT NULL)::integer)=1)
-);
-
-CREATE TABLE main.def_var_event_extra
-(
-    cd_var_event_extra smallserial PRIMARY KEY,
-    var_event_extra text NOT NULL UNIQUE,
-    cd_unit smallint REFERENCES main.def_unit(cd_unit),
-    type_var varchar(20),
-    var_event_extra_spa text,
-    var_event_extra_comment text,
-    CHECK (type_var IN ('integer', 'double precision', 'categorial', 'free text', 'boolean')),
-    CHECK (type_var IN ('categorial','free text', 'boolean') OR cd_unit IS NOT NULL)
-);
-
-CREATE TABLE main.def_categ_event_extra
-(
-    cd_categ_event_extra serial PRIMARY KEY,
-    categ text NOT NULL,
-    cd_var_event_extra smallint REFERENCES main.def_var_event_extra(cd_var_event_extra) NOT NULL,
-    categ_spa text,
-    order_categ int,
-    UNIQUE (cd_var_event_extra,categ)
-);
-
-CREATE TABLE main.event_extra
-(
-    cd_event integer REFERENCES main.event(cd_event) NOT NULL,
-    cd_var_event_extra smallint REFERENCES main.def_var_event_extra(cd_var_event_extra),
-    cd_categ_event_extra integer REFERENCES main.def_categ_event_extra(cd_categ_event_extra),
-    value_bool boolean,
-    value_int integer,
-    value_double double precision,
-    value_text text,
-    CHECK (cd_categ_event_extra IS NOT NULL OR value_bool IS NOT NULL OR value_int IS NOT NULL OR value_double IS NOT NULL OR value_text IS NOT NULL)
+    cd_reg int REFERENCES main.register(cd_reg),
+    cd_subind int REFERENCES main.subindividual(cd_subind),
+    cd_var smallint REFERENCES main.def_var,
+    ind_char_int integer,
+    ind_char_double double precision,
+    ind_char_text text,
+    ind_char_categ integer REFERENCES main.controlled_vocab(cd_categ),
+    ind_char_bool boolean,
+    CHECK( ((ind_char_categ IS NOT NULL)::integer + (ind_char_int IS NOT NULL)::integer + (ind_char_int IS NOT NULL)::integer + (ind_char_categ IS NOT NULL)::integer + ind_char_bool::integer)=1)
+    --UNIQUE (cd_reg,cd_var_ind_char,COALESCE(cd_categ::double,ind_char_int::double,ind_char_double))
+    --might be useful to create more specific constraints depending on whether it is an integer, double or categorial variable.
 );
 
 
-CREATE TABLE main.def_var_registros_extra
+-- Extra tables
+CREATE TABLE main.project_characteristics
 (
-    cd_var_registros_extra smallserial PRIMARY KEY,
-    var_registros_extra text NOT NULL UNIQUE,
-    cd_unit smallint REFERENCES main.def_unit(cd_unit),
-    type_var varchar(20),
-    var_registros_extra_spa text,
-    var_registros_extra_comment text,
-    CHECK (type_var IN ('integer', 'double precision', 'categorial', 'free text', 'boolean','reference')),
-    CHECK (type_var IN ('categorial','free text', 'boolean','reference') OR cd_unit IS NOT NULL)
-);
---Note: reference is used each time the variable is some code for grouping registros or to reference a variable from another table, without being a categoryba
-
-CREATE TABLE main.def_categ_registros_extra
-(
-    cd_categ_registros_extra serial PRIMARY KEY,
-    categ text NOT NULL,
-    cd_var_registros_extra smallint REFERENCES main.def_var_registros_extra(cd_var_registros_extra),
-    categ_spa text,
-    order_categ int,
-    UNIQUE (cd_var_registros_extra,categ)
+	cd_project int REFERENCES main.project(cd_project),
+	cd_var smallint REFERENCES main.def_var,
+	project_char_int integer,
+	project_char_double double precision,
+	project_char_text text,
+	project_char_categ int REFERENCES main.controlled_vocab(cd_categ),
+	project_char_bool boolean
 );
 
-CREATE TABLE main.registros_extra
+CREATE TABLE main.gp_event_characteristics
 (
-    cd_reg integer REFERENCES main.registros(cd_reg) NOT NULL,
-    cd_var_registros_extra smallint REFERENCES main.def_var_registros_extra(cd_var_registros_extra),
-    cd_categ_registros_extra integer REFERENCES main.def_categ_registros_extra(cd_categ_registros_extra),
-    value_bool boolean,
-    value_int integer,
-    value_double double precision,
-    value_text text,
-    CHECK (cd_categ_registros_extra IS NOT NULL OR value_bool IS NOT NULL OR value_int IS NOT NULL OR value_double IS NOT NULL OR value_text IS NOT NULL)
+	cd_gp_event int REFERENCES main.gp_event(cd_gp_event),
+	cd_var smallint REFERENCES main.def_var,
+	gp_event_char_int int,
+	gp_event_char_double double precision,
+	gp_event_char_text text,
+	gp_event_char_categ int REFERENCES main.controlled_vocab(cd_categ),
+	gp_event_char_bool boolean
 );
 
-CREATE TABLE main.def_season
+CREATE TABLE main.event_characteristics
 (
-   cd_tempo char(2) PRIMARY KEY,
-   date_range tsrange,
-   season varchar(10) NOT NULL,
-   temporada varchar(20) NOT NULL,
-   EXCLUDE USING GIST (date_range WITH &&)
+	cd_event int REFERENCES main.event(cd_event),
+	cd_var smallint REFERENCES main.def_var,
+	event_char_int int,
+	event_char_double double precision,
+	event_char_text text,
+	event_char_categ int REFERENCES main.controlled_vocab(cd_categ),
+	event_char_bool boolean
 );
 
-INSERT INTO main.def_season
-VALUES
-  ('T1', '[2021-06-01,2021-12-31 23:59:59]'::tsrange,'Rainy','Aguas altas'),
-  ('T2', '[2022-01-01,2022-08-31 23:59:59]'::tsrange,'Dry','Aguas bajas')
-;
-
-
-/*Variables ambientales*/
-/* vamos a crear tablas de variables ambientales para poder utilizarla de manera rapida: Anotar, la manera limpía de hacerlo sería
-
-* o sea añadir un "grupo biologico" de variables ambientales, con sus propios eventos, gp de eventos
-* o sea añadir unas variables ambientales en las tablas de habitat, con el problema que en el caso de peces, anh+temporada no es un nivel de organización que se pueda referenciar
-*/
-
-CREATE TABLE main.phy_chi_peces
+CREATE TABLE main.reg_characteristics
 (
-  cd_pt_ref smallint REFERENCES main.punto_referencia(cd_pt_ref),
-  cd_tempo char(2) REFERENCES main.def_season(cd_tempo),
-  temp double precision,
-  ph double precision,
-  oxy_dis double precision,
-  cond double precision,
-  oil_film boolean,
-  float_mat boolean,
-  subst_compl_idx double precision,
-  struc_compl_idx double precision,
-  canopy_cover smallint,
-  PRIMARY KEY (cd_pt_ref,cd_tempo)
-);
-
-CREATE TABLE main.def_phy_chi_type
-(
-    cd_phy_chi_type smallserial PRIMARY KEY,
-    phy_chi_type varchar(10) UNIQUE NOT NULL,
-    phy_chi_type_spa varchar(10) UNIQUE NOT NULL
-);
-INSERT INTO main.def_phy_chi_type(phy_chi_type, phy_chi_type_spa)
-VALUES
-  ('water','agua'),
-  ('sediment','sedimento');
-
-CREATE TABLE main.phy_chi_hidro_event
-(
-   cd_event_phy_chi smallserial PRIMARY KEY,
-   cd_pt_ref smallint REFERENCES main.punto_referencia(cd_pt_ref),
-   event_id_phy_chi text UNIQUE NOT NULL,
-   cd_phy_chi_type smallint REFERENCES main.def_phy_chi_type(cd_phy_chi_type),
-   date_time timestamp
-);
-SELECT AddGeometryColumn('main', 'phy_chi_hidro_event', 'the_geom', 3116, 'POINT', 2);
-CREATE INDEX event_phy_chi_pt_geom_idx ON main.phy_chi_hidro_event USING GIST(the_geom);
-
-CREATE TABLE main.phy_chi_hidro_aguas
-(
-   cd_event_phy_chi smallint PRIMARY KEY REFERENCES main.phy_chi_hidro_event(cd_event_phy_chi),
-   basin text,
-   mean_depth double precision,
-   width_approx double precision,
-   photic_depth double precision,
-   river_clasif text,
-   temp double precision,
-   ph double precision,
-   oxy_dis double precision,
-   cond double precision,
-   oxy_sat double precision,
-   tot_sol_situ double precision,
-   tot_org_c double precision,
-   avail_p double precision,
-   mg double precision,
-   cal double precision,
-   na_s double precision,
-   tot_dis_sol double precision,
-   tot_sol double precision,
-   sus_sol double precision,
-   sol_sol double precision,
-   p04 double precision,
-   n03 double precision,
-   silicates double precision,
-   oil_fat double precision,
-   blue_met_act double precision,
-   carbonates double precision,
-   cal_hard double precision,
-   tot_hard double precision,
-   alk double precision,
-   bicarb double precision
+	cd_reg int REFERENCES main.register(cd_reg),
+	cd_var smallint REFERENCES main.def_var,
+	reg_char_int int,
+	reg_char_double double precision,
+	reg_char_text text,
+	reg_char_categ int REFERENCES main.controlled_vocab(cd_categ),
+	reg_char_bool boolean
 );
 
 
-CREATE TABLE main.phy_chi_hidro_sedi
+CREATE TABLE main.taxon_characteristics
 (
-   cd_event_phy_chi smallint PRIMARY KEY REFERENCES main.phy_chi_hidro_event,
-   sand_per double precision,
-   clay_per double precision,
-   silt_per double precision,
-   text_clas text,
-   org_c double precision,
-   avail_p double precision,
-   mg double precision,
-   cal double precision,
-   na_s double precision,
-   boron double precision,
-   fe double precision,
-   tot_n double precision
+	cd_tax int REFERENCES main.taxo(cd_tax),
+	cd_var smallint REFERENCES main.def_var,
+	tax_char_int int,
+	tax_char_double double precision,
+	tax_char_text text,
+	tax_char_categ int REFERENCES main.controlled_vocab(cd_categ),
+	tax_char_bool boolean
 );
 
-
-
-
-
-/* Schema spatial */
-CREATE SCHEMA spat;
-
-CREATE TABLE spat.def_landcov
+CREATE TABLE main.organization_characteristics
 (
-   cd_landcov smallserial PRIMARY KEY,
-   landcov varchar(50) UNIQUE NOT NULL,
-   landcov_spa varchar(50) UNIQUE NOT NULL
+	cd_org int REFERENCES main.organization(cd_org),
+	cd_var smallint REFERENCES main.def_var,
+	org_char_int int,
+	org_char_double double precision,
+	org_char_text text,
+	org_char_categ int REFERENCES main.controlled_vocab(cd_categ),
+	org_char_bool boolean
 );
 
-CREATE TABLE spat.landcov
-(
-  gid serial PRIMARY KEY,
-  cd_landcov smallint REFERENCES spat.def_landcov(cd_landcov) ON DELETE SET NULL ON UPDATE CASCADE
-);
-SELECT AddGeometryColumn('spat', 'landcov', 'the_geom', 3116, 'POLYGON', 2);
-CREATE INDEX spat_landcov_the_geom_idx ON spat.landcov USING GIST(the_geom);
-CREATE INDEX spat_landcov_cd_landcov_fkey ON spat.landcov(cd_landcov);
-
+COMMIT;
