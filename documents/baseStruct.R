@@ -22,13 +22,5 @@ plot(0, xaxt = 'n', yaxt = 'n', bty = 'n', pch = '', ylab = '', xlab = '',xlim=c
 png <- readPNG(t_file)
 rasterImage(png,0,0,1,1)
 
-tables_biol$def_accesory = rep(F,nrow(tables_biol))
-tables_biol$def_accesory [tables_biol$table_name %in% c("controlled_vocab","def_gp_biol","def_location_type","def_measurement_type","def_method","def_org_rel","def_organisation_level","def_subindividual_part","def_tax_rank","def_unit","def_var","def_var_gp","organization_type","proj_rel_type","project_relationship")] <- T
-
-
-A<-dm_object %>%
-  dm_set_colors("red"=all_of(tables_biol$table_name[tables_biol$def_accesory]))%>%
-  dm_draw(view_type = "all")
-A
 
 dbDisconnect(biol)

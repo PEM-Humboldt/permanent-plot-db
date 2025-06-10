@@ -13,13 +13,22 @@ CREATE TABLE main.def_organisation_level
 INSERT INTO main.def_organisation_level(org_lev,pkey_field,main_table)
 VALUES
 	('sub-individual','cd_subind','sub_individual'),
+	('sub-individual characteristics','cd_subind_char','subindividual_characteristics'),
 	('individual','cd_ind','individual'),
+	('individual characteristics','cd_ind_char','individual_characteristics'),
 	('register','cd_reg','register'),
 	('event','cd_event','event'),
 	('event group','cd_gp_event','gp_event'),
 	('project','cd_project','project'),
+	('methodology','cd_method','def_method'),
 	('identification','cd_ident','identification'),
-	('taxon','cd_tax','taxon');
+	('taxon','cd_tax','taxo'),
+	('morfo-taxon','cd_morfo','morfo_taxo'),
+	('person','cd_person','people'),
+	('organization','cd_org','organization'),
+	('role','cd_people_role','people_role')
+	
+	;
 CREATE TABLE main.def_location_type(
 	cd_loc_type integer PRIMARY KEY NOT NULL,
 	location_type text UNIQUE NOT NULL,
@@ -253,6 +262,19 @@ CREATE TABLE main.role_directory
 	country text
 );
 
+CREATE TABLE main.def_project_type
+(
+	cd_proj_type smallserial PRIMARY KEY,
+	proj_type text NOT NULL,
+	proj_type_description text NOT NULL
+);
+
+INSERT INTO main.def_project_type(proj_type, proj_type_description)
+VALUES
+	('institutional project','Project with a reference ID corresponding to an institutional project. This kind of project usually contains various projects here'),
+	('collection field campaign','Project organized around a field campaign, usually included in a larger project with an institutional ID'),
+	('permanent plot','Project mostly useful to be able to filter a permanent plot, note that this kind of project should include various gp_event corresponding to various campaign on the same site'),
+	('data project','Meta-project with the objective of integrating data from various projects');
 
 
 CREATE TABLE main.project
@@ -260,7 +282,8 @@ CREATE TABLE main.project
 	cd_project serial PRIMARY KEY,
 	project text UNIQUE,
 	project_description text,
-	type_project text,
+	cd_proj_type smallint REFERENCES main.def_project_type,
+	cd_method int REFERENCES main.def_method,
 	cd_loc int REFERENCES main.location(cd_loc)
 );
 ALTER TABLE main.organization_relationship ADD COLUMN cd_project int REFERENCES main.project(cd_project);
@@ -455,7 +478,7 @@ CREATE TABLE main.def_subindividual_part
 CREATE TABLE main.subindividual
 (
 	cd_subind serial PRIMARY KEY,
-	cd_ind int REFERENCES main.individual REFERENCES main.individual (cd_ind),
+	cd_ind int REFERENCES main.individual (cd_ind),
 	cd_part smallint REFERENCES main.def_subindividual_part(cd_part),
 	part_number int,
 	parent_cd_subind int REFERENCES main.subindividual(cd_subind),
