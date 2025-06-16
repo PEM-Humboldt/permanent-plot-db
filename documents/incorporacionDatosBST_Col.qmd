@@ -10,10 +10,18 @@ format:
 El equipo de investigación del Centro de Estudios Socio-ecológicos y Cambio Global utiliza un formato interno de R (formato RDS) para almacenar los datos de parcelas permanentes según un esquema de bases de datos relacionales.
 Si bien el lenguaje R no permite directamente imponer reglas de relaciones entre tablas, la lógica interna es la misma que en una base de datos en SQL, con llaves primarias y foráneas.
 
-En este documento, vamos a explorar los datos de la red BST-Col para mostrar como incorporar esos datos a una base de datos relacional en SQL
+En este documento, vamos a mostrar como se pueden incorporar los datos  de la red BST-Col en la base de datos SQL. 
+Haciendo este ejercicio de incorporación, van a aparecer preguntas y dudas sobre los datos.
+
+## Crear y incializar la base de datos
+
+```{r}
+dbname <- "pp_bst_col"
+source("../db_creation/reinitializeDB.R")
+```
 
 
-## Leer los archivos
+## Leer el archivo
 
 En la carpeta compartida, hay varios archivos RDS:
 
@@ -28,9 +36,19 @@ Vamos a enforcarnos acá en los datos de la red de Bosques Secos Tropicales de C
 rdsBST<-readRDS("../../data_google/4.rdsProyectos/dataRedBSTCol.rds")
 ```
 
+
+## Manejar proyectos y localizaciones de proyectos
+
+En la base de datos biologicas, para razones explicadas [acá]("./dataArchitecture.md"), cada una de las parcelas permanentes debe estar entrada como un proyecto.
+
+
 ```{r}
 names(rdsBST)
-rdsBST$metadata[[1]]
+metadata_tot<-Reduce(rbind,rdsBST$metadata)
+```
+
+
+```{r}
 rdsBST$dates[[1]]
 allDates<-data.frame(
   pp=rep(names(rdsBST$dates),sapply(rdsBST$dates,nrow)),
