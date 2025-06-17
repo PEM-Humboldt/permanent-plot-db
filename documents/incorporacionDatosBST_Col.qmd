@@ -5,6 +5,9 @@ lang: es
 format: 
   gfm:
     df-print: kable
+knitr: 
+  opts_chunk: 
+    fig.path: "./Fig/Incor_BST"
 ---
 
 El equipo de investigación del Centro de Estudios Socio-ecológicos y Cambio Global utiliza un formato interno de R (formato RDS) para almacenar los datos de parcelas permanentes según un esquema de bases de datos relacionales.
@@ -16,6 +19,7 @@ Haciendo este ejercicio de incorporación, van a aparecer preguntas y dudas sobr
 ## Crear y incializar la base de datos
 
 ```{r}
+require(RPostgres)
 dbname <- "pp_bst_col"
 source("../db_creation/reinitializeDB.R")
 ```
@@ -45,10 +49,112 @@ En la base de datos biologicas, para razones explicadas [acá]("./dataArchitectu
 ```{r}
 names(rdsBST)
 metadata_tot<-Reduce(rbind,rdsBST$metadata)
+head(metadata_tot,n = 5)
+```
+
+Antes de poder incorporar los proyectos, en caso de que esos tengan una metodología particular, se debe incorporar la metodología y las variables  que permiten incorporar un codigo de metodología.
+
+```{r}
+dbpp<-dbConnect(Postgres(),dbname=dbname)
+```
+
+
+```{sql}
+#| connection: dbpp
+INSERT INTO main.def_unit(cd_measurement_type, unit, unit_spa, abbv_unit, factor)
+VALUES(
+(SELECT cd_measurement_type FROM main.def_measurement_type WHERE measurement_type='number'), 'Number of individuals', 'Número de individuos', 'ind.', 1);
+```
+
+
+```{sql}
+#| connection: dbpp
+INSERT INTO main.def_var(
+ cd_unit,
+ cd_org_lev,
+ cd_var_gp,
+ extra_var,
+ repeatable,
+ var_comment,
+ type_var,
+ name_dwc,
+ extension_dwc,
+ name_var,
+ description
+)
+VALUES
+  ((SELECT cd_unit FROM main.def_unit WHERE unit='Number of individuals'),
+  (SELECT cd_org_lev FROM main.def_organisation_level WHERE org_lev='register'),
+  NULL,
+  false,
+  false,
+  'Note that even though this variable can contain true/false value (when there is never more than one individual by register), they are systematized as 0/1',
+  'integer',
+  'individualCount',
+  'occurrence',
+  'qt_int',
+  'Number of indiduals of a species in a register'
+  );
+```
+
+
+```{sql}
+#| connection: dbpp
+INSERT INTO main.def_method(
+ method,
+ method_spa,
+ cd_var_ind_qt,
+ description_spa,
+ description,
+ required_var,
+ cd_org_lev
+)
+VALUES(
+ 'Permanent plot 1 (to be defined)',
+ 'Parcelas permanentes 1 (por definir)',
+ (SELECT cd_var FROM main.def_var WHERE name_var='qt_int' AND cd_org_lev = (SELECT cd_org_lev FROM main.def_organisation_level WHERE org_lev='register')),
+ 'descripción metodo por definir',
+ 'todo: describe the method',
+ NULL,
+ (SELECT cd_org_lev FROM main.def_organisation_level WHERE org_lev='register')
+);
+```
+
+Con las metodologías definidas (no realmente, más bien con los campos obligatorios llenos), podemos definir las localidades que corresponden a las parcelas.
+
+```{r}
+require(sf)
+dbLocCol<-dbConnect(Postgres(),dbname='dev_geogref')
+colombia<-st_read(dbLocCol,"dissolved_colombia")
+dbDisconnect(dbLocCol)
+plot(st_geometry(colombia), border=NA, col="red")
+```
+
+
+```{r mapParcelas}
+#| fig.height: 10
+#| fig.width: 10
+spatPoints<-st_as_sf(metadata_tot,coords=c("longitude_dec","latitude_dec")) %>%
+  st_set_crs(4326) %>% st_transform(st_crs(colombia))
+plot(st_geometry(spatPoints),reset=F)
+plot(st_geometry(colombia),add=T,border=F,col='turquoise')
+plot(st_geometry(spatPoints),add=T,pch='+')
 ```
 
 
 ```{r}
+schemas<-dbGetQuery(dbpp, "SELECT schema_name FROM information_schema.schemata")$schema_name
+if(!"tmp" %in% schemas){dbExecute(dbpp, "CREATE SCHEMA tmp")}
+spatPoints$namepp<-rownames(spatPoints)
+st_write(obj=spatPoints, dsn=dbpp, layer=Id(schema="tmp",table="spatial_metadata"),delete_layer=T)
+
+```
+
+
+
+
+
+```r
 rdsBST$dates[[1]]
 allDates<-data.frame(
   pp=rep(names(rdsBST$dates),sapply(rdsBST$dates,nrow)),
@@ -65,7 +171,7 @@ head(allMembers)
 
 # Tags
 
-```{r}
+```r
 names(rdsBST)
 rdsBST$censuses$census0$AltoSanJorgeInicial
 rdsBST$taxonomy$AltoSanJorgeInicial

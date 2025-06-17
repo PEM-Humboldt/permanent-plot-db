@@ -11,7 +11,7 @@ if("dbname" %in% ls())
 }
 if(make_sleep)
 {
-  Sys.sleep(60)
+  Sys.sleep(10)
 }
 dbParam<-list(drv = Postgres(), dbname=dbname)
 # Admin connection: drop and create again the database

@@ -173,7 +173,8 @@ CREATE TABLE main.def_method
     cd_var_ind_qt smallint REFERENCES main.def_var(cd_var),
     description_spa text,
     description text,
-    required_var int[]
+    required_var int[],
+    cd_org_lev int REFERENCES main.def_organisation_level(cd_org_lev)
 );
 
 CREATE TABLE main.organization_type
