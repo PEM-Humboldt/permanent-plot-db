@@ -151,6 +151,11 @@ st_write(obj=spatPoints, dsn=dbpp, layer=Id(schema="tmp",table="spatial_metadata
 ```
 
 
+```{sql}
+#| connection: dbpp
+SELECT namepp, geometry
+FROM tmp.spatial_metadata
+```
 
 
 
@@ -175,5 +180,9 @@ head(allMembers)
 names(rdsBST)
 rdsBST$censuses$census0$AltoSanJorgeInicial
 rdsBST$taxonomy$AltoSanJorgeInicial
+```
+
+```{r}
+dbDisconnect(dbpp)
 ```
 
