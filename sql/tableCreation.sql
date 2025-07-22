@@ -275,7 +275,9 @@ VALUES
 	('institutional project','Project with a reference ID corresponding to an institutional project. This kind of project usually contains various projects here'),
 	('collection field campaign','Project organized around a field campaign, usually included in a larger project with an institutional ID'),
 	('permanent plot','Project mostly useful to be able to filter a permanent plot, note that this kind of project should include various gp_event corresponding to various campaign on the same site'),
-	('data project','Meta-project with the objective of integrating data from various projects');
+	('data project','Meta-project with the objective of integrating data from various projects'),
+	('permanent plot set','Set of permanent plots which share characteristics, geographic or otherwise')
+	;
 
 
 CREATE TABLE main.project
