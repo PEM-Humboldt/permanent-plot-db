@@ -39,7 +39,9 @@ INSERT INTO main.def_location_type
 VALUES
 	(1,'Site point','POINT','Should represent the whole location, prefer the centroid than the first or last sampling location'),
 	(2,'Plot polygon','POLYGON','Polygon containing the whole sampling site'),
-	(3,'Transect','MULTILINESTRING','Follow the sampling path of the transect, the order of the geometry is important');
+	(3,'Transect','MULTILINESTRING','Follow the sampling path of the transect, the order of the geometry is important')
+	(4,'Plot group','POLYGON','Convex Hull of the plot coordinates in a group of plots')
+	;
 
 -- it should be called sites and have the possibility to get real coordinates or spatial data
 CREATE TABLE main.location
