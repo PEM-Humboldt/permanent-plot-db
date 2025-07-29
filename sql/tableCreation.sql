@@ -39,7 +39,7 @@ INSERT INTO main.def_location_type
 VALUES
 	(1,'Site point','POINT','Should represent the whole location, prefer the centroid than the first or last sampling location'),
 	(2,'Plot polygon','POLYGON','Polygon containing the whole sampling site'),
-	(3,'Transect','MULTILINESTRING','Follow the sampling path of the transect, the order of the geometry is important')
+	(3,'Transect','MULTILINESTRING','Follow the sampling path of the transect, the order of the geometry is important'),
 	(4,'Plot group','POLYGON','Convex Hull of the plot coordinates in a group of plots')
 	;
 
@@ -47,7 +47,7 @@ VALUES
 CREATE TABLE main.location
 (
     cd_loc serial PRIMARY KEY,
-    location varchar(50) UNIQUE NOT NULL,
+    location text UNIQUE NOT NULL,
     other_location_name text[],
     cd_loc_type integer REFERENCES main.def_location_type(cd_loc_type),
     parent_loc integer REFERENCES main.location(cd_loc),
@@ -175,8 +175,10 @@ CREATE TABLE main.def_method
     cd_var_ind_qt smallint REFERENCES main.def_var(cd_var),
     description_spa text,
     description text,
+    parent_method smallint REFERENCES main.def_method(cd_method),
     required_var int[],
     cd_org_lev int REFERENCES main.def_organisation_level(cd_org_lev)
+	
 );
 
 CREATE TABLE main.organization_type
@@ -318,6 +320,8 @@ CREATE TABLE main.gp_event
     cd_loc integer REFERENCES main.location(cd_loc) ON DELETE SET NULL ON UPDATE CASCADE,
     cd_gp_biol char(4) REFERENCES main.def_gp_biol(cd_gp_biol) ON DELETE CASCADE NOT NULL,
     cd_method int REFERENCES main.def_method(cd_method),
+    date_begin date,
+    date_end date,
     --cd_protocol int REFERENCES main.def_protocol(cd_protocol) ON DELETE SET NULL ON UPDATE CASCADE ,
     campaign_nb int NOT NULL,
     subpart varchar(10),
@@ -336,15 +340,16 @@ CREATE TABLE main.event
     cd_gp_event int REFERENCES main.gp_event(cd_gp_event) ON DELETE CASCADE NOT NULL,
     num_replicate int NOT NULL, --numero de la trampa o del evento (dentro del gp_event)
     description_replicate text, --part of the eventID that describes the replicate
-    date_time_begin timestamp,
-    date_time_end timestamp,
+    date_begin date,
+    time_begin time,
+    date_end date,
+    time_end time,
     locality_verb text,
     event_remarks text,
     cds_creator integer[] ,-- note: we can't use foreign keys because more than  one person might have created the event, otherwise we need to make more tables.
     created date,
     cd_loc int REFERENCES main.location(cd_loc),
-    UNIQUE (cd_gp_event, num_replicate),
-    CHECK (date_time_begin<date_time_end OR date_time_begin IS NULL OR date_time_end IS NULL)
+    UNIQUE (cd_gp_event, num_replicate)
 )
 ;
 -- CREATE INDEX event_cd_gp_event_fkey ON main.event(cd_gp_event);

@@ -38,6 +38,7 @@ Vamos a enforcarnos acá en los datos de la red de Bosques Secos Tropicales de C
 
 ```{r}
 rdsBST<-readRDS("../../data_google/4.rdsProyectos/dataRedBSTCol.rds")
+#rdsTDF<-readRDS("../../data_google/4.rdsProyectos/dataTDF.rds")
 ```
 
 
@@ -181,37 +182,7 @@ dbExecute(dbpp,
           CROSS JOIN (SELECT cd_proj_type FROM main.def_project_type WHERE proj_type='permanent plot') a
           CROSS JOIN (SELECT cd_method FROM main.def_method WHERE method='Permanent plot 1 (to be defined)') b
           LEFT JOIN main.location ON sm.namepp=location
-          ")WITH a AS(
-SELECT namepp,
-  CASE
-    WHEN namepp ~ '((Inicial)|(Intermedio)|(Tardio)|(Temprano))$' THEN 'fase'
-    WHEN namepp ~ 'T[0-9]{1,3}P[0-9]{1,3}$' THEN 'TP'
-    WHEN namepp ~ 'R[0-9]{1,3}T[0-9]{1,3}$' THEN 'RT'
-    WHEN namepp ~ 'P[0-9]{1,3}[A-Z]?$' THEN 'P'
-    WHEN namepp ~ '[0-9]{1,3}$' THEN 'number'
-  END type_name,
-  CASE
-    WHEN namepp ~ '((Inicial)|(Intermedio)|(Tardio)|(Temprano))$' THEN REGEXP_REPLACE(namepp,'((Inicial)|(Intermedio)|(Tardio)|(Temprano))$','')
-    WHEN namepp ~ 'T[0-9]{1,3}P[0-9]{1,3}$' THEN REGEXP_REPLACE(namepp,'T[0-9]{1,3}P[0-9]{1,3}$' ,'')
-    WHEN namepp ~ 'R[0-9]{1,3}T[0-9]{1,3}$' THEN REGEXP_REPLACE(namepp, 'R[0-9]{1,3}T[0-9]{1,3}$','')
-    WHEN namepp ~ 'P[0-9]{1,3}[A-Z]?$' THEN REGEXP_REPLACE(namepp, 'P[0-9]{1,3}[A-Z]?$' ,'')
-    WHEN namepp ~ '[0-9]{1,3}$' THEN REGEXP_REPLACE(namepp, '[0-9]{1,3}$','')
-  END gp_parcelas,
-  CASE
-    WHEN namepp ~ '((Inicial)|(Intermedio)|(Tardio)|(Temprano))$' THEN REGEXP_REPLACE(namepp,'(.*)((Inicial)|(Intermedio)|(Tardio)|(Temprano))$','\2')
-    WHEN namepp ~ 'T[0-9]{1,3}P[0-9]{1,3}$' THEN REGEXP_REPLACE(namepp,'(.+)(T[0-9]{1,3}P[0-9]{1,3})$','\2')
-    WHEN namepp ~ 'R[0-9]{1,3}T[0-9]{1,3}$' THEN REGEXP_REPLACE(namepp,'(.+)(R[0-9]{1,3}T[0-9]{1,3})$','\2')
-    WHEN namepp ~ 'P[0-9]{1,3}[A-Z]?$' THEN REGEXP_REPLACE(namepp,'(.+)(P[0-9]{1,3}[A-Z]?)$','\2')
-    WHEN namepp ~ '[0-9]*$' THEN REGEXP_REPLACE(namepp,'([A-Za-z]+)([0-9]*)$','\2')
-  END parcela
-FROM tmp.spatial_metadata
-)
-SELECT 'Plot group: '|| gp_parcelas AS project,  'Plot group including '|| COUNT(DISTINCT namepp) || ' plots', cd_proj_type, NULL as cd_method, ST_ConvexHull(ST_Collect(ST_Transform(geometry,(SELECT srid FROM geometry_columns WHERE f_geometry_column = 'pt_geom' AND f_table_name = 'location'))))
-FROM a
-LEFT JOIN tmp.spatial_metadata USING (namepp)
-CROSS JOIN (SELECT cd_proj_type FROM main.def_project_type WHERE project_type='permanent plot set')
-WHERE gp_parcelas IS NOT NULL AND gp_parcelas <> ''
-GROUP BY gp_parcelas
+          ")
 ```
 
 
@@ -251,8 +222,8 @@ GROUP BY gp_parcelas
 ```
 
 ```{r}
-dbExecute(db_pp,"
-WITH a AS(
+dbExecute(dbpp,"
+WITH a AS( -- looking from plot groups from the names of the plots
 SELECT namepp,
   CASE
     WHEN namepp ~ '((Inicial)|(Intermedio)|(Tardio)|(Temprano))$' THEN 'fase'
@@ -276,44 +247,222 @@ SELECT namepp,
     WHEN namepp ~ '[0-9]*$' THEN REGEXP_REPLACE(namepp,'([A-Za-z]+)([0-9]*)$','\2')
   END parcela
 FROM tmp.spatial_metadata
-),b AS(
-SELECT gp_parcelas,'Plot group: '|| gp_parcelas AS project,  'Plot group including '|| COUNT(DISTINCT namepp) || ' plots' project_description, cd_proj_type, NULL::int as cd_method, cd_loc_type, ST_ConvexHull(ST_Collect(ST_Transform(geometry,(SELECT srid FROM geometry_columns WHERE f_geometry_column = 'pol_geom' AND f_table_name = 'location')))) ch_geom
+),a2 AS( -- after extracting the groups, look whether some plots have the same name than a group
+SELECT namepp,
+  CASE
+    WHEN namepp IN (SELECT DISTINCT gp_parcelas FROM a) THEN 'plot=gp'
+    ELSE type_name
+  END type_name,
+  CASE
+    WHEN namepp IN (SELECT DISTINCT gp_parcelas FROM a) THEN namepp
+    ELSE gp_parcelas
+  END gp_parcelas,
+  CASE
+    WHEN namepp IN (SELECT DISTINCT gp_parcelas FROM a) THEN 'main'
+    ELSE parcela
+  END parcela
 FROM a
+),b AS( -- creating a convex hull for the plot groups and preparing the location and project variables
+SELECT gp_parcelas,'Plot group: '|| gp_parcelas AS project,  'Plot group including '|| COUNT(DISTINCT namepp) || ' plots' project_description, cd_proj_type, NULL::int as cd_method, cd_loc_type,
+ST_ConvexHull(ST_Collect(ST_Transform(geometry,(SELECT srid FROM geometry_columns WHERE f_geometry_column = 'pol_geom' AND f_table_name = 'location')))) ch_geom
+FROM a2
 LEFT JOIN tmp.spatial_metadata USING (namepp)
 CROSS JOIN (SELECT cd_proj_type FROM main.def_project_type WHERE proj_type='permanent plot set') c
 CROSS JOIN (SELECT cd_loc_type FROM main.def_location_type WHERE location_type='Plot group') d
 WHERE gp_parcelas IS NOT NULL AND gp_parcelas <> ''
 GROUP BY gp_parcelas,cd_proj_type,cd_loc_type
-HAVING COUNT(DISTINCT namepp) > 1
-), e AS(
+HAVING COUNT(DISTINCT namepp) > 2
+UNION
+SELECT gp_parcelas,'Plot group: '|| gp_parcelas AS project,  'Plot group including '|| COUNT(DISTINCT namepp) || ' plots' project_description, cd_proj_type, NULL::int as cd_method, cd_loc_type,
+ST_Buffer(ST_ConvexHull(ST_Collect(ST_Transform(geometry,(SELECT srid FROM geometry_columns WHERE f_geometry_column = 'pol_geom' AND f_table_name = 'location')))),2) ch_geom -- we put a 2m buffer to pass from a line to a polygon when there are only 2 points
+FROM a2
+LEFT JOIN tmp.spatial_metadata USING (namepp)
+CROSS JOIN (SELECT cd_proj_type FROM main.def_project_type WHERE proj_type='permanent plot set') c
+CROSS JOIN (SELECT cd_loc_type FROM main.def_location_type WHERE location_type='Plot group') d
+WHERE gp_parcelas IS NOT NULL AND gp_parcelas <> ''
+GROUP BY gp_parcelas,cd_proj_type,cd_loc_type
+HAVING COUNT(DISTINCT namepp) = 2
+), e AS( -- inserting the locations
 INSERT INTO main.location(location, cd_loc_type, cd_org_lev, pol_geom)
-SELECT gp_parcelas,cd_loc_type,cd_org_lev,ch_geom
+SELECT gp_parcelas|| ' (multiple plots)',cd_loc_type,cd_org_lev,ch_geom
 FROM b
 CROSS JOIN (SELECT cd_org_lev FROM main.def_organisation_level WHERE org_lev='project') d
 RETURNING cd_loc, location
-), f AS(
+), f AS( --inserting the projects
 INSERT INTO main.project(project, project_description, cd_proj_type, cd_method, cd_loc)
 SELECT project, project_description, cd_proj_type, cd_method, cd_loc
 FROM b
-LEFT JOIN e ON b.gp_parcelas=e.location
+LEFT JOIN e ON b.gp_parcelas=REPLACE(e.location,' (multiple plots)','')
 RETURNING cd_project, project, REGEXP_REPLACE(project,'Plot group: ','') AS gp_parcelas
-),g AS(
-SELECT 
-FROM a
-LEFT JOIN e ON a.gp_parcelas=e.cd_loc
-LEFT JOIN main.location l ON a.namepp=l.location
+),g AS( -- creating a temporary table for describing relationship between project, and between locations 
+SELECT a2.gp_parcelas,l.cd_loc cd_loc_children, e.cd_loc cd_loc_parent,p.cd_project cd_proj_child, f.cd_project cd_proj_parent
+FROM a2
+LEFT JOIN e ON a2.gp_parcelas=REPLACE(e.location,' (multiple plots)','')
+LEFT JOIN main.location l ON a2.namepp=l.location
+LEFT JOIN f ON a2.gp_parcelas=REPLACE(f.project,'Plot group: ','')
+LEFT JOIN main.project p ON a2.namepp=p.project
+WHERE 
+  a2.gp_parcelas IS NOT NULL AND a2.gp_parcelas <> '' AND
+  (e.cd_loc IS NOT NULL OR f.cd_project IS NOT NULL)
+), h AS( -- inserting relationships between projects 
+INSERT INTO main.project_relationship
+SELECT cd_proj_child,cd_proj_parent,cd_proj_rel_type
+FROM g
+CROSS JOIN (SELECT cd_proj_rel_type FROM main.proj_rel_type WHERE proj_rel_type='part_of') i
+WHERE cd_proj_parent IS NOT NULL
+RETURNING *
 )
-
+-- adding parent location from the plot coordinates (points) to the convex hulls
+UPDATE main.location 
+SET parent_loc=cd_loc_parent
+FROM g
+WHERE cd_loc_children=cd_loc
 ")
 ```
 
 
+### Manejar los grupos de eventos
+#### localización
 
+En el caso de las parcelas permanentes, la localización de los grupos de eventos corresponde a la localización de las parcelas
 
-### Insert of projects
+#### metodología
+
+Estaría bien tener una metodología diferente según los tipos de campañas (diferenciar el census0 de los recensos). 
+Tambien nos tocaría definir la escala de descripción de la metodología. Es posible que tengamos diferentes metodologías a la escala de evento que puedan dar una metodología compuesta a la escala del grupo de evento
 
 ```{r}
+dbExecute(dbpp,"INSERT INTO main.def_method(method, method_spa, description_spa, description, parent_method, cd_org_lev)
+          VALUES
+            ('pp1_census0','pp1_census0','Establecimiento de una parcela permanente de tipo 1: estructura','Type 1 permanent plot first implementation: structure',(SELECT cd_method FROM main.def_method WHERE method='Permanent plot 1 (to be defined)'),(SELECT cd_org_lev FROM main.def_organisation_level WHERE org_lev='event group')),
+            ('pp1_censusn','pp1_censusn','Monitoreo/recenso de una parcela permanente de tipo 1: dinamica, crecimiento, mortalidad, reclutamiento','Type 1 permanent plot monitoring/recensus: dynamic, growth, mortality, recruitment',(SELECT cd_method FROM main.def_method WHERE method='Permanent plot 1 (to be defined)'),(SELECT cd_org_lev FROM main.def_organisation_level WHERE org_lev='event group'));
+          ")
+```
 
+
+#### dates gp events
+
+```{r}
+datesBST<-data.frame(
+  ppid=rep(names(rdsBST$dates), sapply(rdsBST$dates,nrow)),
+  Reduce(rbind,rdsBST$dates)
+)
+dbWriteTable(dbpp,name = Id(schema='tmp',table='dates_census'),value=datesBST, overwrite=T)
+dbExecute(dbpp,"INSERT INTO main.gp_event(cd_project, cd_loc, cd_gp_biol,cd_method,date_begin,date_end,campaign_nb)
+          SELECT cd_project, cd_loc, 'arbo',
+          CASE
+            WHEN \"measuringType\"='census0' THEN (SELECT cd_method FROM main.def_method WHERE method='pp1_census0')
+            ELSE (SELECT cd_method FROM main.def_method WHERE method='pp1_censusn')
+          END,
+          \"eventDate\",\"eventDate\",
+          CASE
+            WHEN \"measuringType\"='census0' THEN 1
+            ELSE REPLACE(\"measuringType\",'census','')::int + 1
+          END
+          FROM tmp.dates_census dc
+          LEFT JOIN main.project p ON dc.ppid=p.project
+          ")
+```
+
+### Manejo de los eventos
+
+
+```{r}
+BSTcensuses0<-data.frame(
+  ppid=rep(names(rdsBST$censuses$census0),sapply(rdsBST$censuses$census0,nrow)),
+  Reduce(rbind,rdsBST$censuses$census0)
+)
+subplotNb <- tapply(BSTcensuses0$subplot,BSTcensuses0$ppid, function(x)
+  {if (all(is.na(x))){return(1)}else{return(max(x,na.rm = T))}})
+table(subplotNb)
+weirdNbsubplot<-names(subplotNb)[! subplotNb %in% c(1, 5, 10, 25, 100)]
+Reduce(rbind,rdsBST$metadata[weirdNbsubplot])
+subplotNb[weirdNbsubplot]
+spatPoints[spatPoints$area_ha==0.01,]
+BSTcensuses0$comments<-iconv(BSTcensuses0$comments,from='MAC',to='UTF-8')
+dbWriteTable(dbpp,Id(schema='tmp',table='censuses0'),BSTcensuses0,overwrite=T)
+```
+
+
+```{sql}
+#| connection: dbpp
+WITH a AS(
+SELECT ppid, ARRAY_AGG(DISTINCT subplot) subplots, MAX(subplot) FILTER (WHERE subplot IS NOT NULL) max_subplot_nb
+FROM tmp.censuses0 
+GROUP BY ppid
+)
+SELECT area_ha,length_m,width_m,max_subplot_nb,ARRAY_AGG(namepp), count(*)
+FROM a
+LEFT JOIN tmp.spatial_metadata sm ON namepp=ppid
+GROUP BY area_ha,length_m,width_m,max_subplot_nb
+ORDER BY area_ha,max_subplot_nb
+```
+
+```{sql}
+#| connection: dbpp
+WITH a AS(
+SELECT ppid, ARRAY_AGG(DISTINCT subplot) subplots, MAX(subplot) FILTER (WHERE subplot IS NOT NULL) max_subplot_nb
+FROM tmp.censuses0 
+GROUP BY ppid
+), b AS(
+SELECT ppid,  
+  CASE
+    WHEN max_subplot_nb IS NULL THEN 1
+    WHEN area_ha=0.05 THEN 5
+    WHEN area_ha=0.1 THEN 10
+    WHEN area_ha=0.25 THEN 25
+    WHEN area_ha=1 AND max_subplot_nb=10 THEN 10
+    WHEN area_ha=1 AND max_subplot_nb=100 THEN 100
+  END nb_event,
+  max_subplot_nb,  area_ha,length_m,width_m,subplots
+FROM a
+LEFT JOIN tmp.spatial_metadata sm ON namepp=ppid
+), c AS(
+SELECT ppid, generate_series(1,nb_event) event_for_id, nb_event
+FROM b
+)
+INSERT INTO main.event(cd_gp_event,event_id,num_replicate,description_replicate,date_begin,time_begin,date_end,time_end)
+SELECT cd_gp_event,
+  CASE
+    WHEN nb_event=1 THEN c.ppid || '_census0_nosubplot'
+    ELSE c.ppid || '_census0_subplot' || event_for_id
+  END event_id,
+  CASE
+    WHEN nb_event=1 THEN 1
+    ELSE event_for_id
+  END num_replicate,
+  CASE
+    WHEN nb_event=1 THEN NULL
+    ELSE 'subplot '||event_for_id||'/'||nb_event
+  END description_replicate,
+  "eventDate" date_begin, NULL time_begin, "eventDate" date_end, NULL time_end
+FROM c
+LEFT JOIN main.project p ON p.project=c.ppid
+LEFT JOIN main.gp_event ge ON ge.cd_project=p.cd_project
+LEFT JOIN main.def_method m ON ge.cd_method=m.cd_method
+LEFT JOIN tmp.dates_census dc ON dc.ppid=c.ppid AND dc."measuringType"='census0'
+WHERE m.method ~* 'census0'
+RETURNING cd_event,event_id
+```
+
+## Taxonomy
+
+```{r}
+BSTtaxonomy<-
+  data.frame(
+    ppid=rep(names(rdsBST$taxonomy),sapply(rdsBST$taxonomy,nrow)),
+    Reduce(rbind,rdsBST$taxonomy)
+  )
+table(BSTtaxonomy$family,useNA = 'always')
+familyUnknown<-BSTtaxonomy$family == '' | BSTtaxonomy$family == 'indet'
+table(BSTtaxonomy$genus[!familyUnknown])
+genusUnknown <- BSTtaxonomy$genus==''
+genusCF <- grepl('^ *cf',BSTtaxonomy$genus,perl = T, ignore.case = T)
+specepiUnknown <- BSTtaxonomy$specificEpithet==''
+specepiCF_AFF <- grepl('^ *cf',BSTtaxonomy$specificEpithet,perl = T, ignore.case = T) | grepl('^ *aff',BSTtaxonomy$specificEpithet,perl = T,ignore.case = T)
+infraspecies
+table(BSTtaxonomy$infraspecificEpithet)
+BSTtaxonomy[!is.na(BSTtaxonomy$infraspecificEpithet),]
 ```
 
 
