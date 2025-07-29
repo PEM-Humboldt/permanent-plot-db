@@ -38,7 +38,7 @@ Vamos a enforcarnos acá en los datos de la red de Bosques Secos Tropicales de C
 
 ```{r}
 rdsBST<-readRDS("../../data_google/4.rdsProyectos/dataRedBSTCol.rds")
-#rdsTDF<-readRDS("../../data_google/4.rdsProyectos/dataTDF.rds")
+rdsTDF<-readRDS("../../data_google/4.rdsProyectos/dataTDF.rds")
 ```
 
 
@@ -460,7 +460,7 @@ genusUnknown <- BSTtaxonomy$genus==''
 genusCF <- grepl('^ *cf',BSTtaxonomy$genus,perl = T, ignore.case = T)
 specepiUnknown <- BSTtaxonomy$specificEpithet==''
 specepiCF_AFF <- grepl('^ *cf',BSTtaxonomy$specificEpithet,perl = T, ignore.case = T) | grepl('^ *aff',BSTtaxonomy$specificEpithet,perl = T,ignore.case = T)
-infraspecies
+specSP
 table(BSTtaxonomy$infraspecificEpithet)
 BSTtaxonomy[!is.na(BSTtaxonomy$infraspecificEpithet),]
 ```
