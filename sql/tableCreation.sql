@@ -401,8 +401,10 @@ CREATE TABLE main.taxo
     name_tax text UNIQUE,
     authorship text,
     cd_rank varchar(6) REFERENCES main.def_tax_rank(cd_rank) ON DELETE SET NULL ON UPDATE CASCADE,
-    cd_parent int REFERENCES main.taxo(cd_tax) ON UPDATE CASCADE,
-    UNIQUE(name_tax, authorship),
+    cd_parent int REFERENCES main.taxo(cd_tax)  ON UPDATE CASCADE DEFERRABLE INITIALLY DEFERRED,
+    cd_accepted int REFERENCES main.taxo(cd_tax) ON UPDATE CASCADE,
+    gbifid bigint UNIQUE,
+    UNIQUE(name_tax, authorship) DEFERRABLE INITIALLY DEFERRED,
     CHECK(cd_rank IN ('KG', 'DOM') OR cd_parent IS NOT NULL),
     CHECK(
         CASE
@@ -414,6 +416,51 @@ CREATE TABLE main.taxo
 );
 -- CREATE INDEX taxo_cd_parent_key ON main.taxo(cd_parent);
 -- CREATE INDEX taxo_cd_rank_key ON main.taxo(cd_rank);
+
+CREATE OR REPLACE FUNCTION find_higher_id(id1 int,lev character varying(4), OUT idfin int)
+IMMUTABLE
+AS $$
+DECLARE
+        finallev int;
+        starthigher boolean;
+        currentid int;
+        currentlev smallint;
+BEGIN
+currentid := id1;
+SELECT rank_level INTO finallev FROM main.def_tax_rank WHERE cd_rank=lev;
+SELECT r.rank_level INTO currentlev FROM main.taxo n JOIN main.def_tax_rank r ON n.cd_rank=r.cd_rank WHERE cd_tax=currentid;
+starthigher := (currentlev>finallev);
+IF starthigher THEN
+        idfin := NULL;
+END IF;
+
+WHILE currentlev IS NOT NULL AND currentlev<finallev LOOP
+        SELECT cd_parent INTO currentid FROM main.taxo WHERE main.taxo.cd_tax=currentid;
+        SELECT r.rank_level INTO currentlev FROM main.taxo n JOIN main.def_tax_rank r ON n.cd_rank=r.cd_rank WHERE cd_tax=currentid;
+        --RAISE NOTICE 'current level is (%) \n', currentlev;
+        --RAISE NOTICE 'current id is (%) \n', currentid;
+END LOOP;
+
+IF (currentlev>finallev AND NOT starthigher) THEN
+        idfin := NULL;
+END IF;
+
+IF (currentlev=finallev) THEN
+        idfin := currentid;
+END IF;
+
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE INDEX taxo_species_idx ON main.taxo USING HASH(find_higher_id(cd_tax,'SP'));
+CREATE INDEX taxo_genus_idx ON main.taxo USING HASH(find_higher_id(cd_tax,'GN'));
+CREATE INDEX taxo_family_idx ON main.taxo USING HASH(find_higher_id(cd_tax,'FAM'));
+CREATE INDEX taxo_order_idx ON main.taxo USING HASH(find_higher_id(cd_tax,'OR'));
+CREATE INDEX taxo_class_idx ON main.taxo USING HASH(find_higher_id(cd_tax,'CL'));
+CREATE INDEX taxo_phylum_idx ON main.taxo USING HASH(find_higher_id(cd_tax,'PHY'));
+CREATE INDEX taxo_kingdom_idx ON main.taxo USING HASH(find_higher_id(cd_tax,'KG'));
+
+
 
 CREATE TABLE main.morfo_taxo
 (

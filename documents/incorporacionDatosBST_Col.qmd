@@ -453,17 +453,218 @@ BSTtaxonomy<-
     ppid=rep(names(rdsBST$taxonomy),sapply(rdsBST$taxonomy,nrow)),
     Reduce(rbind,rdsBST$taxonomy)
   )
-table(BSTtaxonomy$family,useNA = 'always')
-familyUnknown<-BSTtaxonomy$family == '' | BSTtaxonomy$family == 'indet'
-table(BSTtaxonomy$genus[!familyUnknown])
+#table(BSTtaxonomy$family,useNA = 'always')
+familyUnknown<-BSTtaxonomy$family == '' | BSTtaxonomy$family == 'indet' | BSTtaxonomy$family == 'Indet'
+#table(BSTtaxonomy$genus[!familyUnknown])
 genusUnknown <- BSTtaxonomy$genus==''
+genusMorpho <- BSTtaxonomy$genus %in%c('morf','Morf','morph','Morph','Morpho','Morfo','morpho','morfo','Mopho')
 genusCF <- grepl('^ *cf',BSTtaxonomy$genus,perl = T, ignore.case = T)
 specepiUnknown <- BSTtaxonomy$specificEpithet==''
 specepiCF_AFF <- grepl('^ *cf',BSTtaxonomy$specificEpithet,perl = T, ignore.case = T) | grepl('^ *aff',BSTtaxonomy$specificEpithet,perl = T,ignore.case = T)
-specSP
-table(BSTtaxonomy$infraspecificEpithet)
-BSTtaxonomy[!is.na(BSTtaxonomy$infraspecificEpithet),]
+specSP<- grepl('^ *sp *([0-9]{1,2})?$',BSTtaxonomy$specificEpithet)
+# In this file we do not really have any infraspecific intormation, but we might have to change that in other files
+stopifnot(BSTtaxonomy$infraspecificEpithet[!is.na(BSTtaxonomy$infraspecificEpithet)] %in% c("","sp","sp1"))
 ```
+
+Ahora vamos a limpiar un poco la información taxonomica para pasarla a resolución de nombres en el backbone de GBIF:
+
+```{r}
+simpTaxo<-BSTtaxonomy[c("family","genus","specificEpithet")]
+# manual correction for families
+familyCorrection<-data.frame(
+error=c("Acardiaceae", "Polygoceae", "Apocyceae", "Annoceae", "Boragiceae", "Rhamceae","Primuliaceae", "Thymeleaceae", "Pricramniaceae", "Myrsinaceae", "Leguminosae"),
+correction=c("Anacardiaceae","Polygonaceae", "Apocynaceae", "Annonaceae", "Boraginaceae", "Rhamnaceae", "Primulaceae", "Thymelaeaceae", "Picramniaceae", "Primulaceae","Fabaceae")
+)
+m<-match(simpTaxo$family,familyCorrection$error)
+simpTaxo$family[!is.na(m)]<-familyCorrection$correction[m[!is.na(m)]]
+
+genusCorrection <- data.frame(
+  error=c("Acardium","Cinmomun","Psicotria","Termilia","Anno"),
+  correction=c("Anacardium","Cinnamomum","Psychotria","Terminalia","Annona")
+)
+m<-match(simpTaxo$genus, genusCorrection$error)
+simpTaxo$genus[!is.na(m)]<-genusCorrection$correction[m[!is.na(m)]]
+
+
+simpTaxo$family[familyUnknown]<-NA
+simpTaxo$genus[genusUnknown|genusCF|genusMorpho]<-NA
+simpTaxo$specificEpithet[specepiUnknown|specepiCF_AFF|specSP]<-NA
+unSimpTaxo<-unique(simpTaxo)
+```
+
+### Hasta familias
+
+
+```{r}
+require(taxize)
+require(rgbif)
+familiesToFind<-na.omit(unique(unSimpTaxo$family))
+A<-invisible(get_ids_(na.omit(unique(unSimpTaxo$family)), "gbif"))
+okFamilies<-sapply(A$gbif,function(tab){
+  perfect<-tab$status=='ACCEPTED' & tab$matchtype=='EXACT' & tab$rank == 'family'
+  if(any(perfect)){return(tab$usagekey[perfect])}else{return(NA)}
+})
+stopifnot(!is.na(okFamilies))
+higherRanks <- classification(as.gbifid(okFamilies,check=F))
+higherRanks<-lapply(higherRanks,function(tab){
+  tab$parent_id<-c(NA, tab$id[1:(nrow(tab)-1)])
+  return(tab)
+  
+})
+higherRanks_tab <- unique(Reduce(rbind,higherRanks))
+#sHR<-lapply(higherRanks_tab$id,function(x)name_usage(key=x))
+#sapply(sHR,function(rg)rg$data$authorship)
+dbWriteTable(dbpp,higherRanks_tab,name=dbQuoteIdentifier(conn=dbpp,Id(schema='tmp',table='taxo')),value=higherRanks_tab)
+stat<-'INSERT INTO main.taxo(name_tax,cd_rank,gbifid)
+          SELECT name, cd_rank,id
+          FROM tmp.taxo t
+          LEFT JOIN main.def_tax_rank dtr ON t."rank"=dtr.tax_rank
+          WHERE dtr.cd_rank=\'KG\'
+          '
+dbExecute(dbpp,stat)
+
+stat<-'INSERT INTO main.taxo(name_tax,cd_rank,gbifid,cd_parent)
+          SELECT name, dtr.cd_rank,id,mt.cd_tax
+          FROM tmp.taxo t
+          LEFT JOIN main.def_tax_rank dtr ON t."rank"=dtr.tax_rank
+          LEFT JOIN main.taxo mt ON t.parent_id=mt.gbifid
+          WHERE dtr.cd_rank=\'PHY\'
+          '
+cat(stat)
+dbExecute(dbpp,stat)
+
+
+stat<-'INSERT INTO main.taxo(name_tax,cd_rank,gbifid,cd_parent)
+          SELECT name, dtr.cd_rank,id,mt.cd_tax
+          FROM tmp.taxo t
+          LEFT JOIN main.def_tax_rank dtr ON t."rank"=dtr.tax_rank
+          LEFT JOIN main.taxo mt ON t.parent_id=mt.gbifid
+          WHERE dtr.cd_rank=\'CL\'
+          '
+cat(stat)
+dbExecute(dbpp,stat)
+
+stat<-'INSERT INTO main.taxo(name_tax,cd_rank,gbifid,cd_parent)
+          SELECT name, dtr.cd_rank,id,mt.cd_tax
+          FROM tmp.taxo t
+          LEFT JOIN main.def_tax_rank dtr ON t."rank"=dtr.tax_rank
+          LEFT JOIN main.taxo mt ON t.parent_id=mt.gbifid
+          WHERE dtr.cd_rank=\'OR\'
+          '
+cat(stat)
+dbExecute(dbpp,stat)
+
+
+stat<-'INSERT INTO main.taxo(name_tax,cd_rank,gbifid,cd_parent)
+          SELECT name, dtr.cd_rank,id,mt.cd_tax
+          FROM tmp.taxo t
+          LEFT JOIN main.def_tax_rank dtr ON t."rank"=dtr.tax_rank
+          LEFT JOIN main.taxo mt ON t.parent_id=mt.gbifid
+          WHERE dtr.cd_rank=\'FAM\'
+          '
+cat(stat)
+dbExecute(dbpp,stat)
+dbExecute(dbpp,"DROP TABLE tmp.taxo")
+
+```
+
+### Generos
+
+
+```{r}
+genusFamily<-tapply(simpTaxo$family[!is.na(simpTaxo$genus)],simpTaxo$genus[!is.na(simpTaxo$genus)],function(x){
+  A<-sort(table(x),decreasing = T)
+  names(A)[1]
+})
+gbGenus<-get_gbifid_(names(genusFamily))
+
+checkGbGenus<-mapply(function(tab,fam,gen){
+  if(!nrow(tab)>0){return(NULL)}
+  tabg <- tab [!is.na(tab$rank) & tab$rank=='genus',]
+  exact <- (!is.na(tabg$genus) &tabg$genus == gen)
+  accepted <- (!is.na(tabg$status) & tabg$status == 'ACCEPTED')
+  familyOk <- (!is.na(tabg$family) & tabg$family == fam)
+  if(sum(exact&accepted&familyOk)>=1)
+  {return(tabg[exact&accepted&familyOk,,drop=F][1,,drop=F])}
+  if(nrow(tabg)==0){return(tab)}
+  return(tabg)
+},gbGenus,genusFamily,names(genusFamily))
+
+resN<-sapply(checkGbGenus,function(x)ifelse(is.null(x),0,nrow(x)))
+checkGbGenus[resN==0]
+checkGbGenus[resN>1]
+cat(names(checkGbGenus[resN>1]))
+
+(familyPb<-
+  rbind(
+    data.frame(genus="Ampelocera", familyError="Ulmaceae", familyCorrection="Cannabaceae"),
+    data.frame(genus="Aptandra", familyError="Olacaceae", familyCorrection="Aptandraceae"),
+    data.frame(genus="Cochlospermum", familyError="Bixaceae", familyCorrection="Cochlospermaceae"),
+    data.frame(genus="Cordia", familyError="Boraginaceae", familyCorrection="Cordiaceae"),
+    data.frame(genus="Heisteria", familyError="Olacaceae", familyCorrection="Erythropalaceae"),
+    data.frame(genus="Hirtella", familyError="Chrysobalanaceae", familyCorrection="Cordiaceae"),
+    data.frame(genus="Humboldtiella", familyError="Fabaceae", familyCorrection="Gosseletinidae"),
+    data.frame(genus="Rochefortia", familyError="Boraginaceae", familyCorrection="Ehretiaceae"),
+    data.frame(genus="Sambucus", familyError="Adoxaceae", familyCorrection="Viburnaceae"),
+    data.frame(genus="Scyphostelma", familyError="Fabaceae", familyCorrection="Apocynaceae")
+  ))
+synonimia<-rbind(
+  data.frame(syno="Arrabidaea", accepted="Fridericia"),
+  data.frame(syno="Cnidosculus", accepted="Cnidoscolus"),
+  data.frame(syno="Cydista", accepted="Bignonia"),
+  data.frame(syno="Margaritopsis", accepted="Eumachia"),
+  data.frame(syno="Memora", accepted="Adenocalymma"),
+  data.frame(syno="Rollinia", accepted="Annona")
+)
+orto<-rbind(
+  data.frame(error="Simiria",correction="Simira")
+)
+sinSolución<-c("Bignoniaceae","Euphorbia")
+# gbGenus<-mapply(function(x,y)get_gbifid(x,family=y,ask=F,kingdom='Plantae'),names(genusFamily),genusFamily)
+# genusToSearch<-unique(na.omit(unSimpTaxo$genus))
+# familyGenusToSearch<-unSimpTaxo$family[match(unSimpTa)]
+# gbGenus<-invisible(get_ids_(genusToSearch, "gbif"))
+# foundCanonical<-sapply(gbGenus$gbif,function(tab)ifelse(nrow(tab)>0,tab$canonicalname[1],NA))
+# gbGenus$gbif[!foundCanonical==names(foundCanonical)]
+```
+
+### Especies
+
+
+```{r}
+speciesToSearch <- paste(unSimpTaxo$genus[!is.na(unSimpTaxo$genus) & !is.na(unSimpTaxo$specificEpithet)], unSimpTaxo$specificEpithet [!is.na(unSimpTaxo$genus) & !is.na(unSimpTaxo$specificEpithet)])
+speciesFamily<-tapply(unSimpTaxo$family[!is.na(unSimpTaxo$genus) & !is.na(unSimpTaxo$specificEpithet)],speciesToSearch,function(x)sort(x,decreasing=T)[1])
+gbSpecies <- get_gbifid_(names(speciesFamily))
+checkGbSpecies<-mapply(function(tab,fam,spe){
+  if(!nrow(tab)>0){return(NULL)}
+  tabg <- tab [!is.na(tab$rank) & tab$rank=='species',]
+  exact <- (!is.na(tabg$species) &trimws(tabg$species) == spe)
+  accepted <- (!is.na(tabg$status) & tabg$status == 'ACCEPTED')
+  familyOk <- (!is.na(tabg$family) & tabg$family == fam)
+  if(sum(exact&accepted&familyOk)>=1)
+  {return(tabg[exact&accepted&familyOk,,drop=F][1,,drop=F])}
+  if(nrow(tabg)==0){return(tab)}
+  return(tabg)
+},gbSpecies,speciesFamily,names(speciesFamily))
+
+resN<-sapply(checkGbSpecies,function(x)ifelse(is.null(x),0,nrow(x)))
+checkGbSpecies[resN==0]
+checkGbSpecies[resN>1]
+cat(names(checkGbSpecies[resN>1]))
+toTestSynonym<-sapply(checkGbSpecies[resN>1],function(tab)tab[1,"status"]=="SYNONYM")
+synoRes<-sapply(sapply(checkGbSpecies[resN>1][toTestSynonym],function(tab)tab[1,"acceptedusagekey"]),function(x)
+  {found=name_usage(key=x)
+  return(found$data$canonicalName)
+  }
+  )
+(speSynoAccepted<-data.frame(syno=names(checkGbSpecies[resN>1][toTestSynonym]),accepted=synoRes,row.names = NULL))
+toTestFamily<-mapply(function(spe,fam){spe[1,"family"]!=fam},checkGbSpecies[resN>1],speciesFamily[resN>1])
+speFamilySuggested <- data.frame(species=names(checkGbSpecies[resN>1][toTestFamily]), familyProblem=speciesFamily[resN>1][toTestFamily], familySuggested= sapply(checkGbSpecies[resN>1][toTestFamily],function(tab)tab[1,"family"]),row.names = NULL)
+
+(suggestedOther <- data.frame(problem=names(checkGbSpecies[resN>1][!(toTestSynonym|toTestFamily)]),suggested=sapply(checkGbSpecies[resN>1][!(toTestSynonym|toTestFamily)],function(tab)tab[1,"canonicalname"]),row.names=NULL))
+suggestedOther[]
+```
+
 
 
 ```r
