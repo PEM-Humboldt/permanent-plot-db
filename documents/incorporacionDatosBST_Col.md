@@ -46,7 +46,6 @@ Tropicales de Colombia (BST-Col).
 
 ``` r
 rdsBST<-readRDS("../../data_google/4.rdsProyectos/dataRedBSTCol.rds")
-rdsTDF<-readRDS("../../data_google/4.rdsProyectos/dataTDF.rds")
 ```
 
 ## Manejar proyectos y localizaciones de proyectos
@@ -143,6 +142,13 @@ obligatorios llenos), podemos definir las localidades que corresponden a
 las parcelas.
 
 ``` r
+dbLocCol<-dbConnect(Postgres(),dbname='dev_geogref')
+colombia<-st_read(dbLocCol,"dissolved_colombia")
+dbDisconnect(dbLocCol)
+plot(st_geometry(colombia), border=NA, col="red")
+```
+
+``` r
 require(sf)
 ```
 
@@ -151,23 +157,13 @@ require(sf)
     Linking to GEOS 3.13.0, GDAL 3.9.3, PROJ 9.4.1; sf_use_s2() is TRUE
 
 ``` r
-dbLocCol<-dbConnect(Postgres(),dbname='dev_geogref')
-colombia<-st_read(dbLocCol,"dissolved_colombia")
-dbDisconnect(dbLocCol)
-plot(st_geometry(colombia), border=NA, col="red")
-```
-
-![](./Fig/Incor_BSTunnamed-chunk-9-1.png)
-
-``` r
+CRS<-4686
 spatPoints<-st_as_sf(metadata_tot,coords=c("longitude_dec","latitude_dec")) %>%
-  st_set_crs(4326) %>% st_transform(st_crs(colombia))
-plot(st_geometry(spatPoints),reset=F)
-plot(st_geometry(colombia),add=T,border=F,col='turquoise')
-plot(st_geometry(spatPoints),add=T,pch='+')
+  st_set_crs(4326) %>% st_transform(CRS)
+#plot(st_geometry(spatPoints),reset=F)
+#plot(st_geometry(colombia),add=T,border=F,col='turquoise')
+#plot(st_geometry(spatPoints),add=T,pch='+')
 ```
-
-![](./Fig/Incor_BSTmapParcelas-1.png)
 
 ``` r
 schemas<-dbGetQuery(dbpp, "SELECT schema_name FROM information_schema.schemata")$schema_name
@@ -7169,6 +7165,2940 @@ names(rdsBST)
 rdsBST$censuses$census0$AltoSanJorgeInicial
 rdsBST$taxonomy$AltoSanJorgeInicial
 ```
+
+## Archivo TDF
+
+``` r
+rdsTDF<-readRDS("../../data_google/4.rdsProyectos/dataTDF.rds")
+```
+
+### Taxonomía
+
+``` r
+TDFtaxonomy<-rdsTDF$taxonomy
+TDFtaxonomy$family<-as.character(TDFtaxonomy$family)
+TDFtaxonomy$genus<-as.character(TDFtaxonomy$genus)
+TDFtaxonomy$sp_epithet<-as.character(TDFtaxonomy$sp_epithet)
+all(rdsTDF$dynamics$recruitment$code %in% rdsTDF$taxonomy$code)
+```
+
+    [1] TRUE
+
+``` r
+#table(TDFtaxonomy$family,useNA = 'always')
+familyUnknown<-TDFtaxonomy$family == '' | TDFtaxonomy$family == 'indet' | TDFtaxonomy$family == 'Indet'
+#table(TDFtaxonomy$genus[!familyUnknown])
+genusUnknown <- TDFtaxonomy$genus==''
+genusMorpho <- TDFtaxonomy$genus %in%c('morf','Morf','morph','Morph','Morpho','Morfo','morpho','morfo','Mopho')
+genusCF <- grepl('^ *cf',TDFtaxonomy$genus,perl = T, ignore.case = T)
+specepiUnknown <- TDFtaxonomy$sp_epithet==''
+specepiCF_AFF <- grepl('^ *cf',TDFtaxonomy$sp_epithet,perl = T, ignore.case = T) | grepl('^ *aff',TDFtaxonomy$sp_epithet,perl = T,ignore.case = T)
+specSP<- grepl('^ *sp *([0-9]{1,2})?$',TDFtaxonomy$sp_epithet)
+# In this file we do not really have any infraspecific intormation, but we might have to change that in other files
+stopifnot(TDFtaxonomy$infrasp_epithet[!is.na(TDFtaxonomy$infrasp_epithet)] %in% c("","sp","sp1"))
+```
+
+``` r
+simpTaxo<-TDFtaxonomy[c("family","genus","sp_epithet")]
+# manual correction for families
+familyCorrection<-data.frame(
+error=c("Acardiaceae", "Polygoceae", "Apocyceae", "Annoceae", "Boragiceae", "Rhamceae","Primuliaceae", "Thymeleaceae", "Pricramniaceae", "Myrsinaceae", "Leguminosae"),
+correction=c("Anacardiaceae","Polygonaceae", "Apocynaceae", "Annonaceae", "Boraginaceae", "Rhamnaceae", "Primulaceae", "Thymelaeaceae", "Picramniaceae", "Primulaceae","Fabaceae")
+)
+m<-match(simpTaxo$family,familyCorrection$error)
+simpTaxo$family[!is.na(m)]<-familyCorrection$correction[m[!is.na(m)]]
+
+genusCorrection <- data.frame(
+  error=c("Acardium","Cinmomun","Psicotria","Termilia","Anno"),
+  correction=c("Anacardium","Cinnamomum","Psychotria","Terminalia","Annona")
+)
+m<-match(simpTaxo$genus, genusCorrection$error)
+simpTaxo$genus[!is.na(m)]<-genusCorrection$correction[m[!is.na(m)]]
+
+
+simpTaxo$family[familyUnknown]<-NA
+simpTaxo$genus[genusUnknown|genusCF|genusMorpho]<-NA
+simpTaxo$sp_epithet[specepiUnknown|specepiCF_AFF|specSP]<-NA
+unSimpTaxo<-unique(simpTaxo)
+```
+
+#### Hasta familias
+
+``` r
+require(taxize)
+require(rgbif)
+familiesToFind<-na.omit(unique(unSimpTaxo$family))
+A<-invisible(get_ids_(na.omit(unique(unSimpTaxo$family)), "gbif"))
+```
+
+    ══  db: gbif ═════════════════
+
+
+    Retrieving data for taxon 'Cactaceae'
+
+
+    Retrieving data for taxon 'Ulmaceae'
+
+
+    Retrieving data for taxon 'Rutaceae'
+
+
+    Retrieving data for taxon 'Apocynaceae'
+
+
+    Retrieving data for taxon 'Anacardiaceae'
+
+
+    Retrieving data for taxon 'Fabaceae'
+
+
+    Retrieving data for taxon 'Malpighiaceae'
+
+
+    Retrieving data for taxon 'Burseraceae'
+
+
+    Retrieving data for taxon 'Salicaceae'
+
+
+    Retrieving data for taxon 'Cannabaceae'
+
+
+    Retrieving data for taxon 'Polygonaceae'
+
+
+    Retrieving data for taxon 'Combretaceae'
+
+
+    Retrieving data for taxon 'Boraginaceae'
+
+
+    Retrieving data for taxon 'Euphorbiaceae'
+
+
+    Retrieving data for taxon 'Capparaceae'
+
+
+    Retrieving data for taxon 'Ebenaceae'
+
+
+    Retrieving data for taxon 'Myrtaceae'
+
+
+    Retrieving data for taxon 'Rubiaceae'
+
+
+    Retrieving data for taxon 'Bignoniaceae'
+
+
+    Retrieving data for taxon 'Celastraceae'
+
+
+    Retrieving data for taxon 'Achariaceae'
+
+
+    Retrieving data for taxon 'Nyctaginaceae'
+
+
+    Retrieving data for taxon 'Sapotaceae'
+
+
+    Retrieving data for taxon 'Malvaceae'
+
+
+    Retrieving data for taxon 'Violaceae'
+
+
+    Retrieving data for taxon 'Petiveriaceae'
+
+
+    Retrieving data for taxon 'Meliaceae'
+
+
+    Retrieving data for taxon 'Rhamnaceae'
+
+
+    Retrieving data for taxon 'Achatocarpaceae'
+
+
+    Retrieving data for taxon 'Lamiaceae'
+
+
+    Retrieving data for taxon 'Moraceae'
+
+
+    Retrieving data for taxon 'Lecythidaceae'
+
+
+    Retrieving data for taxon 'Lauraceae'
+
+
+    Retrieving data for taxon 'Annonaceae'
+
+
+    Retrieving data for taxon 'Sapindaceae'
+
+
+    Retrieving data for taxon 'Primulaceae'
+
+
+    Retrieving data for taxon 'Aristolochiaceae'
+
+
+    Retrieving data for taxon 'Zygophyllaceae'
+
+
+    Retrieving data for taxon 'Urticaceae'
+
+
+    Retrieving data for taxon 'Asteraceae'
+
+
+    Retrieving data for taxon 'Vitaceae'
+
+
+    Retrieving data for taxon 'Stemonuraceae'
+
+
+    Retrieving data for taxon 'Convolvulaceae'
+
+
+    Retrieving data for taxon 'Amaranthaceae'
+
+
+    Retrieving data for taxon 'Phyllanthaceae'
+
+
+    Retrieving data for taxon 'Smilacaceae'
+
+
+    Retrieving data for taxon 'Araliaceae'
+
+
+    Retrieving data for taxon 'Erythroxylaceae'
+
+
+    Retrieving data for taxon 'Basellaceae'
+
+
+    Retrieving data for taxon 'Hernandiaceae'
+
+
+    Retrieving data for taxon 'Verbenaceae'
+
+
+    Retrieving data for taxon 'Arecaceae'
+
+
+    Retrieving data for taxon 'Solanaceae'
+
+
+    Retrieving data for taxon 'Chrysobalanaceae'
+
+
+    Retrieving data for taxon 'Piperaceae'
+
+
+    Retrieving data for taxon 'Clusiaceae'
+
+
+    Retrieving data for taxon 'Bixaceae'
+
+
+    Retrieving data for taxon 'Connaraceae'
+
+
+    Retrieving data for taxon 'Melastomataceae'
+
+
+    Retrieving data for taxon 'Olacaceae'
+
+
+    Retrieving data for taxon 'Ochnaceae'
+
+
+    Retrieving data for taxon 'Siparunaceae'
+
+
+    Retrieving data for taxon 'Vochysiaceae'
+
+
+    Retrieving data for taxon 'Thymelaeaceae'
+
+
+    Retrieving data for taxon 'Phytolaccaceae'
+
+``` r
+okFamilies<-sapply(A$gbif,function(tab){
+  perfect<-tab$status=='ACCEPTED' & tab$matchtype=='EXACT' & tab$rank == 'family'
+  if(any(perfect)){return(tab$usagekey[perfect])}else{return(NA)}
+})
+stopifnot(!is.na(okFamilies))
+higherRanks <- classification(as.gbifid(okFamilies,check=F))
+higherRanks<-lapply(higherRanks,function(tab){
+  tab$parent_id<-c(NA, tab$id[1:(nrow(tab)-1)])
+  return(tab)
+  
+})
+higherRanks_tab <- unique(Reduce(rbind,higherRanks))
+#sHR<-lapply(higherRanks_tab$id,function(x)name_usage(key=x))
+#sapply(sHR,function(rg)rg$data$authorship)
+# dbWriteTable(dbpp,higherRanks_tab,name=dbQuoteIdentifier(conn=dbpp,Id(schema='tmp',table='taxo')),value=higherRanks_tab)
+# stat<-'INSERT INTO main.taxo(name_tax,cd_rank,gbifid)
+#           SELECT name, cd_rank,id
+#           FROM tmp.taxo t
+#           LEFT JOIN main.def_tax_rank dtr ON t."rank"=dtr.tax_rank
+#           WHERE dtr.cd_rank=\'KG\'
+#           '
+# dbExecute(dbpp,stat)
+# 
+# stat<-'INSERT INTO main.taxo(name_tax,cd_rank,gbifid,cd_parent)
+#           SELECT name, dtr.cd_rank,id,mt.cd_tax
+#           FROM tmp.taxo t
+#           LEFT JOIN main.def_tax_rank dtr ON t."rank"=dtr.tax_rank
+#           LEFT JOIN main.taxo mt ON t.parent_id=mt.gbifid
+#           WHERE dtr.cd_rank=\'PHY\'
+#           '
+# cat(stat)
+# dbExecute(dbpp,stat)
+# 
+# 
+# stat<-'INSERT INTO main.taxo(name_tax,cd_rank,gbifid,cd_parent)
+#           SELECT name, dtr.cd_rank,id,mt.cd_tax
+#           FROM tmp.taxo t
+#           LEFT JOIN main.def_tax_rank dtr ON t."rank"=dtr.tax_rank
+#           LEFT JOIN main.taxo mt ON t.parent_id=mt.gbifid
+#           WHERE dtr.cd_rank=\'CL\'
+#           '
+# cat(stat)
+# dbExecute(dbpp,stat)
+# 
+# stat<-'INSERT INTO main.taxo(name_tax,cd_rank,gbifid,cd_parent)
+#           SELECT name, dtr.cd_rank,id,mt.cd_tax
+#           FROM tmp.taxo t
+#           LEFT JOIN main.def_tax_rank dtr ON t."rank"=dtr.tax_rank
+#           LEFT JOIN main.taxo mt ON t.parent_id=mt.gbifid
+#           WHERE dtr.cd_rank=\'OR\'
+#           '
+# cat(stat)
+# dbExecute(dbpp,stat)
+# 
+# 
+# stat<-'INSERT INTO main.taxo(name_tax,cd_rank,gbifid,cd_parent)
+#           SELECT name, dtr.cd_rank,id,mt.cd_tax
+#           FROM tmp.taxo t
+#           LEFT JOIN main.def_tax_rank dtr ON t."rank"=dtr.tax_rank
+#           LEFT JOIN main.taxo mt ON t.parent_id=mt.gbifid
+#           WHERE dtr.cd_rank=\'FAM\'
+#           '
+# cat(stat)
+# dbExecute(dbpp,stat)
+# dbExecute(dbpp,"DROP TABLE tmp.taxo")
+```
+
+### Generos
+
+``` r
+genusFamily<-tapply(simpTaxo$family[!is.na(simpTaxo$genus)],simpTaxo$genus[!is.na(simpTaxo$genus)],function(x){
+  A<-sort(table(x),decreasing = T)
+  names(A)[1]
+})
+gbGenus<-get_gbifid_(names(genusFamily))
+```
+
+
+    Retrieving data for taxon 'Acalypha'
+
+
+    Retrieving data for taxon 'Acanthocereus'
+
+
+    Retrieving data for taxon 'Achatocarpus'
+
+
+    Retrieving data for taxon 'Adenocalymma'
+
+
+    Retrieving data for taxon 'Aegiphila'
+
+
+    Retrieving data for taxon 'Aiouea'
+
+
+    Retrieving data for taxon 'Albizia'
+
+
+    Retrieving data for taxon 'Alibertia'
+
+
+    Retrieving data for taxon 'Allophylus'
+
+
+    Retrieving data for taxon 'Alseis'
+
+
+    Retrieving data for taxon 'Amaioua'
+
+
+    Retrieving data for taxon 'Amanoa'
+
+
+    Retrieving data for taxon 'Ampelocera'
+
+
+    Retrieving data for taxon 'Amphilophium'
+
+
+    Retrieving data for taxon 'Amyris'
+
+
+    Retrieving data for taxon 'Anacardium'
+
+
+    Retrieving data for taxon 'Anemopaegma'
+
+
+    Retrieving data for taxon 'Annona'
+
+
+    Retrieving data for taxon 'Anredera'
+
+
+    Retrieving data for taxon 'Apeiba'
+
+
+    Retrieving data for taxon 'Aralia'
+
+
+    Retrieving data for taxon 'Ardisia'
+
+
+    Retrieving data for taxon 'Aristolochia'
+
+
+    Retrieving data for taxon 'Arrabidaea'
+
+
+    Retrieving data for taxon 'Asclepias'
+
+
+    Retrieving data for taxon 'Aspidosperma'
+
+
+    Retrieving data for taxon 'Astronium'
+
+
+    Retrieving data for taxon 'Attalea'
+
+
+    Retrieving data for taxon 'Bactris'
+
+
+    Retrieving data for taxon 'Banara'
+
+
+    Retrieving data for taxon 'Bauhinia'
+
+
+    Retrieving data for taxon 'Bentamantha'
+
+
+    Retrieving data for taxon 'Bignonia'
+
+
+    Retrieving data for taxon 'Bonellia'
+
+
+    Retrieving data for taxon 'Bronwenia'
+
+
+    Retrieving data for taxon 'Brosimum'
+
+
+    Retrieving data for taxon 'Brownea'
+
+
+    Retrieving data for taxon 'Bulnesia'
+
+
+    Retrieving data for taxon 'Bunchosia'
+
+
+    Retrieving data for taxon 'Bursera'
+
+
+    Retrieving data for taxon 'Caesalpinia'
+
+
+    Retrieving data for taxon 'Calliandra'
+
+
+    Retrieving data for taxon 'Callicarpa'
+
+
+    Retrieving data for taxon 'Callichlamys'
+
+
+    Retrieving data for taxon 'Calycophyllum'
+
+
+    Retrieving data for taxon 'Calyptranthes'
+
+
+    Retrieving data for taxon 'Capparidastrum'
+
+
+    Retrieving data for taxon 'Capparis'
+
+
+    Retrieving data for taxon 'Casearia'
+
+
+    Retrieving data for taxon 'Cassia'
+
+
+    Retrieving data for taxon 'Castilla'
+
+
+    Retrieving data for taxon 'Cavanillesia'
+
+
+    Retrieving data for taxon 'Cecropia'
+
+
+    Retrieving data for taxon 'Ceiba'
+
+
+    Retrieving data for taxon 'Celtis'
+
+
+    Retrieving data for taxon 'Cestrum'
+
+
+    Retrieving data for taxon 'Cheiloclinium'
+
+
+    Retrieving data for taxon 'Chiococca'
+
+
+    Retrieving data for taxon 'Chomelia'
+
+
+    Retrieving data for taxon 'Chromolaena'
+
+
+    Retrieving data for taxon 'Cissus'
+
+
+    Retrieving data for taxon 'Citharexylum'
+
+
+    Retrieving data for taxon 'Clarisia'
+
+
+    Retrieving data for taxon 'Clathrotropis'
+
+
+    Retrieving data for taxon 'Clusia'
+
+
+    Retrieving data for taxon 'Coccoloba'
+
+
+    Retrieving data for taxon 'Cochlospermum'
+
+
+    Retrieving data for taxon 'Coffea'
+
+
+    Retrieving data for taxon 'Combretum'
+
+
+    Retrieving data for taxon 'Connarus'
+
+
+    Retrieving data for taxon 'Cordia'
+
+
+    Retrieving data for taxon 'Cordiera'
+
+
+    Retrieving data for taxon 'Coursetia'
+
+
+    Retrieving data for taxon 'Coussarea'
+
+
+    Retrieving data for taxon 'Coutarea'
+
+
+    Retrieving data for taxon 'Crateva'
+
+
+    Retrieving data for taxon 'Croton'
+
+
+    Retrieving data for taxon 'Cupania'
+
+
+    Retrieving data for taxon 'Cynophalla'
+
+
+    Retrieving data for taxon 'Daphnopsis'
+
+
+    Retrieving data for taxon 'Dilodendron'
+
+
+    Retrieving data for taxon 'Dioclea'
+
+
+    Retrieving data for taxon 'Diospyros'
+
+
+    Retrieving data for taxon 'Discophora'
+
+
+    Retrieving data for taxon 'Duguetia'
+
+
+    Retrieving data for taxon 'Elaeoluma'
+
+
+    Retrieving data for taxon 'Endlicheria'
+
+
+    Retrieving data for taxon 'Enterolobium'
+
+
+    Retrieving data for taxon 'Erythrina'
+
+
+    Retrieving data for taxon 'Erythroxylum'
+
+
+    Retrieving data for taxon 'Eschweilera'
+
+
+    Retrieving data for taxon 'Esenbeckia'
+
+
+    Retrieving data for taxon 'Eugenia'
+
+
+    Retrieving data for taxon 'Euphorbia'
+
+
+    Retrieving data for taxon 'Ficus'
+
+
+    Retrieving data for taxon 'Forsteronia'
+
+
+    Retrieving data for taxon 'Fridericia'
+
+
+    Retrieving data for taxon 'Galipea'
+
+
+    Retrieving data for taxon 'Genipa'
+
+
+    Retrieving data for taxon 'Gliricidia'
+
+
+    Retrieving data for taxon 'Graffenrieda'
+
+
+    Retrieving data for taxon 'Guapira'
+
+
+    Retrieving data for taxon 'Guarea'
+
+
+    Retrieving data for taxon 'Guatteria'
+
+
+    Retrieving data for taxon 'Guazuma'
+
+
+    Retrieving data for taxon 'Guettarda'
+
+
+    Retrieving data for taxon 'Gustavia'
+
+
+    Retrieving data for taxon 'Gyrocarpus'
+
+
+    Retrieving data for taxon 'Hampea'
+
+
+    Retrieving data for taxon 'Handroanthus'
+
+
+    Retrieving data for taxon 'Heisteria'
+
+
+    Retrieving data for taxon 'Helianthostylis'
+
+
+    Retrieving data for taxon 'Herrania'
+
+
+    Retrieving data for taxon 'Himatanthus'
+
+
+    Retrieving data for taxon 'Hippocratea'
+
+
+    Retrieving data for taxon 'Hiraea'
+
+
+    Retrieving data for taxon 'Hirtella'
+
+
+    Retrieving data for taxon 'Hura'
+
+
+    Retrieving data for taxon 'Inga'
+
+
+    Retrieving data for taxon 'Ipomoea'
+
+
+    Retrieving data for taxon 'Iresine'
+
+
+    Retrieving data for taxon 'Ixora'
+
+
+    Retrieving data for taxon 'Jacaranda'
+
+
+    Retrieving data for taxon 'Jatropha'
+
+
+    Retrieving data for taxon 'Ladenbergia'
+
+
+    Retrieving data for taxon 'Lantana'
+
+
+    Retrieving data for taxon 'Lecythis'
+
+
+    Retrieving data for taxon 'Leonia'
+
+
+    Retrieving data for taxon 'Leucaena'
+
+
+    Retrieving data for taxon 'Licania'
+
+
+    Retrieving data for taxon 'Licaria'
+
+
+    Retrieving data for taxon 'Lindackeria'
+
+
+    Retrieving data for taxon 'Lippia'
+
+
+    Retrieving data for taxon 'Lonchocarpus'
+
+
+    Retrieving data for taxon 'Luehea'
+
+
+    Retrieving data for taxon 'Lycoseris'
+
+
+    Retrieving data for taxon 'Mabea'
+
+
+    Retrieving data for taxon 'Machaerium'
+
+
+    Retrieving data for taxon 'Maclura'
+
+
+    Retrieving data for taxon 'Malmea'
+
+
+    Retrieving data for taxon 'Malpighia'
+
+
+    Retrieving data for taxon 'Mandevilla'
+
+
+    Retrieving data for taxon 'Manihot'
+
+
+    Retrieving data for taxon 'Manilkara'
+
+
+    Retrieving data for taxon 'Margaritaria'
+
+
+    Retrieving data for taxon 'Marsdenia'
+
+
+    Retrieving data for taxon 'Matayba'
+
+
+    Retrieving data for taxon 'Mayna'
+
+
+    Retrieving data for taxon 'Melicoccus'
+
+
+    Retrieving data for taxon 'Memora'
+
+
+    Retrieving data for taxon 'Miconia'
+
+
+    Retrieving data for taxon 'Morisonia'
+
+
+    Retrieving data for taxon 'Muellera'
+
+
+    Retrieving data for taxon 'Myrcia'
+
+
+    Retrieving data for taxon 'Myriocarpa'
+
+
+    Retrieving data for taxon 'Myrospermum'
+
+
+    Retrieving data for taxon 'Myrsine'
+
+
+    Retrieving data for taxon 'Nectandra'
+
+
+    Retrieving data for taxon 'Neea'
+
+
+    Retrieving data for taxon 'Ochroma'
+
+
+    Retrieving data for taxon 'Ocotea'
+
+
+    Retrieving data for taxon 'Omphalea'
+
+
+    Retrieving data for taxon 'Opuntia'
+
+
+    Retrieving data for taxon 'Ouratea'
+
+
+    Retrieving data for taxon 'Oxandra'
+
+
+    Retrieving data for taxon 'Pachira'
+
+
+    Retrieving data for taxon 'Palicourea'
+
+
+    Retrieving data for taxon 'Paullinia'
+
+
+    Retrieving data for taxon 'Peltogyne'
+
+
+    Retrieving data for taxon 'Pereskia'
+
+
+    Retrieving data for taxon 'Petrea'
+
+
+    Retrieving data for taxon 'Phanera'
+
+
+    Retrieving data for taxon 'Phryganocydia'
+
+
+    Retrieving data for taxon 'Phyllanthus'
+
+
+    Retrieving data for taxon 'Pilosocereus'
+
+
+    Retrieving data for taxon 'Piper'
+
+
+    Retrieving data for taxon 'Piptadenia'
+
+
+    Retrieving data for taxon 'Pisonia'
+
+
+    Retrieving data for taxon 'Pithecellobium'
+
+
+    Retrieving data for taxon 'Pittoniotis'
+
+
+    Retrieving data for taxon 'Platymiscium'
+
+
+    Retrieving data for taxon 'Pouteria'
+
+
+    Retrieving data for taxon 'Pradosia'
+
+
+    Retrieving data for taxon 'Prestonia'
+
+
+    Retrieving data for taxon 'Prosopis'
+
+
+    Retrieving data for taxon 'Protium'
+
+
+    Retrieving data for taxon 'Pseudobombax'
+
+
+    Retrieving data for taxon 'Pseudolmedia'
+
+
+    Retrieving data for taxon 'Pseudomalmea'
+
+
+    Retrieving data for taxon 'Pseudosamanea'
+
+
+    Retrieving data for taxon 'Psidium'
+
+
+    Retrieving data for taxon 'Psychotria'
+
+
+    Retrieving data for taxon 'Pterocarpus'
+
+
+    Retrieving data for taxon 'Quadrella'
+
+
+    Retrieving data for taxon 'Randia'
+
+
+    Retrieving data for taxon 'Rinorea'
+
+
+    Retrieving data for taxon 'Rollinia'
+
+
+    Retrieving data for taxon 'Rudgea'
+
+
+    Retrieving data for taxon 'Ruprechtia'
+
+
+    Retrieving data for taxon 'Sapindus'
+
+
+    Retrieving data for taxon 'Sapium'
+
+
+    Retrieving data for taxon 'Seguieria'
+
+
+    Retrieving data for taxon 'Senegalia'
+
+
+    Retrieving data for taxon 'Senna'
+
+
+    Retrieving data for taxon 'Serjania'
+
+
+    Retrieving data for taxon 'Simira'
+
+
+    Retrieving data for taxon 'Siparuna'
+
+
+    Retrieving data for taxon 'Smilax'
+
+
+    Retrieving data for taxon 'Solanum'
+
+
+    Retrieving data for taxon 'Sorocea'
+
+
+    Retrieving data for taxon 'Spathelia'
+
+
+    Retrieving data for taxon 'Spondias'
+
+
+    Retrieving data for taxon 'Stenocereus'
+
+
+    Retrieving data for taxon 'Styphnolobium'
+
+
+    Retrieving data for taxon 'Swartzia'
+
+
+    Retrieving data for taxon 'Syagrus'
+
+
+    Retrieving data for taxon 'Tabebuia'
+
+
+    Retrieving data for taxon 'Tabernaemontana'
+
+
+    Retrieving data for taxon 'Tachigali'
+
+
+    Retrieving data for taxon 'Tanaecium'
+
+
+    Retrieving data for taxon 'Tapirira'
+
+
+    Retrieving data for taxon 'Terminalia'
+
+
+    Retrieving data for taxon 'Trichilia'
+
+
+    Retrieving data for taxon 'Trichostigma'
+
+
+    Retrieving data for taxon 'Triplaris'
+
+
+    Retrieving data for taxon 'Urera'
+
+
+    Retrieving data for taxon 'Vachellia'
+
+
+    Retrieving data for taxon 'Verbesina'
+
+
+    Retrieving data for taxon 'Vernonanthura'
+
+
+    Retrieving data for taxon 'Vigna'
+
+
+    Retrieving data for taxon 'Vitex'
+
+
+    Retrieving data for taxon 'Vochysia'
+
+
+    Retrieving data for taxon 'Xylophragma'
+
+
+    Retrieving data for taxon 'Xylosma'
+
+
+    Retrieving data for taxon 'Zanthoxylum'
+
+
+    Retrieving data for taxon 'Ziziphus'
+
+
+    Retrieving data for taxon 'Zygia'
+
+``` r
+checkGbGenus<-mapply(function(tab,fam,gen){
+  if(!nrow(tab)>0){return(NULL)}
+  tabg <- tab [!is.na(tab$rank) & tab$rank=='genus',]
+  exact <- (!is.na(tabg$genus) &tabg$genus == gen)
+  accepted <- (!is.na(tabg$status) & tabg$status == 'ACCEPTED')
+  familyOk <- (!is.na(tabg$family) & tabg$family == fam)
+  if(sum(exact&accepted&familyOk)>=1)
+  {return(tabg[exact&accepted&familyOk,,drop=F][1,,drop=F])}
+  if(nrow(tabg)==0){return(tab)}
+  return(tabg)
+},gbGenus,genusFamily,names(genusFamily))
+
+resN<-sapply(checkGbGenus,function(x)ifelse(is.null(x),0,nrow(x)))
+checkGbGenus[resN==0]
+```
+
+    named list()
+
+``` r
+checkGbGenus[resN>1]
+```
+
+    $Ampelocera
+       usagekey            scientificname  rank   status  matchtype canonicalname
+    1   7303603       Ampelocera Klotzsch genus ACCEPTED HIGHERRANK    Ampelocera
+    17  1108472 Apelocera Chevrolat, 1862 genus  SYNONYM      FUZZY     Apelocera
+       confidence  kingdom       phylum      order       family      genus
+    1          94  Plantae Tracheophyta    Rosales  Cannabaceae Ampelocera
+    17          0 Animalia   Arthropoda Coleoptera Cerambycidae   Euderces
+       kingdomkey phylumkey classkey orderkey familykey genuskey         class
+    1           6   7707728      220      691      2384  7303603 Magnoliopsida
+    17          1        54      216     1470      5602  1147935       Insecta
+                                                                                   note
+    1                                                                              <NA>
+    17 Similarity: name=-5; authorship=0; classification=-2; rank=0; status=0; score=-7
+       species specieskey acceptedusagekey
+    1     <NA>         NA               NA
+    17    <NA>         NA          1147935
+
+    $Arrabidaea
+       usagekey    scientificname  rank   status  matchtype acceptedusagekey
+    1   3172501    Arrabidaea DC. genus  SYNONYM HIGHERRANK          3233562
+    2   7987026 Arrabidaea Steud. genus DOUBTFUL      EXACT               NA
+    49  4091766         Arabidaea genus DOUBTFUL      FUZZY               NA
+       canonicalname confidence kingdom       phylum    order       family
+    1     Arrabidaea         93 Plantae Tracheophyta Lamiales Bignoniaceae
+    2     Arrabidaea         90 Plantae Tracheophyta  Rosales   Rhamnaceae
+    49     Arabidaea          0 Plantae Tracheophyta Lamiales Bignoniaceae
+            genus kingdomkey phylumkey classkey orderkey familykey genuskey
+    1  Fridericia          6   7707728      220      408      6655  3233562
+    2  Arrabidaea          6   7707728      220      691      2407  7987026
+    49  Arabidaea          6   7707728      220      408      6655  4091766
+               class
+    1  Magnoliopsida
+    2  Magnoliopsida
+    49 Magnoliopsida
+                                                                                     note
+    1                                                                                <NA>
+    2  Similarity: name=100; authorship=0; classification=-2; rank=0; status=-5; score=93
+    49 Similarity: name=-5; authorship=0; classification=-2; rank=0; status=-5; score=-12
+       species specieskey
+    1     <NA>         NA
+    2     <NA>         NA
+    49    <NA>         NA
+
+    $Cochlospermum
+       usagekey               scientificname  rank   status  matchtype
+    1   2874864          Cochlospermum Kunth genus ACCEPTED HIGHERRANK
+    2   9123835          Cochliospermum Lag. genus  SYNONYM      FUZZY
+    3   7721974 Cochliospermum Lagasca, 1817 genus DOUBTFUL      FUZZY
+    40  2897071           Coelospermum Blume genus ACCEPTED      FUZZY
+    41  5371893            Cyclospermum Lag. genus ACCEPTED      FUZZY
+    42  6423677            Ciclospermum Lag. genus  SYNONYM      FUZZY
+    43  9128212   Ciclospermum Lagasca, 1821 genus  SYNONYM      FUZZY
+    48  2853045        Collospermum Skottsb. genus  SYNONYM      FUZZY
+    49  7237371    Cyclospermum Seward, 1917 genus DOUBTFUL      FUZZY
+    50  8741595   Cyclospermum Lagasca, 1821 genus DOUBTFUL      FUZZY
+        canonicalname confidence kingdom       phylum          order
+    1   Cochlospermum         94 Plantae Tracheophyta       Malvales
+    2  Cochliospermum         73 Plantae Tracheophyta Caryophyllales
+    3  Cochliospermum         68 Plantae Tracheophyta Caryophyllales
+    40   Coelospermum          0 Plantae Tracheophyta    Gentianales
+    41   Cyclospermum          0 Plantae Tracheophyta        Apiales
+    42   Ciclospermum          0 Plantae Tracheophyta        Apiales
+    43   Ciclospermum          0 Plantae Tracheophyta        Apiales
+    48   Collospermum          0 Plantae Tracheophyta    Asparagales
+    49   Cyclospermum          0 Plantae         <NA>           <NA>
+    50   Cyclospermum          0 Plantae Tracheophyta        Apiales
+                 family          genus kingdomkey phylumkey classkey orderkey
+    1  Cochlospermaceae  Cochlospermum          6   7707728      220      941
+    2     Amaranthaceae         Suaeda          6   7707728      220      422
+    3     Amaranthaceae Cochliospermum          6   7707728      220      422
+    40        Rubiaceae   Coelospermum          6   7707728      220      412
+    41         Apiaceae   Cyclospermum          6   7707728      220     1351
+    42         Apiaceae   Cyclospermum          6   7707728      220     1351
+    43         Apiaceae   Cyclospermum          6   7707728      220     1351
+    48      Asteliaceae        Astelia          6   7707728      196     1169
+    49             <NA>   Cyclospermum          6        NA       NA       NA
+    50         Apiaceae   Cyclospermum          6   7707728      220     1351
+       familykey genuskey         class acceptedusagekey
+    1    3702383  2874864 Magnoliopsida               NA
+    2       3064  3083525 Magnoliopsida          3083525
+    3       3064  7721974 Magnoliopsida               NA
+    40      8798  2897071 Magnoliopsida               NA
+    41      6720  5371893 Magnoliopsida               NA
+    42      6720  5371893 Magnoliopsida          5371893
+    43      6720  8741595 Magnoliopsida          8741595
+    48      7684  2765628    Liliopsida          2765628
+    49        NA  7237371          <NA>               NA
+    50      6720  8741595 Magnoliopsida               NA
+                                                                                     note
+    1                                                                                <NA>
+    2    Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    3   Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+    40   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=1; score=-6
+    41   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=1; score=-6
+    42   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=0; score=-7
+    43   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=0; score=-7
+    48   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=0; score=-7
+    49 Similarity: name=-5; authorship=0; classification=-2; rank=0; status=-5; score=-12
+    50 Similarity: name=-5; authorship=0; classification=-2; rank=0; status=-5; score=-12
+       species specieskey
+    1     <NA>         NA
+    2     <NA>         NA
+    3     <NA>         NA
+    40    <NA>         NA
+    41    <NA>         NA
+    42    <NA>         NA
+    43    <NA>         NA
+    48    <NA>         NA
+    49    <NA>         NA
+    50    <NA>         NA
+
+    $Cordia
+       usagekey              scientificname  rank   status matchtype canonicalname
+    1   2900865                   Cordia L. genus ACCEPTED     EXACT        Cordia
+    2   2016303           Cordia Stål, 1866 genus ACCEPTED     EXACT        Cordia
+    3  12370745                      Cordia genus DOUBTFUL     EXACT        Cordia
+    4   7268281  Cerdia Moc. & Sessé ex DC. genus ACCEPTED     FUZZY        Cerdia
+    5   2891989               Coddia Verdc. genus ACCEPTED     FUZZY        Coddia
+    6   1048439        Coraia H.Clark, 1865 genus ACCEPTED     FUZZY        Coraia
+    7   3265828           Corcia Stål, 1859 genus ACCEPTED     FUZZY        Corcia
+    8   4806337      Cornia Lutkevich, 1937 genus ACCEPTED     FUZZY        Cornia
+    9   2753601                Corsia Becc. genus ACCEPTED     FUZZY        Corsia
+    10  6026663                  Cortia DC. genus ACCEPTED     FUZZY        Cortia
+    11  1848951       Coudia Chrétien, 1915 genus ACCEPTED     FUZZY        Coudia
+    12  3247970  Cardia Graham-Ponton, 1869 genus  SYNONYM     FUZZY        Cardia
+    13  3233419                Cardia Dulac genus  SYNONYM     FUZZY        Cardia
+    14  2412507                      Corcia genus  SYNONYM     FUZZY        Corcia
+    15  4703185          Coria Walker, 1866 genus  SYNONYM     FUZZY         Coria
+    16  1142641         Cormia Pascoe, 1864 genus  SYNONYM     FUZZY        Cormia
+    17  2000890      Corydia Serville, 1831 genus  SYNONYM     FUZZY       Corydia
+    18  4059758              Corda St.-Lag. genus DOUBTFUL     FUZZY         Corda
+    19  4059953       Coredia Hook.f., 1857 genus DOUBTFUL     FUZZY       Coredia
+    47  7333786 Codia J.R.Forst. & G.Forst. genus ACCEPTED     FUZZY         Codia
+       confidence
+    1          99
+    2          99
+    3          93
+    4          74
+    5          74
+    6          74
+    7          74
+    8          74
+    9          74
+    10         74
+    11         74
+    12         73
+    13         73
+    14         73
+    15         73
+    16         73
+    17         73
+    18         68
+    19         68
+    47         -6
+                                                                                     note
+    1   Similarity: name=100; authorship=0; classification=-2; rank=0; status=1; score=99
+    2   Similarity: name=100; authorship=0; classification=-2; rank=0; status=1; score=99
+    3  Similarity: name=100; authorship=0; classification=-2; rank=0; status=-5; score=93
+    4    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    5    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    6    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    7    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    8    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    9    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    10   Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    11   Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    12   Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    13   Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    14   Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    15   Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    16   Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    17   Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    18  Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+    19  Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+    47   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=1; score=-6
+        kingdom       phylum          order          family       genus kingdomkey
+    1   Plantae Tracheophyta    Boraginales      Cordiaceae      Cordia          6
+    2  Animalia   Arthropoda      Hemiptera   Aphrophoridae      Cordia          1
+    3   Plantae Tracheophyta       Lamiales       Lamiaceae      Cordia          6
+    4   Plantae Tracheophyta Caryophyllales Caryophyllaceae      Cerdia          6
+    5   Plantae Tracheophyta    Gentianales       Rubiaceae      Coddia          6
+    6  Animalia   Arthropoda     Coleoptera   Chrysomelidae      Coraia          1
+    7  Animalia   Arthropoda      Hemiptera      Reduviidae      Corcia          1
+    8  Animalia   Arthropoda           <NA>            <NA>      Cornia          1
+    9   Plantae Tracheophyta       Liliales      Corsiaceae      Corsia          6
+    10  Plantae Tracheophyta        Apiales        Apiaceae      Cortia          6
+    11 Animalia   Arthropoda    Lepidoptera     Gelechiidae      Coudia          1
+    12 Animalia     Mollusca       Cardiida       Cardiidae     Cardium          1
+    13  Plantae Tracheophyta       Lamiales  Plantaginaceae    Veronica          6
+    14 Animalia     Chordata   Clupeiformes       Clupeidae      Corica          1
+    15 Animalia   Arthropoda    Lepidoptera        Erebidae      Erebus          1
+    16 Animalia   Arthropoda     Coleoptera    Cerambycidae Pterolophia          1
+    17 Animalia   Arthropoda      Blattodea      Corydiidae      Therea          1
+    18  Plantae Tracheophyta    Boraginales    Boraginaceae       Corda          6
+    19  Plantae Tracheophyta    Boraginales    Boraginaceae     Coredia          6
+    47  Plantae Tracheophyta     Oxalidales     Cunoniaceae       Codia          6
+       phylumkey classkey orderkey familykey genuskey         class
+    1    7707728      220  7226464   4930453  2900865 Magnoliopsida
+    2         54      216      809      3764  2016303       Insecta
+    3    7707728      220      408      2497 12370745 Magnoliopsida
+    4    7707728      220      422      2518  7268281 Magnoliopsida
+    5    7707728      220      412      8798  2891989 Magnoliopsida
+    6         54      216     1470      7780  1048439       Insecta
+    7         54      216      809      4324  3265828       Insecta
+    8         54       NA       NA        NA  4806337          <NA>
+    9    7707728      196     1172      3735  2753601    Liliopsida
+    10   7707728      220     1351      6720  6026663 Magnoliopsida
+    11        54      216      797      3553  1848951       Insecta
+    12        52      137  9529005      6858  5189002      Bivalvia
+    13   7707728      220      408      2420  3172047 Magnoliopsida
+    14        44       NA      538      7332  2413519          <NA>
+    15        54      216      797   4532185  1766547       Insecta
+    16        54      216     1470      5602  1134917       Insecta
+    17        54      216      800   4802592  2000748       Insecta
+    18   7707728      220  7226464      2498  4059758 Magnoliopsida
+    19   7707728      220  7226464      2498  4059953 Magnoliopsida
+    47   7707728      220  7224021      2405  7333786 Magnoliopsida
+       acceptedusagekey species specieskey
+    1                NA    <NA>         NA
+    2                NA    <NA>         NA
+    3                NA    <NA>         NA
+    4                NA    <NA>         NA
+    5                NA    <NA>         NA
+    6                NA    <NA>         NA
+    7                NA    <NA>         NA
+    8                NA    <NA>         NA
+    9                NA    <NA>         NA
+    10               NA    <NA>         NA
+    11               NA    <NA>         NA
+    12          5189002    <NA>         NA
+    13          3172047    <NA>         NA
+    14          2413519    <NA>         NA
+    15          1766547    <NA>         NA
+    16          1134917    <NA>         NA
+    17          2000748    <NA>         NA
+    18               NA    <NA>         NA
+    19               NA    <NA>         NA
+    47               NA    <NA>         NA
+
+    $Euphorbia
+      usagekey                   scientificname  rank   status  matchtype
+    1 11397237                     Euphorbia L. genus DOUBTFUL HIGHERRANK
+    2  1076499        Euphoria Burmeister, 1842 genus ACCEPTED      FUZZY
+    3  4924299                         Euphorbi genus  SYNONYM      FUZZY
+    4  1529493 Euphoria Robineau-Desvoidy, 1863 genus  SYNONYM      FUZZY
+    5  7264658          Euphoria Comm. ex Juss. genus  SYNONYM      FUZZY
+    6  7513611            Euphoria Klages, 1894 genus  SYNONYM      FUZZY
+    7  4793144         Euphormia Townsend, 1919 genus DOUBTFUL      FUZZY
+      canonicalname confidence  kingdom       phylum        order        family
+    1     Euphorbia         92  Plantae Tracheophyta Malpighiales Euphorbiaceae
+    2      Euphoria         74 Animalia   Arthropoda   Coleoptera  Scarabaeidae
+    3      Euphorbi         73  Plantae Tracheophyta Malpighiales Euphorbiaceae
+    4      Euphoria         73 Animalia   Arthropoda      Diptera      Muscidae
+    5      Euphoria         73  Plantae Tracheophyta   Sapindales   Sapindaceae
+    6      Euphoria         73 Animalia   Arthropoda   Coleoptera  Scarabaeidae
+    7     Euphormia         68 Animalia   Arthropoda      Diptera          <NA>
+          genus kingdomkey phylumkey classkey orderkey familykey genuskey
+    1 Euphorbia          6   7707728      220     1414      4691 11397237
+    2  Euphoria          1        54      216     1470      5840  1076499
+    3 Euphorbia          6   7707728      220     1414      4691 11397237
+    4   Neomyia          1        54      216      811      5564  1527624
+    5    Litchi          6   7707728      220      933      6657  3190001
+    6  Euphoria          1        54      216     1470      5840  1076499
+    7 Euphormia          1        54      216      811        NA  4793144
+              class
+    1 Magnoliopsida
+    2       Insecta
+    3 Magnoliopsida
+    4       Insecta
+    5 Magnoliopsida
+    6       Insecta
+    7       Insecta
+                                                                                   note
+    1                                                                              <NA>
+    2  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    3  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    4  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    5  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    6  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    7 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+      acceptedusagekey species specieskey
+    1               NA    <NA>         NA
+    2               NA    <NA>         NA
+    3         11397237    <NA>         NA
+    4          1527624    <NA>         NA
+    5          3190001    <NA>         NA
+    6          1076499    <NA>         NA
+    7               NA    <NA>         NA
+
+    $Heisteria
+      usagekey                scientificname  rank   status matchtype canonicalname
+    2  3232590               Heisteria Jacq. genus ACCEPTED     EXACT     Heisteria
+    3  3230495               Heisteria Fabr. genus  SYNONYM     EXACT     Heisteria
+    4  3233149                  Heisteria L. genus  SYNONYM     EXACT     Heisteria
+    5  9295409 Heiseria E.E.Schill. & Panero genus ACCEPTED     FUZZY      Heiseria
+    6  7293322                      Heistera genus ACCEPTED     FUZZY      Heistera
+    7  8143654              Heistera Schreb. genus  SYNONYM     FUZZY      Heistera
+      confidence kingdom       phylum kingdomkey phylumkey
+    2         92 Plantae Tracheophyta          6   7707728
+    3         92 Plantae Tracheophyta          6   7707728
+    4         92 Plantae Tracheophyta          6   7707728
+    5         74 Plantae Tracheophyta          6   7707728
+    6         74 Plantae Tracheophyta          6   7707728
+    7         73 Plantae Tracheophyta          6   7707728
+                                                                                   note
+    2 Similarity: name=100; authorship=0; classification=-2; rank=0; status=1; score=99
+    3 Similarity: name=100; authorship=0; classification=-2; rank=0; status=0; score=98
+    4 Similarity: name=100; authorship=0; classification=-2; rank=0; status=0; score=98
+    5  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    6  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    7  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+            order          family      genus classkey orderkey familykey genuskey
+    2  Santalales Erythropalaceae  Heisteria      220      934   4924615  3232590
+    3 Asparagales    Asparagaceae Veltheimia      196     1169      7683  2767959
+    4     Fabales    Polygalaceae   Muraltia      220     1370      2417  7130220
+    5   Asterales      Asteraceae   Heiseria      220      414      3065  9295409
+    6     Fabales    Polygalaceae   Heistera      220     1370      2417  7293322
+    7  Santalales Erythropalaceae  Heisteria      220      934   4924615  3232590
+              class acceptedusagekey species specieskey
+    2 Magnoliopsida               NA    <NA>         NA
+    3    Liliopsida          2767959    <NA>         NA
+    4 Magnoliopsida          7130220    <NA>         NA
+    5 Magnoliopsida               NA    <NA>         NA
+    6 Magnoliopsida               NA    <NA>         NA
+    7 Magnoliopsida          3232590    <NA>         NA
+
+    $Hirtella
+       usagekey                               scientificname  rank   status
+    1   8690066 Hirtella Pereira, Zanata, Cetra & Reis, 2014 genus ACCEPTED
+    2   8057116                                     Hirtella genus DOUBTFUL
+    3   2944960                                  Hirtella L. genus DOUBTFUL
+    4   4637903                       Hartella Matthew, 1885 genus ACCEPTED
+    5   9424271        Hartella Georgescu & Abramovich, 2009 genus ACCEPTED
+    6   7086476                             Hertella Henssen genus ACCEPTED
+    7   8035393                          Hiatella Bosc, 1801 genus ACCEPTED
+    8   4314377                         Hircella Mayer, 1882 genus ACCEPTED
+    9  10632189                        Hiatella Daudin, 1801 genus DOUBTFUL
+    10  4815362                       Hirella Cossmann, 1920 genus DOUBTFUL
+    11  3745316                      Hirtellia Dumort., 1829 genus DOUBTFUL
+        matchtype canonicalname confidence   kingdom       phylum         order
+    1  HIGHERRANK      Hirtella         94  Animalia     Chordata  Siluriformes
+    2       EXACT      Hirtella         90   Plantae Tracheophyta   Boraginales
+    3       EXACT      Hirtella         90   Plantae Tracheophyta  Malpighiales
+    4       FUZZY      Hartella         74  Animalia   Arthropoda Ptychopariida
+    5       FUZZY      Hartella         74 Chromista Foraminifera     Rotaliida
+    6       FUZZY      Hertella         74     Fungi   Ascomycota  Peltigerales
+    7       FUZZY      Hiatella         74  Animalia     Mollusca    Adapedonta
+    8       FUZZY      Hircella         74  Animalia   Arthropoda     Amphipoda
+    9       FUZZY      Hiatella         68  Animalia     Mollusca    Adapedonta
+    10      FUZZY       Hirella         68  Animalia     Chordata          <NA>
+    11      FUZZY     Hirtellia         68   Plantae Tracheophyta  Malpighiales
+                 family     genus kingdomkey phylumkey orderkey familykey genuskey
+    1      Loricariidae  Hirtella          1        44      708      5158  8690066
+    2        Cordiaceae  Hirtella          6   7707728  7226464   4930453  8057116
+    3  Chrysobalanaceae  Hirtella          6   7707728     1414      9111  2944960
+    4    Conocoryphidae  Hartella          1        54  9583276   3266934  4637903
+    5   Heterohelicidae  Hartella          4   8376456  7692889   7401666  9424271
+    6    Placynthiaceae  Hertella          5        95     1055      4118  7086476
+    7       Hiatellidae  Hiatella          1        52  9584178      6882  8035393
+    8       Caprellidae  Hircella          1        54     1231      4420  4314377
+    9       Hiatellidae  Hiatella          1        52  9584178      6882 10632189
+    10   Ateleaspididae   Hirella          1        44       NA   3237912  4815362
+    11 Chrysobalanaceae Hirtellia          6   7707728     1414      9111  3745316
+                                                                                     note
+    1                                                                                <NA>
+    2  Similarity: name=100; authorship=0; classification=-2; rank=0; status=-5; score=93
+    3  Similarity: name=100; authorship=0; classification=-2; rank=0; status=-5; score=93
+    4    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    5    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    6    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    7    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    8    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    9   Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+    10  Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+    11  Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+       classkey           class species specieskey acceptedusagekey
+    1        NA            <NA>    <NA>         NA               NA
+    2       220   Magnoliopsida    <NA>         NA               NA
+    3       220   Magnoliopsida    <NA>         NA               NA
+    4   9273948       Trilobita    <NA>         NA               NA
+    5   7434778   Globothalamea    <NA>         NA               NA
+    6       180 Lecanoromycetes    <NA>         NA               NA
+    7       137        Bivalvia    <NA>         NA               NA
+    8       229    Malacostraca    <NA>         NA               NA
+    9       137        Bivalvia    <NA>         NA               NA
+    10       NA            <NA>    <NA>         NA               NA
+    11      220   Magnoliopsida    <NA>         NA               NA
+
+    $Memora
+      usagekey                      scientificname  rank   status  matchtype
+    1  7298469                        Memora Miers genus  SYNONYM HIGHERRANK
+    2  3243940      Medora H.Adams & A.Adams, 1855 genus ACCEPTED      FUZZY
+    3  4702525                 Melora Walker, 1855 genus ACCEPTED      FUZZY
+    4  2068252                 Menora Medler, 1999 genus ACCEPTED      FUZZY
+    5  2773872                        Medora Kunth genus  SYNONYM      FUZZY
+    6  3919160                 Mebora Steud., 1841 genus DOUBTFUL      FUZZY
+    7  3251033                Medora Agassiz, 1862 genus DOUBTFUL      FUZZY
+    8  4807878 Memoria Mandelshtam & Masumov, 1968 genus DOUBTFUL      FUZZY
+    9  4674801               Mesora Foerster, 1862 genus DOUBTFUL      FUZZY
+      acceptedusagekey canonicalname confidence  kingdom       phylum
+    1          6401106        Memora         94  Plantae Tracheophyta
+    2               NA        Medora         74 Animalia     Mollusca
+    3               NA        Melora         74 Animalia   Arthropoda
+    4               NA        Menora         74 Animalia   Arthropoda
+    5          9608430        Medora         73  Plantae Tracheophyta
+    6               NA        Mebora         68  Plantae Tracheophyta
+    7               NA        Medora         68 Animalia     Cnidaria
+    8               NA       Memoria         68 Animalia   Arthropoda
+    9               NA        Mesora         68 Animalia   Arthropoda
+                order        family        genus kingdomkey phylumkey classkey
+    1        Lamiales  Bignoniaceae Adenocalymma          6   7707728      220
+    2 Stylommatophora  Clausiliidae       Medora          1        52      225
+    3     Lepidoptera          <NA>       Melora          1        54      216
+    4       Hemiptera      Flatidae       Menora          1        54      216
+    5     Asparagales  Asparagaceae  Maianthemum          6   7707728      196
+    6    Malpighiales Euphorbiaceae       Mebora          6   7707728      220
+    7            <NA>          <NA>       Medora          1        43       NA
+    8      Podocopida          <NA>      Memoria          1        54      353
+    9     Hymenoptera          <NA>       Mesora          1        54      216
+      orderkey familykey genuskey         class
+    1      408      6655  6401106 Magnoliopsida
+    2     1456   3243939  3243940    Gastropoda
+    3      797        NA  4702525       Insecta
+    4      809      8502  2068252       Insecta
+    5     1169      7683  9608430    Liliopsida
+    6     1414      4691  3919160 Magnoliopsida
+    7       NA        NA  3251033          <NA>
+    8     1438        NA  4807878     Ostracoda
+    9     1457        NA  4674801       Insecta
+                                                                                   note
+    1                                                                              <NA>
+    2  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    3  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    4  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    5  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    6 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+    7 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+    8 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+    9 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+      species specieskey
+    1    <NA>         NA
+    2    <NA>         NA
+    3    <NA>         NA
+    4    <NA>         NA
+    5    <NA>         NA
+    6    <NA>         NA
+    7    <NA>         NA
+    8    <NA>         NA
+    9    <NA>         NA
+
+    $Rollinia
+      usagekey       scientificname  rank   status  matchtype acceptedusagekey
+    1  7507748  Rollinia A.St.-Hil. genus  SYNONYM HIGHERRANK          3155252
+    2 11861229             Roslinia genus ACCEPTED      FUZZY               NA
+    3  3050997 Rollinsia Al-Shehbaz genus  SYNONYM      FUZZY          3049366
+    4  3780795       Roslinia Neck. genus  SYNONYM      FUZZY          2904597
+    5  3230943      Roulinia Decne. genus  SYNONYM      FUZZY          3170354
+    6  9521105     Roulinia Brongn. genus  SYNONYM      FUZZY          2776982
+    7  7667129       Roslinia G.Don genus DOUBTFUL      FUZZY               NA
+      canonicalname confidence  kingdom       phylum        order        family
+    1      Rollinia         94  Plantae Tracheophyta  Magnoliales    Annonaceae
+    2      Roslinia         74 Bacteria Firmicutes_A Monoglobales Monoglobaceae
+    3     Rollinsia         73  Plantae Tracheophyta  Brassicales  Brassicaceae
+    4      Roslinia         73  Plantae Tracheophyta     Lamiales   Acanthaceae
+    5      Roulinia         73  Plantae Tracheophyta  Gentianales   Apocynaceae
+    6      Roulinia         73  Plantae Tracheophyta  Asparagales  Asparagaceae
+    7      Roslinia         68  Plantae Tracheophyta  Gentianales  Gentianaceae
+            genus kingdomkey phylumkey classkey orderkey familykey genuskey
+    1      Annona          6   7707728      220      718      9291  3155252
+    2    Roslinia          3  11371390      304 10847295  10671835 11861229
+    3 Dryopetalon          6   7707728      220  7225535      3112  3049366
+    4    Justicia          6   7707728      220      408      2393  2904597
+    5   Cynanchum          6   7707728      220      412      6701  3170354
+    6      Nolina          6   7707728      196     1169      7683  2776982
+    7    Roslinia          6   7707728      220      412      2503  7667129
+              class
+    1 Magnoliopsida
+    2    Clostridia
+    3 Magnoliopsida
+    4 Magnoliopsida
+    5 Magnoliopsida
+    6    Liliopsida
+    7 Magnoliopsida
+                                                                                   note
+    1                                                                              <NA>
+    2  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
+    3  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    4  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    5  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    6  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    7 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+      species specieskey
+    1    <NA>         NA
+    2    <NA>         NA
+    3    <NA>         NA
+    4    <NA>         NA
+    5    <NA>         NA
+    6    <NA>         NA
+    7    <NA>         NA
+
+    $Seguieria
+      usagekey          scientificname  rank   status  matchtype canonicalname
+    1  7309605        Seguieria Loefl. genus ACCEPTED HIGHERRANK     Seguieria
+    2  7327024 Seguiera Rchb. ex Oliv. genus  SYNONYM      FUZZY      Seguiera
+    3  6008611 Seguiera O.Kuntze, 1891 genus  SYNONYM      FUZZY      Seguiera
+    4  7430994   Seguiera Adans., 1763 genus DOUBTFUL      FUZZY      Seguiera
+      confidence kingdom       phylum          order         family       genus
+    1         94 Plantae Tracheophyta Caryophyllales Phytolaccaceae   Seguieria
+    2         73 Plantae Tracheophyta       Myrtales   Combretaceae   Combretum
+    3         73 Plantae Tracheophyta    Gentianales   Gentianaceae Blackstonia
+    4         68 Plantae Tracheophyta Caryophyllales Phytolaccaceae    Seguiera
+      kingdomkey phylumkey classkey orderkey familykey genuskey         class
+    1          6   7707728      220      422      2516  7309605 Magnoliopsida
+    2          6   7707728      220      690      2431  2986357 Magnoliopsida
+    3          6   7707728      220      412      2503  6366885 Magnoliopsida
+    4          6   7707728      220      422      2516  7430994 Magnoliopsida
+      acceptedusagekey
+    1               NA
+    2          2986357
+    3          6366885
+    4               NA
+                                                                                   note
+    1                                                                              <NA>
+    2  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    3  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
+    4 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
+      species specieskey
+    1    <NA>         NA
+    2    <NA>         NA
+    3    <NA>         NA
+    4    <NA>         NA
+
+``` r
+cat(names(checkGbGenus[resN>1]))
+```
+
+    Ampelocera Arrabidaea Cochlospermum Cordia Euphorbia Heisteria Hirtella Memora Rollinia Seguieria
+
+``` r
+# (familyPb<-
+#   rbind(
+#     data.frame(genus="Ampelocera", familyError="Ulmaceae", familyCorrection="Cannabaceae"),
+#     data.frame(genus="Aptandra", familyError="Olacaceae", familyCorrection="Aptandraceae"),
+#     data.frame(genus="Cochlospermum", familyError="Bixaceae", familyCorrection="Cochlospermaceae"),
+#     data.frame(genus="Cordia", familyError="Boraginaceae", familyCorrection="Cordiaceae"),
+#     data.frame(genus="Heisteria", familyError="Olacaceae", familyCorrection="Erythropalaceae"),
+#     data.frame(genus="Hirtella", familyError="Chrysobalanaceae", familyCorrection="Cordiaceae"),
+#     data.frame(genus="Humboldtiella", familyError="Fabaceae", familyCorrection="Gosseletinidae"),
+#     data.frame(genus="Rochefortia", familyError="Boraginaceae", familyCorrection="Ehretiaceae"),
+#     data.frame(genus="Sambucus", familyError="Adoxaceae", familyCorrection="Viburnaceae"),
+#     data.frame(genus="Scyphostelma", familyError="Fabaceae", familyCorrection="Apocynaceae")
+#   ))
+# synonimia<-rbind(
+#   data.frame(syno="Arrabidaea", accepted="Fridericia"),
+#   data.frame(syno="Cnidosculus", accepted="Cnidoscolus"),
+#   data.frame(syno="Cydista", accepted="Bignonia"),
+#   data.frame(syno="Margaritopsis", accepted="Eumachia"),
+#   data.frame(syno="Memora", accepted="Adenocalymma"),
+#   data.frame(syno="Rollinia", accepted="Annona")
+# )
+# orto<-rbind(
+#   data.frame(error="Simiria",correction="Simira")
+# )
+# sinSolución<-c("Bignoniaceae","Euphorbia")
+# gbGenus<-mapply(function(x,y)get_gbifid(x,family=y,ask=F,kingdom='Plantae'),names(genusFamily),genusFamily)
+# genusToSearch<-unique(na.omit(unSimpTaxo$genus))
+# familyGenusToSearch<-unSimpTaxo$family[match(unSimpTa)]
+# gbGenus<-invisible(get_ids_(genusToSearch, "gbif"))
+# foundCanonical<-sapply(gbGenus$gbif,function(tab)ifelse(nrow(tab)>0,tab$canonicalname[1],NA))
+# gbGenus$gbif[!foundCanonical==names(foundCanonical)]
+```
+
+### Especies
+
+``` r
+speciesToSearch <- paste(unSimpTaxo$genus[!is.na(unSimpTaxo$genus) & !is.na(unSimpTaxo$sp_epithet)], unSimpTaxo$sp_epithet [!is.na(unSimpTaxo$genus) & !is.na(unSimpTaxo$sp_epithet)])
+speciesFamily<-tapply(unSimpTaxo$family[!is.na(unSimpTaxo$genus) & !is.na(unSimpTaxo$sp_epithet)],speciesToSearch,function(x)sort(x,decreasing=T)[1])
+gbSpecies <- get_gbifid_(names(speciesFamily))
+```
+
+
+    Retrieving data for taxon 'Acalypha diversifolia'
+
+
+    Retrieving data for taxon 'Acanthocereus tetragonus'
+
+
+    Retrieving data for taxon 'Achatocarpus nigricans'
+
+
+    Retrieving data for taxon 'Adenocalymma aspericarpum'
+
+
+    Retrieving data for taxon 'Albizia niopoides'
+
+
+    Retrieving data for taxon 'Allophylus nitidulus'
+
+
+    Retrieving data for taxon 'Alseis blackiana'
+
+
+    Retrieving data for taxon 'Amaioua corymbosa'
+
+
+    Retrieving data for taxon 'Amanoa guianensis'
+
+
+    Retrieving data for taxon 'Ampelocera macphersonii'
+
+
+    Retrieving data for taxon 'Amphilophium paniculatum'
+
+
+    Retrieving data for taxon 'Amyris pinnata'
+
+
+    Retrieving data for taxon 'Anacardium excelsum'
+
+
+    Retrieving data for taxon 'Annona muricata'
+
+
+    Retrieving data for taxon 'Anredera floribunda'
+
+
+    Retrieving data for taxon 'Apeiba tibourbou'
+
+
+    Retrieving data for taxon 'Aralia excelsa'
+
+
+    Retrieving data for taxon 'Ardisia foetida'
+
+
+    Retrieving data for taxon 'Aristolochia maxima'
+
+
+    Retrieving data for taxon 'Aspidosperma polyneuron'
+
+
+    Retrieving data for taxon 'Astronium graveolens'
+
+
+    Retrieving data for taxon 'Attalea butyracea'
+
+
+    Retrieving data for taxon 'Attalea microcarpa'
+
+
+    Retrieving data for taxon 'Bactris bidentula'
+
+
+    Retrieving data for taxon 'Bactris pilosa'
+
+
+    Retrieving data for taxon 'Banara ibaguensis'
+
+
+    Retrieving data for taxon 'Bauhinia glabra'
+
+
+    Retrieving data for taxon 'Bauhinia hymenaeifolia'
+
+
+    Retrieving data for taxon 'Bauhinia petiolata'
+
+
+    Retrieving data for taxon 'Bignonia aequinoctialis'
+
+
+    Retrieving data for taxon 'Bignonia pterocalyx'
+
+
+    Retrieving data for taxon 'Bonellia frutescens'
+
+
+    Retrieving data for taxon 'Bronwenia cornifolia'
+
+
+    Retrieving data for taxon 'Brosimum alicastrum'
+
+
+    Retrieving data for taxon 'Brosimum guianense'
+
+
+    Retrieving data for taxon 'Brownea ariza'
+
+
+    Retrieving data for taxon 'Bulnesia arborea'
+
+
+    Retrieving data for taxon 'Bunchosia armeniaca'
+
+
+    Retrieving data for taxon 'Bunchosia odorata'
+
+
+    Retrieving data for taxon 'Bunchosia pseudonitida'
+
+
+    Retrieving data for taxon 'Bursera graveolens'
+
+
+    Retrieving data for taxon 'Bursera simaruba'
+
+
+    Retrieving data for taxon 'Bursera tomentosa'
+
+
+    Retrieving data for taxon 'Caesalpinia cassioides'
+
+
+    Retrieving data for taxon 'Caesalpinia punctata'
+
+
+    Retrieving data for taxon 'Calliandra magdalenae'
+
+
+    Retrieving data for taxon 'Callicarpa acuminata'
+
+
+    Retrieving data for taxon 'Callichlamys latifolia'
+
+
+    Retrieving data for taxon 'Calycophyllum candidissimum'
+
+
+    Retrieving data for taxon 'Calyptranthes multiflora'
+
+
+    Retrieving data for taxon 'Capparidastrum frondosum'
+
+
+    Retrieving data for taxon 'Capparidastrum pachaca'
+
+
+    Retrieving data for taxon 'Capparidastrum sola'
+
+
+    Retrieving data for taxon 'Capparidastrum tenuisiliquum'
+
+
+    Retrieving data for taxon 'Casearia aculeata'
+
+
+    Retrieving data for taxon 'Casearia corymbosa'
+
+
+    Retrieving data for taxon 'Casearia praecox'
+
+
+    Retrieving data for taxon 'Casearia sylvestris'
+
+
+    Retrieving data for taxon 'Castilla elastica'
+
+
+    Retrieving data for taxon 'Cavanillesia platanifolia'
+
+
+    Retrieving data for taxon 'Cecropia peltata'
+
+
+    Retrieving data for taxon 'Ceiba pentandra'
+
+
+    Retrieving data for taxon 'Celtis iguanaea'
+
+
+    Retrieving data for taxon 'Chiococca alba'
+
+
+    Retrieving data for taxon 'Chomelia spinosa'
+
+
+    Retrieving data for taxon 'Chromolaena perglabra'
+
+
+    Retrieving data for taxon 'Cissus verticillata'
+
+
+    Retrieving data for taxon 'Citharexylum kunthianum'
+
+
+    Retrieving data for taxon 'Clarisia racemosa'
+
+
+    Retrieving data for taxon 'Clathrotropis macrocarpa'
+
+
+    Retrieving data for taxon 'Clusia umbellata'
+
+
+    Retrieving data for taxon 'Coccoloba acuminata'
+
+
+    Retrieving data for taxon 'Coccoloba caracasana'
+
+
+    Retrieving data for taxon 'Coccoloba obovata'
+
+
+    Retrieving data for taxon 'Coccoloba obtusifolia'
+
+
+    Retrieving data for taxon 'Coccoloba padiformis'
+
+
+    Retrieving data for taxon 'Cochlospermum orinocense'
+
+
+    Retrieving data for taxon 'Coffea arabica'
+
+
+    Retrieving data for taxon 'Combretum aculeatum'
+
+
+    Retrieving data for taxon 'Combretum fruticosum'
+
+
+    Retrieving data for taxon 'Connarus ruber'
+
+
+    Retrieving data for taxon 'Cordia alba'
+
+
+    Retrieving data for taxon 'Cordia alliodora'
+
+
+    Retrieving data for taxon 'Cordia bicolor'
+
+
+    Retrieving data for taxon 'Cordia gerascanthus'
+
+
+    Retrieving data for taxon 'Cordia macuirensis'
+
+
+    Retrieving data for taxon 'Cordiera myrciifolia'
+
+
+    Retrieving data for taxon 'Coursetia ferruginea'
+
+
+    Retrieving data for taxon 'Coussarea paniculata'
+
+
+    Retrieving data for taxon 'Coutarea hexandra'
+
+
+    Retrieving data for taxon 'Crateva tapia'
+
+
+    Retrieving data for taxon 'Croton gossypiifolius'
+
+
+    Retrieving data for taxon 'Croton niveus'
+
+
+    Retrieving data for taxon 'Croton punctatus'
+
+
+    Retrieving data for taxon 'Croton schiedeanus'
+
+
+    Retrieving data for taxon 'Cupania cinerea'
+
+
+    Retrieving data for taxon 'Cynophalla amplissima'
+
+
+    Retrieving data for taxon 'Cynophalla flexuosa'
+
+
+    Retrieving data for taxon 'Cynophalla hastata'
+
+
+    Retrieving data for taxon 'Cynophalla linearis'
+
+
+    Retrieving data for taxon 'Cynophalla polyantha'
+
+
+    Retrieving data for taxon 'Cynophalla verrucosa'
+
+
+    Retrieving data for taxon 'Dilodendron costaricense'
+
+
+    Retrieving data for taxon 'Duguetia odorata'
+
+
+    Retrieving data for taxon 'Enterolobium cyclocarpum'
+
+
+    Retrieving data for taxon 'Enterolobium schomburgkii'
+
+
+    Retrieving data for taxon 'Erythrina poeppigiana'
+
+
+    Retrieving data for taxon 'Erythrina velutina'
+
+
+    Retrieving data for taxon 'Erythroxylum hondense'
+
+
+    Retrieving data for taxon 'Erythroxylum jaimei'
+
+
+    Retrieving data for taxon 'Erythroxylum macrophyllum'
+
+
+    Retrieving data for taxon 'Erythroxylum ulei'
+
+
+    Retrieving data for taxon 'Eschweilera tenuifolia'
+
+
+    Retrieving data for taxon 'Esenbeckia alata'
+
+
+    Retrieving data for taxon 'Esenbeckia pentaphylla'
+
+
+    Retrieving data for taxon 'Eugenia biflora'
+
+
+    Retrieving data for taxon 'Eugenia florida'
+
+
+    Retrieving data for taxon 'Eugenia monticola'
+
+
+    Retrieving data for taxon 'Eugenia procera'
+
+
+    Retrieving data for taxon 'Eugenia venezuelensis'
+
+
+    Retrieving data for taxon 'Euphorbia cotinifolia'
+
+
+    Retrieving data for taxon 'Ficus americana'
+
+
+    Retrieving data for taxon 'Ficus trigona'
+
+
+    Retrieving data for taxon 'Ficus zarzalensis'
+
+
+    Retrieving data for taxon 'Forsteronia spicata'
+
+
+    Retrieving data for taxon 'Fridericia pubescens'
+
+
+    Retrieving data for taxon 'Genipa americana'
+
+
+    Retrieving data for taxon 'Gliricidia sepium'
+
+
+    Retrieving data for taxon 'Graffenrieda rotundifolia'
+
+
+    Retrieving data for taxon 'Guapira uberrima'
+
+
+    Retrieving data for taxon 'Guarea glabra'
+
+
+    Retrieving data for taxon 'Guatteria metensis'
+
+
+    Retrieving data for taxon 'Guazuma ulmifolia'
+
+
+    Retrieving data for taxon 'Guettarda comata'
+
+
+    Retrieving data for taxon 'Gustavia augusta'
+
+
+    Retrieving data for taxon 'Gustavia hexapetala'
+
+
+    Retrieving data for taxon 'Gustavia superba'
+
+
+    Retrieving data for taxon 'Gyrocarpus americanus'
+
+
+    Retrieving data for taxon 'Hampea thespesioides'
+
+
+    Retrieving data for taxon 'Handroanthus barbatus'
+
+
+    Retrieving data for taxon 'Handroanthus billbergii'
+
+
+    Retrieving data for taxon 'Handroanthus chrysanthus'
+
+
+    Retrieving data for taxon 'Handroanthus ochraceus'
+
+
+    Retrieving data for taxon 'Heisteria acuminata'
+
+
+    Retrieving data for taxon 'Helianthostylis sprucei'
+
+
+    Retrieving data for taxon 'Herrania laciniifolia'
+
+
+    Retrieving data for taxon 'Himatanthus articulatus'
+
+
+    Retrieving data for taxon 'Hippocratea volubilis'
+
+
+    Retrieving data for taxon 'Hirtella racemosa'
+
+
+    Retrieving data for taxon 'Hura crepitans'
+
+
+    Retrieving data for taxon 'Inga gracilifolia'
+
+
+    Retrieving data for taxon 'Inga laurina'
+
+
+    Retrieving data for taxon 'Inga vera'
+
+
+    Retrieving data for taxon 'Ipomoea carnea'
+
+
+    Retrieving data for taxon 'Jacaranda caucana'
+
+
+    Retrieving data for taxon 'Jatropha gossypiifolia'
+
+
+    Retrieving data for taxon 'Lantana camara'
+
+
+    Retrieving data for taxon 'Lecythis chartacea'
+
+
+    Retrieving data for taxon 'Lecythis minor'
+
+
+    Retrieving data for taxon 'Leucaena leucocephala'
+
+
+    Retrieving data for taxon 'Licania apetala'
+
+
+    Retrieving data for taxon 'Licania micrantha'
+
+
+    Retrieving data for taxon 'Licania parvifructa'
+
+
+    Retrieving data for taxon 'Licaria guianensis'
+
+
+    Retrieving data for taxon 'Lindackeria paludosa'
+
+
+    Retrieving data for taxon 'Lippia origanoides'
+
+
+    Retrieving data for taxon 'Lonchocarpus pictus'
+
+
+    Retrieving data for taxon 'Lonchocarpus violaceus'
+
+
+    Retrieving data for taxon 'Luehea seemannii'
+
+
+    Retrieving data for taxon 'Lycoseris mexicana'
+
+
+    Retrieving data for taxon 'Mabea trianae'
+
+
+    Retrieving data for taxon 'Machaerium arboreum'
+
+
+    Retrieving data for taxon 'Machaerium biovulatum'
+
+
+    Retrieving data for taxon 'Machaerium capote'
+
+
+    Retrieving data for taxon 'Machaerium kegelii'
+
+
+    Retrieving data for taxon 'Machaerium microphyllum'
+
+
+    Retrieving data for taxon 'Maclura tinctoria'
+
+
+    Retrieving data for taxon 'Malpighia glabra'
+
+
+    Retrieving data for taxon 'Manihot carthaginensis'
+
+
+    Retrieving data for taxon 'Margaritaria nobilis'
+
+
+    Retrieving data for taxon 'Mayna grandifolia'
+
+
+    Retrieving data for taxon 'Mayna odorata'
+
+
+    Retrieving data for taxon 'Melicoccus bijugatus'
+
+
+    Retrieving data for taxon 'Melicoccus oliviformis'
+
+
+    Retrieving data for taxon 'Memora aspericarpa'
+
+
+    Retrieving data for taxon 'Miconia splendens'
+
+
+    Retrieving data for taxon 'Morisonia americana'
+
+
+    Retrieving data for taxon 'Muellera broadwayi'
+
+
+    Retrieving data for taxon 'Myriocarpa stipitata'
+
+
+    Retrieving data for taxon 'Myrospermum frutescens'
+
+
+    Retrieving data for taxon 'Neea ignicola'
+
+
+    Retrieving data for taxon 'Neea macrophylla'
+
+
+    Retrieving data for taxon 'Ochroma pyramidale'
+
+
+    Retrieving data for taxon 'Ocotea schomburgkiana'
+
+
+    Retrieving data for taxon 'Ocotea veraguensis'
+
+
+    Retrieving data for taxon 'Omphalea diandra'
+
+
+    Retrieving data for taxon 'Oxandra espintana'
+
+
+    Retrieving data for taxon 'Pachira nukakica'
+
+
+    Retrieving data for taxon 'Pachira quinata'
+
+
+    Retrieving data for taxon 'Palicourea rigida'
+
+
+    Retrieving data for taxon 'Paullinia cururu'
+
+
+    Retrieving data for taxon 'Paullinia globosa'
+
+
+    Retrieving data for taxon 'Peltogyne purpurea'
+
+
+    Retrieving data for taxon 'Pereskia guamacho'
+
+
+    Retrieving data for taxon 'Phanera guianensis'
+
+
+    Retrieving data for taxon 'Phyllanthus botryanthus'
+
+
+    Retrieving data for taxon 'Pilosocereus lanuginosus'
+
+
+    Retrieving data for taxon 'Piper amalago'
+
+
+    Retrieving data for taxon 'Pisonia aculeata'
+
+
+    Retrieving data for taxon 'Pithecellobium dulce'
+
+
+    Retrieving data for taxon 'Pithecellobium lanceolatum'
+
+
+    Retrieving data for taxon 'Pithecellobium roseum'
+
+
+    Retrieving data for taxon 'Pittoniotis trichantha'
+
+
+    Retrieving data for taxon 'Platymiscium pinnatum'
+
+
+    Retrieving data for taxon 'Pouteria plicata'
+
+
+    Retrieving data for taxon 'Pradosia colombiana'
+
+
+    Retrieving data for taxon 'Prestonia trifida'
+
+
+    Retrieving data for taxon 'Prosopis juliflora'
+
+
+    Retrieving data for taxon 'Protium guianense'
+
+
+    Retrieving data for taxon 'Protium tenuifolium'
+
+
+    Retrieving data for taxon 'Pseudobombax septenatum'
+
+
+    Retrieving data for taxon 'Pseudosamanea guachapele'
+
+
+    Retrieving data for taxon 'Psidium guineense'
+
+
+    Retrieving data for taxon 'Pterocarpus rohrii'
+
+
+    Retrieving data for taxon 'Quadrella indica'
+
+
+    Retrieving data for taxon 'Quadrella odoratissima'
+
+
+    Retrieving data for taxon 'Randia aculeata'
+
+
+    Retrieving data for taxon 'Randia armata'
+
+
+    Retrieving data for taxon 'Randia dioica'
+
+
+    Retrieving data for taxon 'Rinorea pubiflora'
+
+
+    Retrieving data for taxon 'Rollinia mucosa'
+
+
+    Retrieving data for taxon 'Rudgea crassiloba'
+
+
+    Retrieving data for taxon 'Sapindus saponaria'
+
+
+    Retrieving data for taxon 'Sapium glandulosum'
+
+
+    Retrieving data for taxon 'Seguieria americana'
+
+
+    Retrieving data for taxon 'Senegalia macbridei'
+
+
+    Retrieving data for taxon 'Senegalia tamarindifolia'
+
+
+    Retrieving data for taxon 'Senna atomaria'
+
+
+    Retrieving data for taxon 'Senna spectabilis'
+
+
+    Retrieving data for taxon 'Serjania adusta'
+
+
+    Retrieving data for taxon 'Simira cordifolia'
+
+
+    Retrieving data for taxon 'Simira rubescens'
+
+
+    Retrieving data for taxon 'Siparuna guianensis'
+
+
+    Retrieving data for taxon 'Solanum lepidotum'
+
+
+    Retrieving data for taxon 'Sorocea muriculata'
+
+
+    Retrieving data for taxon 'Sorocea sprucei'
+
+
+    Retrieving data for taxon 'Sorocea trophoides'
+
+
+    Retrieving data for taxon 'Spondias mombin'
+
+
+    Retrieving data for taxon 'Spondias radlkoferi'
+
+
+    Retrieving data for taxon 'Stenocereus griseus'
+
+
+    Retrieving data for taxon 'Stenocereus humilis'
+
+
+    Retrieving data for taxon 'Styphnolobium sporadicum'
+
+
+    Retrieving data for taxon 'Swartzia simplex'
+
+
+    Retrieving data for taxon 'Swartzia trianae'
+
+
+    Retrieving data for taxon 'Syagrus sancona'
+
+
+    Retrieving data for taxon 'Tabebuia rosea'
+
+
+    Retrieving data for taxon 'Tabernaemontana cymosa'
+
+
+    Retrieving data for taxon 'Tabernaemontana grandiflora'
+
+
+    Retrieving data for taxon 'Tabernaemontana markgrafiana'
+
+
+    Retrieving data for taxon 'Tachigali guianensis'
+
+
+    Retrieving data for taxon 'Tanaecium tetragonolobum'
+
+
+    Retrieving data for taxon 'Tapirira guianensis'
+
+
+    Retrieving data for taxon 'Terminalia amazonia'
+
+
+    Retrieving data for taxon 'Terminalia oblonga'
+
+
+    Retrieving data for taxon 'Trichilia acuminata'
+
+
+    Retrieving data for taxon 'Trichilia carinata'
+
+
+    Retrieving data for taxon 'Trichilia elegans'
+
+
+    Retrieving data for taxon 'Trichilia hirta'
+
+
+    Retrieving data for taxon 'Trichilia oligofoliolata'
+
+
+    Retrieving data for taxon 'Trichilia pallida'
+
+
+    Retrieving data for taxon 'Trichostigma octandrum'
+
+
+    Retrieving data for taxon 'Triplaris americana'
+
+
+    Retrieving data for taxon 'Triplaris melaenodendron'
+
+
+    Retrieving data for taxon 'Urera baccifera'
+
+
+    Retrieving data for taxon 'Urera caracasana'
+
+
+    Retrieving data for taxon 'Urera simplex'
+
+
+    Retrieving data for taxon 'Vachellia farnesiana'
+
+
+    Retrieving data for taxon 'Vachellia pennatula'
+
+
+    Retrieving data for taxon 'Vernonanthura patens'
+
+
+    Retrieving data for taxon 'Vigna caracalla'
+
+
+    Retrieving data for taxon 'Vitex orinocensis'
+
+
+    Retrieving data for taxon 'Vochysia vismiifolia'
+
+
+    Retrieving data for taxon 'Xylophragma seemannianum'
+
+
+    Retrieving data for taxon 'Xylosma intermedia'
+
+
+    Retrieving data for taxon 'Zanthoxylum fagara'
+
+
+    Retrieving data for taxon 'Zanthoxylum lenticulare'
+
+
+    Retrieving data for taxon 'Zanthoxylum rhoifolium'
+
+
+    Retrieving data for taxon 'Zanthoxylum rigidum'
+
+
+    Retrieving data for taxon 'Zanthoxylum schreberi'
+
+
+    Retrieving data for taxon 'Zanthoxylum verrucosum'
+
+
+    Retrieving data for taxon 'Ziziphus strychnifolia'
+
+
+    Retrieving data for taxon 'Zygia inaequalis'
+
+``` r
+checkGbSpecies<-mapply(function(tab,fam,spe){
+  if(!nrow(tab)>0){return(NULL)}
+  tabg <- tab [!is.na(tab$rank) & tab$rank=='species',]
+  exact <- (!is.na(tabg$species) &trimws(tabg$species) == spe)
+  accepted <- (!is.na(tabg$status) & tabg$status == 'ACCEPTED')
+  familyOk <- (!is.na(tabg$family) & tabg$family == fam)
+  if(sum(exact&accepted&familyOk)>=1)
+  {return(tabg[exact&accepted&familyOk,,drop=F][1,,drop=F])}
+  if(nrow(tabg)==0){return(tab)}
+  return(tabg)
+},gbSpecies,speciesFamily,names(speciesFamily))
+
+resN<-sapply(checkGbSpecies,function(x)ifelse(is.null(x),0,nrow(x)))
+checkGbSpecies[resN==0]
+```
+
+    named list()
+
+``` r
+checkGbSpecies[resN>1]
+```
+
+    $`Bauhinia glabra`
+      usagekey          scientificname    rank  status matchtype acceptedusagekey
+    1  2953162   Bauhinia glabra Jacq. species SYNONYM     EXACT          2953170
+    2  7478147 Bauhinia glabra A.Chev. species SYNONYM     EXACT          2953170
+    3  2953183   Bauhinia faberi Oliv. species SYNONYM     FUZZY          2953181
+        canonicalname confidence kingdom       phylum   order   family    genus
+    1 Bauhinia glabra         97 Plantae Tracheophyta Fabales Fabaceae Schnella
+    2 Bauhinia glabra         97 Plantae Tracheophyta Fabales Fabaceae Schnella
+    3 Bauhinia faberi          9 Plantae Tracheophyta Fabales Fabaceae Bauhinia
+                   species kingdomkey phylumkey classkey orderkey familykey
+    1      Schnella glabra          6   7707728      220     1370      5386
+    2      Schnella glabra          6   7707728      220     1370      5386
+    3 Bauhinia brachycarpa          6   7707728      220     1370      5386
+      genuskey specieskey         class
+    1  7278569    2953170 Magnoliopsida
+    2  7278569    2953170 Magnoliopsida
+    3  2952935    2953181 Magnoliopsida
+                                                                                    note
+    1                                                                               <NA>
+    2 Similarity: name=110; authorship=0; classification=-2; rank=6; status=0; score=114
+    3     Similarity: name=5; authorship=0; classification=-2; rank=6; status=0; score=9
+
+    $`Bauhinia hymenaeifolia`
+      usagekey                          scientificname    rank  status matchtype
+    1  2953128 Bauhinia hymenaeifolia Triana ex Hemsl. species SYNONYM     EXACT
+    2 10922276           Bauhinia hymenaeifolia Triana species SYNONYM     EXACT
+      acceptedusagekey          canonicalname confidence kingdom       phylum
+    1          2953134 Bauhinia hymenaeifolia         97 Plantae Tracheophyta
+    2          2953134 Bauhinia hymenaeifolia         97 Plantae Tracheophyta
+        order   family    genus                species kingdomkey phylumkey
+    1 Fabales Fabaceae Schnella Schnella hymenaeifolia          6   7707728
+    2 Fabales Fabaceae Schnella Schnella hymenaeifolia          6   7707728
+      classkey orderkey familykey genuskey specieskey         class
+    1      220     1370      5386  7278569    2953134 Magnoliopsida
+    2      220     1370      5386  7278569    2953134 Magnoliopsida
+                                                                                    note
+    1                                                                               <NA>
+    2 Similarity: name=110; authorship=0; classification=-2; rank=6; status=0; score=114
+
+    $`Caesalpinia punctata`
+      usagekey                       scientificname    rank  status matchtype
+    1  2958812          Caesalpinia punctata Willd. species SYNONYM     EXACT
+    2  3932462 Caesalpinia epunctata (Vogel) Benth. species SYNONYM     FUZZY
+      acceptedusagekey         canonicalname confidence kingdom       phylum
+    1          3931553  Caesalpinia punctata         98 Plantae Tracheophyta
+    2          3931482 Caesalpinia epunctata          9 Plantae Tracheophyta
+        order   family     genus            species kingdomkey phylumkey classkey
+    1 Fabales Fabaceae Libidibia Libidibia punctata          6   7707728      220
+    2 Fabales Fabaceae   Pomaria     Pomaria pilosa          6   7707728      220
+      orderkey familykey genuskey specieskey         class
+    1     1370      5386  6376506    3931553 Magnoliopsida
+    2     1370      5386  2944606    3931482 Magnoliopsida
+                                                                                note
+    1                                                                           <NA>
+    2 Similarity: name=5; authorship=0; classification=-2; rank=6; status=0; score=9
+
+    $`Calyptranthes multiflora`
+      usagekey                            scientificname    rank  status matchtype
+    1  3181482 Calyptranthes multiflora Poepp. ex O.Berg species SYNONYM     EXACT
+    2  8679187           Calyptranthes multiflora Poepp. species SYNONYM     EXACT
+    3  3181528           Calyptranthes musciflora O.Berg species SYNONYM     FUZZY
+      acceptedusagekey            canonicalname confidence kingdom       phylum
+    1          9208293 Calyptranthes multiflora         97 Plantae Tracheophyta
+    2          9208293 Calyptranthes multiflora         97 Plantae Tracheophyta
+    3         10837430 Calyptranthes musciflora          9 Plantae Tracheophyta
+         order    family  genus               species kingdomkey phylumkey classkey
+    1 Myrtales Myrtaceae Myrcia Myrcia aulomyrcioides          6   7707728      220
+    2 Myrtales Myrtaceae Myrcia Myrcia aulomyrcioides          6   7707728      220
+    3 Myrtales Myrtaceae Myrcia       Myrcia grammica          6   7707728      220
+      orderkey familykey genuskey specieskey         class
+    1      690      5014  3173889    9208293 Magnoliopsida
+    2      690      5014  3173889    9208293 Magnoliopsida
+    3      690      5014  3173889   10837430 Magnoliopsida
+                                                                                    note
+    1                                                                               <NA>
+    2 Similarity: name=110; authorship=0; classification=-2; rank=6; status=0; score=114
+    3     Similarity: name=5; authorship=0; classification=-2; rank=6; status=0; score=9
+
+    $`Clusia umbellata`
+      usagekey           scientificname    rank  status matchtype acceptedusagekey
+    1  5617077   Cassia umbellata Rchb. species SYNONYM     FUZZY          3977118
+    2  7726511 Cassia umbellata Bertol. species SYNONYM     FUZZY          3977118
+         canonicalname confidence
+    1 Cassia umbellata          0
+    2 Cassia umbellata         -6
+                                                                                                                    note
+    1 Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6; 2 synonym homonyms; nextMatch=0
+    2                                  Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6
+      kingdom       phylum   order   family genus             species kingdomkey
+    1 Plantae Tracheophyta Fabales Fabaceae Senna Senna barronfieldii          6
+    2 Plantae Tracheophyta Fabales Fabaceae Senna Senna barronfieldii          6
+      phylumkey classkey orderkey familykey genuskey specieskey         class
+    1   7707728      220     1370      5386  2956904    3977118 Magnoliopsida
+    2   7707728      220     1370      5386  2956904    3977118 Magnoliopsida
+
+    $`Cordia alliodora`
+      usagekey                       scientificname    rank   status matchtype
+    1  7649215  Cordia alliodora (Ruiz & Pav.) Oken species ACCEPTED     EXACT
+    2  7694440 Cordia alliodora (Ruiz & Pav.) Cham. species  SYNONYM     EXACT
+         canonicalname confidence kingdom       phylum       order     family
+    1 Cordia alliodora         97 Plantae Tracheophyta Boraginales Cordiaceae
+    2 Cordia alliodora         97 Plantae Tracheophyta Boraginales Cordiaceae
+       genus          species kingdomkey phylumkey classkey orderkey familykey
+    1 Cordia Cordia alliodora          6   7707728      220  7226464   4930453
+    2 Cordia Cordia alliodora          6   7707728      220  7226464   4930453
+      genuskey specieskey         class acceptedusagekey
+    1  2900865    7649215 Magnoliopsida               NA
+    2  2900865    7649215 Magnoliopsida          7649215
+                                                                                    note
+    1                                                                               <NA>
+    2 Similarity: name=110; authorship=0; classification=-2; rank=6; status=0; score=114
+
+    $`Cordia bicolor`
+      usagekey                scientificname    rank   status matchtype
+    1  5660135 Cordia bicolor A.DC. ex A.DC. species ACCEPTED     EXACT
+    2  6528643 Cardita bicolor Lamarck, 1819 species  SYNONYM     FUZZY
+    3  5594017         Correa bicolor Paxton species DOUBTFUL     FUZZY
+    4  7295541         Cordia discolor Cham. species  SYNONYM     FUZZY
+    5  5071521   Ceria bicolor Kertész, 1902 species  SYNONYM     FUZZY
+    6  7728300        Chordia bicolor Livera species  SYNONYM     FUZZY
+    7  2452478 Contia bicolor Nikolsky, 1903 species  SYNONYM     FUZZY
+        canonicalname confidence  kingdom       phylum       order        family
+    1  Cordia bicolor         99  Plantae Tracheophyta Boraginales    Cordiaceae
+    2 Cardita bicolor         69 Animalia     Mollusca   Carditida    Carditidae
+    3  Correa bicolor         64  Plantae Tracheophyta  Sapindales      Rutaceae
+    4 Cordia discolor          9  Plantae Tracheophyta Boraginales    Cordiaceae
+    5   Ceria bicolor          0 Animalia   Arthropoda     Diptera     Syrphidae
+    6 Chordia bicolor          0  Plantae Tracheophyta    Lamiales Orobanchaceae
+    7  Contia bicolor          0 Animalia     Chordata        <NA>    Colubridae
+             genus              species kingdomkey phylumkey classkey orderkey
+    1       Cordia       Cordia bicolor          6   7707728      220  7226464
+    2     Cardites     Cardites bicolor          1        52      137  9280416
+    3       Correa       Correa bicolor          6   7707728      220      933
+    4     Varronia    Varronia discolor          6   7707728      220  7226464
+    5 Monoceromyia Monoceromyia bicolor          1        54      216      811
+    6 Christisonia Christisonia bicolor          6   7707728      220      408
+    7      Lycodon     Lycodon striatus          1        44 11592253       NA
+      familykey genuskey specieskey         class acceptedusagekey
+    1   4930453  2900865    5660135 Magnoliopsida               NA
+    2      3459  5429841    5794399      Bivalvia          5794399
+    3      2396  3232927    5594017 Magnoliopsida               NA
+    4   4930453  7131431    4060868 Magnoliopsida          4060868
+    5      6920  1535408   11220182       Insecta         11220182
+    6      6651  7332254    3730896 Magnoliopsida          3730896
+    7      6172  2449776    9113553      Squamata          9113553
+                                                                                   note
+    1                                                                              <NA>
+    2  Similarity: name=65; authorship=0; classification=-2; rank=6; status=0; score=69
+    3 Similarity: name=65; authorship=0; classification=-2; rank=6; status=-5; score=64
+    4    Similarity: name=5; authorship=0; classification=-2; rank=6; status=0; score=9
+    5 Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6
+    6 Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6
+    7 Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6
+
+    $`Cordia gerascanthus`
+      usagekey                    scientificname    rank   status matchtype
+    1  5341264            Cordia gerascanthus L. species ACCEPTED     EXACT
+    2  7410306         Cordia gerascanthus Kunth species  SYNONYM     EXACT
+    3  8691149         Cordia gerascanthus Jacq. species  SYNONYM     EXACT
+    4  7866030 Cordia gerascanthus Griseb., 1861 species  SYNONYM     EXACT
+    5  5662196        Cordia geraschanthus Jacq. species  SYNONYM     FUZZY
+             canonicalname confidence kingdom       phylum       order     family
+    1  Cordia gerascanthus         97 Plantae Tracheophyta Boraginales Cordiaceae
+    2  Cordia gerascanthus         97 Plantae Tracheophyta Boraginales Cordiaceae
+    3  Cordia gerascanthus         97 Plantae Tracheophyta Boraginales Cordiaceae
+    4  Cordia gerascanthus         97 Plantae Tracheophyta Boraginales Cordiaceae
+    5 Cordia geraschanthus         92 Plantae Tracheophyta Boraginales Cordiaceae
+       genus             species kingdomkey phylumkey classkey orderkey familykey
+    1 Cordia Cordia gerascanthus          6   7707728      220  7226464   4930453
+    2 Cordia    Cordia tinifolia          6   7707728      220  7226464   4930453
+    3 Cordia    Cordia alliodora          6   7707728      220  7226464   4930453
+    4 Cordia    Cordia alliodora          6   7707728      220  7226464   4930453
+    5 Cordia   Cordia trichotoma          6   7707728      220  7226464   4930453
+      genuskey specieskey         class acceptedusagekey
+    1  2900865    5341264 Magnoliopsida               NA
+    2  2900865    5660536 Magnoliopsida          5660536
+    3  2900865    7649215 Magnoliopsida          7649215
+    4  2900865    7649215 Magnoliopsida          7649215
+    5  2900865    7294667 Magnoliopsida          7294667
+                                                                                    note
+    1                                                                               <NA>
+    2 Similarity: name=110; authorship=0; classification=-2; rank=6; status=0; score=114
+    3 Similarity: name=110; authorship=0; classification=-2; rank=6; status=0; score=114
+    4 Similarity: name=110; authorship=0; classification=-2; rank=6; status=0; score=114
+    5   Similarity: name=95; authorship=0; classification=-2; rank=6; status=0; score=99
+
+    $`Licania apetala`
+      usagekey                   scientificname    rank  status matchtype
+    1  2985563 Licania apetala (E.Mey.) Fritsch species SYNONYM     EXACT
+    2  7441760  Licania apetala (E.Mey.) Kuntze species SYNONYM     EXACT
+      acceptedusagekey   canonicalname confidence kingdom       phylum        order
+    1         10289996 Licania apetala         97 Plantae Tracheophyta Malpighiales
+    2         10289996 Licania apetala         97 Plantae Tracheophyta Malpighiales
+                family        genus               species kingdomkey phylumkey
+    1 Chrysobalanaceae Leptobalanus Leptobalanus apetalus          6   7707728
+    2 Chrysobalanaceae Leptobalanus Leptobalanus apetalus          6   7707728
+      classkey orderkey familykey genuskey specieskey         class
+    1      220     1414      9111  9798427   10289996 Magnoliopsida
+    2      220     1414      9111  9798427   10289996 Magnoliopsida
+                                                                                    note
+    1                                                                               <NA>
+    2 Similarity: name=110; authorship=0; classification=-2; rank=6; status=0; score=114
+
+    $`Lonchocarpus pictus`
+      usagekey                scientificname    rank   status matchtype
+    1  2969193   Lonchocarpus pictus Pittier species  SYNONYM     EXACT
+    2  8128027 Lonchocarpus plicatus M.Sousa species ACCEPTED     FUZZY
+      acceptedusagekey         canonicalname confidence kingdom       phylum
+    1          9927912   Lonchocarpus pictus         98 Plantae Tracheophyta
+    2               NA Lonchocarpus plicatus         10 Plantae Tracheophyta
+        order   family        genus               species kingdomkey phylumkey
+    1 Fabales Fabaceae     Deguelia        Deguelia picta          6   7707728
+    2 Fabales Fabaceae Lonchocarpus Lonchocarpus plicatus          6   7707728
+      classkey orderkey familykey genuskey specieskey         class
+    1      220     1370      5386  7577914    9927912 Magnoliopsida
+    2      220     1370      5386  2968975    8128027 Magnoliopsida
+                                                                                 note
+    1                                                                            <NA>
+    2 Similarity: name=5; authorship=0; classification=-2; rank=6; status=1; score=10
+
+    $`Machaerium microphyllum`
+      usagekey                           scientificname    rank   status matchtype
+    1  5354962 Machaerium microphyllum (E.Mey.) Standl. species  SYNONYM     EXACT
+    2  5354902           Machaerium macrophyllum Benth. species ACCEPTED     FUZZY
+      acceptedusagekey           canonicalname confidence kingdom       phylum
+    1          7932857 Machaerium microphyllum         98 Plantae Tracheophyta
+    2               NA Machaerium macrophyllum         93 Plantae Tracheophyta
+        order   family      genus                 species kingdomkey phylumkey
+    1 Fabales Fabaceae Machaerium   Machaerium isadelphum          6   7707728
+    2 Fabales Fabaceae Machaerium Machaerium macrophyllum          6   7707728
+      classkey orderkey familykey genuskey specieskey         class
+    1      220     1370      5386  2959589    7932857 Magnoliopsida
+    2      220     1370      5386  2959589    5354902 Magnoliopsida
+                                                                                   note
+    1                                                                              <NA>
+    2 Similarity: name=95; authorship=0; classification=-2; rank=6; status=1; score=100
+
+    $`Pachira quinata`
+      usagekey                       scientificname    rank              status
+    2 12389859 Pachira quinata (Jacq.) W.S.Alverson species HETEROTYPIC_SYNONYM
+    3  4073616 Pachira quinata (Jacq.) W.S.Alverson species HETEROTYPIC_SYNONYM
+      matchtype   canonicalname confidence kingdom       phylum    order    family
+    2     EXACT Pachira quinata         97 Plantae Tracheophyta Malvales Malvaceae
+    3     EXACT Pachira quinata         97 Plantae Tracheophyta Malvales Malvaceae
+      kingdomkey phylumkey classkey orderkey familykey         class
+    2          6   7707728      220      941      6685 Magnoliopsida
+    3          6   7707728      220      941      6685 Magnoliopsida
+                                                                                     note
+    2 Similarity: name=110; authorship=0; classification=-2; rank=6; status=-1; score=113
+    3 Similarity: name=110; authorship=0; classification=-2; rank=6; status=-1; score=113
+        genus          species genuskey specieskey
+    2  Bombax     Bombax ceiba  2874861    3152226
+    3 Pochota Pochota fendleri  7296119    9158473
+
+    $`Phanera guianensis`
+      usagekey                          scientificname    rank   status matchtype
+    1  8332496          Phanera guianensis (Aubl.) Vaz species  SYNONYM     EXACT
+    2  4929140 Phanera yunnanensis (Franch.) Wunderlin species ACCEPTED     FUZZY
+      acceptedusagekey       canonicalname confidence kingdom       phylum   order
+    1          4929144  Phanera guianensis         98 Plantae Tracheophyta Fabales
+    2               NA Phanera yunnanensis         10 Plantae Tracheophyta Fabales
+        family    genus             species kingdomkey phylumkey classkey orderkey
+    1 Fabaceae Schnella Schnella guianensis          6   7707728      220     1370
+    2 Fabaceae  Phanera Phanera yunnanensis          6   7707728      220     1370
+      familykey genuskey specieskey         class
+    1      5386  7278569    4929144 Magnoliopsida
+    2      5386  7278390    4929140 Magnoliopsida
+                                                                                 note
+    1                                                                            <NA>
+    2 Similarity: name=5; authorship=0; classification=-2; rank=6; status=1; score=10
+
+    $`Rollinia mucosa`
+      usagekey                  scientificname    rank  status matchtype
+    1  3158590  Rollinia mucosa (Jacq.) Baill. species SYNONYM     EXACT
+    2  4274970 Rollinia muscosa (Jacq.) Baill. species SYNONYM     FUZZY
+      acceptedusagekey    canonicalname confidence kingdom       phylum       order
+    1          5407571  Rollinia mucosa         98 Plantae Tracheophyta Magnoliales
+    2          5407571 Rollinia muscosa          9 Plantae Tracheophyta Magnoliales
+          family  genus       species kingdomkey phylumkey classkey orderkey
+    1 Annonaceae Annona Annona mucosa          6   7707728      220      718
+    2 Annonaceae Annona Annona mucosa          6   7707728      220      718
+      familykey genuskey specieskey         class
+    1      9291  3155252    5407571 Magnoliopsida
+    2      9291  3155252    5407571 Magnoliopsida
+                                                                                note
+    1                                                                           <NA>
+    2 Similarity: name=5; authorship=0; classification=-2; rank=6; status=0; score=9
+
+    $`Terminalia amazonia`
+      usagekey                         scientificname    rank   status matchtype
+    1  3699754  Terminalia amazonia (J.F.Gmel.) Exell species  SYNONYM     EXACT
+    2  8153963 Terminalia amazonica (J.F.Gmel.) Exell species ACCEPTED     FUZZY
+      acceptedusagekey        canonicalname confidence kingdom       phylum
+    1          8153963  Terminalia amazonia         98 Plantae Tracheophyta
+    2               NA Terminalia amazonica         93 Plantae Tracheophyta
+         order       family      genus              species kingdomkey phylumkey
+    1 Myrtales Combretaceae Terminalia Terminalia amazonica          6   7707728
+    2 Myrtales Combretaceae Terminalia Terminalia amazonica          6   7707728
+      classkey orderkey familykey genuskey specieskey         class
+    1      220      690      2431  3189387    8153963 Magnoliopsida
+    2      220      690      2431  3189387    8153963 Magnoliopsida
+                                                                                   note
+    1                                                                              <NA>
+    2 Similarity: name=95; authorship=0; classification=-2; rank=6; status=1; score=100
+
+    $`Vigna caracalla`
+      usagekey              scientificname    rank  status matchtype
+    1  2982781 Vigna caracalla (L.) Verdc. species SYNONYM     EXACT
+    2  2982454      Vigna carinalis Benth. species SYNONYM     FUZZY
+      acceptedusagekey   canonicalname confidence kingdom       phylum   order
+    1          8308653 Vigna caracalla         98 Plantae Tracheophyta Fabales
+    2          7225155 Vigna carinalis         90 Plantae Tracheophyta Fabales
+        family          genus                  species kingdomkey phylumkey
+    1 Fabaceae Cochliasanthus Cochliasanthus caracalla          6   7707728
+    2 Fabaceae          Vigna          Vigna vexillata          6   7707728
+      classkey orderkey familykey genuskey specieskey         class
+    1      220     1370      5386  3975532    8308653 Magnoliopsida
+    2      220     1370      5386  2982372    2982409 Magnoliopsida
+                                                                                  note
+    1                                                                             <NA>
+    2 Similarity: name=90; authorship=0; classification=-2; rank=6; status=0; score=94
+
+``` r
+cat(names(checkGbSpecies[resN>1]))
+```
+
+    Bauhinia glabra Bauhinia hymenaeifolia Caesalpinia punctata Calyptranthes multiflora Clusia umbellata Cordia alliodora Cordia bicolor Cordia gerascanthus Licania apetala Lonchocarpus pictus Machaerium microphyllum Pachira quinata Phanera guianensis Rollinia mucosa Terminalia amazonia Vigna caracalla
+
+``` r
+toTestSynonym<-sapply(checkGbSpecies[resN>1],function(tab)tab[1,"status"]=="SYNONYM")
+synoRes<-sapply(sapply(checkGbSpecies[resN>1][toTestSynonym],function(tab)tab[1,"acceptedusagekey"]),function(x)
+  {found=name_usage(key=x)
+  return(found$data$canonicalName)
+  }
+  )
+(speSynoAccepted<-data.frame(syno=names(checkGbSpecies[resN>1][toTestSynonym]),accepted=synoRes,row.names = NULL))
+```
+
+| syno                     | accepted                 |
+|:-------------------------|:-------------------------|
+| Bauhinia glabra          | Schnella glabra          |
+| Bauhinia hymenaeifolia   | Schnella hymenaeifolia   |
+| Caesalpinia punctata     | Libidibia punctata       |
+| Calyptranthes multiflora | Myrcia aulomyrcioides    |
+| Clusia umbellata         | Senna barronfieldii      |
+| Licania apetala          | Leptobalanus apetalus    |
+| Lonchocarpus pictus      | Deguelia picta           |
+| Machaerium microphyllum  | Machaerium isadelphum    |
+| Phanera guianensis       | Schnella guianensis      |
+| Rollinia mucosa          | Annona mucosa            |
+| Terminalia amazonia      | Terminalia amazonica     |
+| Vigna caracalla          | Cochliasanthus caracalla |
+
+``` r
+toTestFamily<-mapply(function(spe,fam){spe[1,"family"]!=fam},checkGbSpecies[resN>1],speciesFamily[resN>1])
+(speFamilySuggested <- data.frame(species=names(checkGbSpecies[resN>1][toTestFamily]), familyProblem=speciesFamily[resN>1][toTestFamily], familySuggested= sapply(checkGbSpecies[resN>1][toTestFamily],function(tab)tab[1,"family"]),row.names = NULL))
+```
+
+| species             | familyProblem | familySuggested |
+|:--------------------|:--------------|:----------------|
+| Clusia umbellata    | Clusiaceae    | Fabaceae        |
+| Cordia alliodora    | Boraginaceae  | Cordiaceae      |
+| Cordia bicolor      | Boraginaceae  | Cordiaceae      |
+| Cordia gerascanthus | Boraginaceae  | Cordiaceae      |
+
+``` r
+(suggestedOther <- data.frame(problem=names(checkGbSpecies[resN>1][!(toTestSynonym|toTestFamily)]),suggested=sapply(checkGbSpecies[resN>1][!(toTestSynonym|toTestFamily)],function(tab)tab[1,"canonicalname"]),row.names=NULL))
+```
+
+| problem         | suggested       |
+|:----------------|:----------------|
+| Pachira quinata | Pachira quinata |
+
+``` r
+suggestedOther[]
+```
+
+| problem         | suggested       |
+|:----------------|:----------------|
+| Pachira quinata | Pachira quinata |
 
 ``` r
 dbDisconnect(dbpp)

@@ -122,8 +122,7 @@ VALUES(
 
 Con las metodologías definidas (no realmente, más bien con los campos obligatorios llenos), podemos definir las localidades que corresponden a las parcelas.
 
-```{r}
-require(sf)
+```r
 dbLocCol<-dbConnect(Postgres(),dbname='dev_geogref')
 colombia<-st_read(dbLocCol,"dissolved_colombia")
 dbDisconnect(dbLocCol)
@@ -134,11 +133,13 @@ plot(st_geometry(colombia), border=NA, col="red")
 ```{r mapParcelas}
 #| fig.height: 10
 #| fig.width: 10
+require(sf)
+CRS<-4686
 spatPoints<-st_as_sf(metadata_tot,coords=c("longitude_dec","latitude_dec")) %>%
-  st_set_crs(4326) %>% st_transform(st_crs(colombia))
-plot(st_geometry(spatPoints),reset=F)
-plot(st_geometry(colombia),add=T,border=F,col='turquoise')
-plot(st_geometry(spatPoints),add=T,pch='+')
+  st_set_crs(4326) %>% st_transform(CRS)
+#plot(st_geometry(spatPoints),reset=F)
+#plot(st_geometry(colombia),add=T,border=F,col='turquoise')
+#plot(st_geometry(spatPoints),add=T,pch='+')
 ```
 
 
