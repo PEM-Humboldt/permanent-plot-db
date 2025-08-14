@@ -722,19 +722,19 @@ stopifnot(TDFtaxonomy$infrasp_epithet[!is.na(TDFtaxonomy$infrasp_epithet)] %in% 
 ```{r}
 simpTaxo<-TDFtaxonomy[c("family","genus","sp_epithet")]
 # manual correction for families
-familyCorrection<-data.frame(
-error=c("Acardiaceae", "Polygoceae", "Apocyceae", "Annoceae", "Boragiceae", "Rhamceae","Primuliaceae", "Thymeleaceae", "Pricramniaceae", "Myrsinaceae", "Leguminosae"),
-correction=c("Anacardiaceae","Polygonaceae", "Apocynaceae", "Annonaceae", "Boraginaceae", "Rhamnaceae", "Primulaceae", "Thymelaeaceae", "Picramniaceae", "Primulaceae","Fabaceae")
-)
-m<-match(simpTaxo$family,familyCorrection$error)
-simpTaxo$family[!is.na(m)]<-familyCorrection$correction[m[!is.na(m)]]
+# familyCorrection<-data.frame(
+# error=c("Acardiaceae", "Polygoceae", "Apocyceae", "Annoceae", "Boragiceae", "Rhamceae","Primuliaceae", "Thymeleaceae", "Pricramniaceae", "Myrsinaceae", "Leguminosae"),
+# correction=c("Anacardiaceae","Polygonaceae", "Apocynaceae", "Annonaceae", "Boraginaceae", "Rhamnaceae", "Primulaceae", "Thymelaeaceae", "Picramniaceae", "Primulaceae","Fabaceae")
+# )
+# m<-match(simpTaxo$family,familyCorrection$error)
+# simpTaxo$family[!is.na(m)]<-familyCorrection$correction[m[!is.na(m)]]
 
-genusCorrection <- data.frame(
-  error=c("Acardium","Cinmomun","Psicotria","Termilia","Anno"),
-  correction=c("Anacardium","Cinnamomum","Psychotria","Terminalia","Annona")
-)
-m<-match(simpTaxo$genus, genusCorrection$error)
-simpTaxo$genus[!is.na(m)]<-genusCorrection$correction[m[!is.na(m)]]
+# genusCorrection <- data.frame(
+#   error=c("Acardium","Cinmomun","Psicotria","Termilia","Anno"),
+#   correction=c("Anacardium","Cinnamomum","Psychotria","Terminalia","Annona")
+# )
+# m<-match(simpTaxo$genus, genusCorrection$error)
+# simpTaxo$genus[!is.na(m)]<-genusCorrection$correction[m[!is.na(m)]]
 
 
 simpTaxo$family[familyUnknown]<-NA
@@ -823,8 +823,12 @@ higherRanks_tab <- unique(Reduce(rbind,higherRanks))
 
 
 ```{r}
-genusFamily<-tapply(simpTaxo$family[!is.na(simpTaxo$genus)],simpTaxo$genus[!is.na(simpTaxo$genus)],function(x){
-  A<-sort(table(x),decreasing = T)
+# genusFamily<-tapply(simpTaxo$family[!is.na(simpTaxo$genus)],simpTaxo$genus[!is.na(simpTaxo$genus)],function(x){
+#   A<-sort(table(x),decreasing = T)
+#   names(A)[1]
+# })
+
+genusFamily<-tapply(simpTaxo$family[!is.na(simpTaxo$genus)&is.na(simpTaxo$sp_epithet)],simpTaxo$genus[!is.na(simpTaxo$genus)&is.na(simpTaxo$sp_epithet)],function(x){A<-sort(table(x),decreasing = T)
   names(A)[1]
 })
 gbGenus<-get_gbifid_(names(genusFamily))
@@ -916,7 +920,15 @@ toTestFamily<-mapply(function(spe,fam){spe[1,"family"]!=fam},checkGbSpecies[resN
 suggestedOther[]
 ```
 
+Clusia umbellata no existe, Gbif hace un match con otro genero
+Terminalia se queda amazonia
+Pachira quinata se queda así
 
+Clusia umbellata -> Tovomita umbellata
+
+
+
+KEW: WCVP
 ```{r}
 dbDisconnect(dbpp)
 ```

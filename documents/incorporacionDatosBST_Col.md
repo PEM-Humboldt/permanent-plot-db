@@ -2490,11 +2490,11 @@ checkGbGenus[resN>1]
     3   7721974 Cochliospermum Lagasca, 1817 genus DOUBTFUL      FUZZY
     40  2897071           Coelospermum Blume genus ACCEPTED      FUZZY
     41  5371893            Cyclospermum Lag. genus ACCEPTED      FUZZY
-    42  6423677            Ciclospermum Lag. genus  SYNONYM      FUZZY
-    43  9128212   Ciclospermum Lagasca, 1821 genus  SYNONYM      FUZZY
+    42  9128212   Ciclospermum Lagasca, 1821 genus  SYNONYM      FUZZY
+    43  6423677            Ciclospermum Lag. genus  SYNONYM      FUZZY
     48  2853045        Collospermum Skottsb. genus  SYNONYM      FUZZY
-    49  7237371    Cyclospermum Seward, 1917 genus DOUBTFUL      FUZZY
-    50  8741595   Cyclospermum Lagasca, 1821 genus DOUBTFUL      FUZZY
+    49  8741595   Cyclospermum Lagasca, 1821 genus DOUBTFUL      FUZZY
+    50  7237371    Cyclospermum Seward, 1917 genus DOUBTFUL      FUZZY
         canonicalname confidence kingdom       phylum          order
     1   Cochlospermum         94 Plantae Tracheophyta       Malvales
     2  Cochliospermum         73 Plantae Tracheophyta Caryophyllales
@@ -2504,8 +2504,8 @@ checkGbGenus[resN>1]
     42   Ciclospermum          0 Plantae Tracheophyta        Apiales
     43   Ciclospermum          0 Plantae Tracheophyta        Apiales
     48   Collospermum          0 Plantae Tracheophyta    Asparagales
-    49   Cyclospermum          0 Plantae         <NA>           <NA>
-    50   Cyclospermum          0 Plantae Tracheophyta        Apiales
+    49   Cyclospermum          0 Plantae Tracheophyta        Apiales
+    50   Cyclospermum          0 Plantae         <NA>           <NA>
                  family          genus kingdomkey phylumkey classkey orderkey
     1  Cochlospermaceae  Cochlospermum          6   7707728      220      941
     2     Amaranthaceae         Suaeda          6   7707728      220      422
@@ -2515,19 +2515,19 @@ checkGbGenus[resN>1]
     42         Apiaceae   Cyclospermum          6   7707728      220     1351
     43         Apiaceae   Cyclospermum          6   7707728      220     1351
     48      Asteliaceae        Astelia          6   7707728      196     1169
-    49             <NA>   Cyclospermum          6        NA       NA       NA
-    50         Apiaceae   Cyclospermum          6   7707728      220     1351
+    49         Apiaceae   Cyclospermum          6   7707728      220     1351
+    50             <NA>   Cyclospermum          6        NA       NA       NA
        familykey genuskey         class acceptedusagekey
     1    3702383  2874864 Magnoliopsida               NA
     2       3064  3083525 Magnoliopsida          3083525
     3       3064  7721974 Magnoliopsida               NA
     40      8798  2897071 Magnoliopsida               NA
     41      6720  5371893 Magnoliopsida               NA
-    42      6720  5371893 Magnoliopsida          5371893
-    43      6720  8741595 Magnoliopsida          8741595
+    42      6720  8741595 Magnoliopsida          8741595
+    43      6720  5371893 Magnoliopsida          5371893
     48      7684  2765628    Liliopsida          2765628
-    49        NA  7237371          <NA>               NA
-    50      6720  8741595 Magnoliopsida               NA
+    49      6720  8741595 Magnoliopsida               NA
+    50        NA  7237371          <NA>               NA
                                                                                      note
     1                                                                                <NA>
     2    Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
@@ -2572,7 +2572,7 @@ checkGbGenus[resN>1]
     17  2000890      Corydia Serville, 1831 genus  SYNONYM     FUZZY       Corydia
     18  4059758              Corda St.-Lag. genus DOUBTFUL     FUZZY         Corda
     19  4059953       Coredia Hook.f., 1857 genus DOUBTFUL     FUZZY       Coredia
-    47  7333786 Codia J.R.Forst. & G.Forst. genus ACCEPTED     FUZZY         Codia
+    45  7333786 Codia J.R.Forst. & G.Forst. genus ACCEPTED     FUZZY         Codia
        confidence
     1          99
     2          99
@@ -2593,7 +2593,7 @@ checkGbGenus[resN>1]
     17         73
     18         68
     19         68
-    47         -6
+    45         -6
                                                                                      note
     1   Similarity: name=100; authorship=0; classification=-2; rank=0; status=1; score=99
     2   Similarity: name=100; authorship=0; classification=-2; rank=0; status=1; score=99
@@ -2614,7 +2614,7 @@ checkGbGenus[resN>1]
     17   Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
     18  Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
     19  Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-    47   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=1; score=-6
+    45   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=1; score=-6
         kingdom       phylum          order          family       genus kingdomkey
     1   Plantae Tracheophyta    Boraginales      Cordiaceae      Cordia          6
     2  Animalia   Arthropoda      Hemiptera   Aphrophoridae      Cordia          1
@@ -2635,7 +2635,7 @@ checkGbGenus[resN>1]
     17 Animalia   Arthropoda      Blattodea      Corydiidae      Therea          1
     18  Plantae Tracheophyta    Boraginales    Boraginaceae       Corda          6
     19  Plantae Tracheophyta    Boraginales    Boraginaceae     Coredia          6
-    47  Plantae Tracheophyta     Oxalidales     Cunoniaceae       Codia          6
+    45  Plantae Tracheophyta     Oxalidales     Cunoniaceae       Codia          6
        phylumkey classkey orderkey familykey genuskey         class
     1    7707728      220  7226464   4930453  2900865 Magnoliopsida
     2         54      216      809      3764  2016303       Insecta
@@ -2656,7 +2656,7 @@ checkGbGenus[resN>1]
     17        54      216      800   4802592  2000748       Insecta
     18   7707728      220  7226464      2498  4059758 Magnoliopsida
     19   7707728      220  7226464      2498  4059953 Magnoliopsida
-    47   7707728      220  7224021      2405  7333786 Magnoliopsida
+    45   7707728      220  7224021      2405  7333786 Magnoliopsida
        acceptedusagekey species specieskey
     1                NA    <NA>         NA
     2                NA    <NA>         NA
@@ -2677,7 +2677,7 @@ checkGbGenus[resN>1]
     17          2000748    <NA>         NA
     18               NA    <NA>         NA
     19               NA    <NA>         NA
-    47               NA    <NA>         NA
+    45               NA    <NA>         NA
 
     $Cydista
       usagekey       scientificname  rank   status  matchtype acceptedusagekey
@@ -2764,8 +2764,8 @@ checkGbGenus[resN>1]
     $Heisteria
       usagekey                scientificname  rank   status matchtype canonicalname
     2  3232590               Heisteria Jacq. genus ACCEPTED     EXACT     Heisteria
-    3  3230495               Heisteria Fabr. genus  SYNONYM     EXACT     Heisteria
-    4  3233149                  Heisteria L. genus  SYNONYM     EXACT     Heisteria
+    3  3233149                  Heisteria L. genus  SYNONYM     EXACT     Heisteria
+    4  3230495               Heisteria Fabr. genus  SYNONYM     EXACT     Heisteria
     5  9295409 Heiseria E.E.Schill. & Panero genus ACCEPTED     FUZZY      Heiseria
     6  7293322                      Heistera genus ACCEPTED     FUZZY      Heistera
     7  8143654              Heistera Schreb. genus  SYNONYM     FUZZY      Heistera
@@ -2785,15 +2785,15 @@ checkGbGenus[resN>1]
     7  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
             order          family      genus classkey orderkey familykey genuskey
     2  Santalales Erythropalaceae  Heisteria      220      934   4924615  3232590
-    3 Asparagales    Asparagaceae Veltheimia      196     1169      7683  2767959
-    4     Fabales    Polygalaceae   Muraltia      220     1370      2417  7130220
+    3     Fabales    Polygalaceae   Muraltia      220     1370      2417  7130220
+    4 Asparagales    Asparagaceae Veltheimia      196     1169      7683  2767959
     5   Asterales      Asteraceae   Heiseria      220      414      3065  9295409
     6     Fabales    Polygalaceae   Heistera      220     1370      2417  7293322
     7  Santalales Erythropalaceae  Heisteria      220      934   4924615  3232590
               class acceptedusagekey species specieskey
     2 Magnoliopsida               NA    <NA>         NA
-    3    Liliopsida          2767959    <NA>         NA
-    4 Magnoliopsida          7130220    <NA>         NA
+    3 Magnoliopsida          7130220    <NA>         NA
+    4    Liliopsida          2767959    <NA>         NA
     5 Magnoliopsida               NA    <NA>         NA
     6 Magnoliopsida               NA    <NA>         NA
     7 Magnoliopsida          3232590    <NA>         NA
@@ -2891,14 +2891,14 @@ checkGbGenus[resN>1]
     1  2899694       Margaritopsis C.Wright genus SYNONYM     EXACT
     2  3248873   Margaritopsis Thiele, 1906 genus SYNONYM     EXACT
     3  4592792 Margaritanopsis F.Haas, 1910 genus SYNONYM     FUZZY
-    4  7960830              Margaritinopsis genus SYNONYM     FUZZY
-    5 10555380              Margaritinopsis genus SYNONYM     FUZZY
+    4 10555380              Margaritinopsis genus SYNONYM     FUZZY
+    5  7960830              Margaritinopsis genus SYNONYM     FUZZY
       acceptedusagekey   canonicalname confidence
     1          2896907   Margaritopsis         98
     2          2292959   Margaritopsis         98
     3          4628370 Margaritanopsis         53
-    4          2287870 Margaritinopsis         53
-    5          4628370 Margaritinopsis         53
+    4          4628370 Margaritinopsis         53
+    5          2287870 Margaritinopsis         53
                                                                                    note
     1 Similarity: name=100; authorship=0; classification=-2; rank=0; status=0; score=98
     2 Similarity: name=100; authorship=0; classification=-2; rank=0; status=0; score=98
@@ -2909,14 +2909,14 @@ checkGbGenus[resN>1]
     1  Plantae Tracheophyta Gentianales        Rubiaceae      Eumachia          6
     2 Animalia     Mollusca    Trochida     Margaritidae    Margarites          1
     3 Animalia     Mollusca    Unionida Margaritiferidae     Gibbosula          1
-    4 Animalia     Mollusca    Unionida Margaritiferidae Margaritifera          1
-    5 Animalia     Mollusca    Unionida Margaritiferidae     Gibbosula          1
+    4 Animalia     Mollusca    Unionida Margaritiferidae     Gibbosula          1
+    5 Animalia     Mollusca    Unionida Margaritiferidae Margaritifera          1
       phylumkey classkey orderkey familykey genuskey         class species
     1   7707728      220      412      8798  2896907 Magnoliopsida    <NA>
     2        52      225  9715180   6532323  2292959    Gastropoda    <NA>
     3        52      137  9301143      3462  4628370      Bivalvia    <NA>
-    4        52      137  9301143      3462  2287870      Bivalvia    <NA>
-    5        52      137  9301143      3462  4628370      Bivalvia    <NA>
+    4        52      137  9301143      3462  4628370      Bivalvia    <NA>
+    5        52      137  9301143      3462  2287870      Bivalvia    <NA>
       specieskey
     1         NA
     2         NA
@@ -3036,32 +3036,32 @@ checkGbGenus[resN>1]
     2 11861229             Roslinia genus ACCEPTED      FUZZY               NA
     3  3050997 Rollinsia Al-Shehbaz genus  SYNONYM      FUZZY          3049366
     4  3780795       Roslinia Neck. genus  SYNONYM      FUZZY          2904597
-    5  3230943      Roulinia Decne. genus  SYNONYM      FUZZY          3170354
-    6  9521105     Roulinia Brongn. genus  SYNONYM      FUZZY          2776982
+    5  9521105     Roulinia Brongn. genus  SYNONYM      FUZZY          2776982
+    6  3230943      Roulinia Decne. genus  SYNONYM      FUZZY          3170354
     7  7667129       Roslinia G.Don genus DOUBTFUL      FUZZY               NA
       canonicalname confidence  kingdom       phylum        order        family
     1      Rollinia         94  Plantae Tracheophyta  Magnoliales    Annonaceae
     2      Roslinia         74 Bacteria Firmicutes_A Monoglobales Monoglobaceae
     3     Rollinsia         73  Plantae Tracheophyta  Brassicales  Brassicaceae
     4      Roslinia         73  Plantae Tracheophyta     Lamiales   Acanthaceae
-    5      Roulinia         73  Plantae Tracheophyta  Gentianales   Apocynaceae
-    6      Roulinia         73  Plantae Tracheophyta  Asparagales  Asparagaceae
+    5      Roulinia         73  Plantae Tracheophyta  Asparagales  Asparagaceae
+    6      Roulinia         73  Plantae Tracheophyta  Gentianales   Apocynaceae
     7      Roslinia         68  Plantae Tracheophyta  Gentianales  Gentianaceae
             genus kingdomkey phylumkey classkey orderkey familykey genuskey
     1      Annona          6   7707728      220      718      9291  3155252
     2    Roslinia          3  11371390      304 10847295  10671835 11861229
     3 Dryopetalon          6   7707728      220  7225535      3112  3049366
     4    Justicia          6   7707728      220      408      2393  2904597
-    5   Cynanchum          6   7707728      220      412      6701  3170354
-    6      Nolina          6   7707728      196     1169      7683  2776982
+    5      Nolina          6   7707728      196     1169      7683  2776982
+    6   Cynanchum          6   7707728      220      412      6701  3170354
     7    Roslinia          6   7707728      220      412      2503  7667129
               class
     1 Magnoliopsida
     2    Clostridia
     3 Magnoliopsida
     4 Magnoliopsida
-    5 Magnoliopsida
-    6    Liliopsida
+    5    Liliopsida
+    6 Magnoliopsida
     7 Magnoliopsida
                                                                                    note
     1                                                                              <NA>
@@ -5462,222 +5462,222 @@ checkGbSpecies[resN>1]
     2 Similarity: name=110; authorship=0; classification=-2; rank=6; status=0; score=114
 
     $`Aristolochia rigens`
-       usagekey                                 scientificname    rank
-    2   2873998                      Aristolochia ringens Vahl species
-    3   3588469           Aristolochia egensis Poepp. ex Duch. species
-    4   8506015                    Aristolochia egensis Poepp. species
-    5   3589760                      Aristolochia repens Mill. species
-    6   8227923               Aristolochia ringens Link & Otto species
-    7  12119239               Aristolochia spec Linnaeus, 1753 species
-    8  11642304               Aristolochia spec Boiss. & Reut. species
-    9   7573587                      Aristolochia longa Thunb. species
-    10  3588879                    Aristolochia picta H.Karst. species
-    11  3589307                  Aristolochia acutifolia Duch. species
-    12 10773854             Aristolochia binhthuanensis T.V.Do species
-    13  3589732                 Aristolochia burkartii Ahumada species
-    14  3589634                Aristolochia cardiantha Pfeifer species
-    15 11446535 Aristolochia clusii x Aristolochia paucinervis species
-    16  3588989                Aristolochia cortinata Reinecke species
-    17  3588776                Aristolochia daemoninoxia Mast. species
-    18  3589492                 Aristolochia fosteri Barringer species
-    19  3589071                 Aristolochia macgregorii Merr. species
-    20  2874003                   Aristolochia odoratissima L. species
-    21  3588750                Aristolochia styoglossa Pfeifer species
-    22  7313743                Aristolochia triangularis Cham. species
-    23  7451896              Aristolochia alpestris Barb.Rodr. species
-    24  8512856                     Aristolochia caudata Booth species
-    25  3589215                  Aristolochia coadunata Backer species
-    26  3588838                  Aristolochia cuyabensis Malme species
-    27  3588831                 Aristolochia cyclochilia Duch. species
-    28  3588745                  Aristolochia dammeriana Mast. species
-    29  8534459               Aristolochia dongnaiensis Pierre species
-    30  8463695                 Aristolochia emarginata Willd. species
-    31  8686686              Aristolochia eschscholtzii Ledeb. species
-    32  3589505                Aristolochia forrestiana J.S.Ma species
-    33  3589453                    Aristolochia fuertesii Urb. species
-    34 11958267                           Aristolochia giraffa species
-    35  3588997                          Aristolochia guntheri species
-    36  3589798                       Aristolochia juruana Ule species
-    37  7758189                 Aristolochia macrophylla Duch. species
-    38  3588965              Aristolochia malacophylla Standl. species
-    39 10968203                    Aristolochia milhomens Mure species
-    40  3589799                 Aristolochia multinervis Pomel species
-    41  3589635                     Aristolochia oblonga Vell. species
-    42  3589304                Aristolochia panamensis Standl. species
-    43  3588780                 Aristolochia podocarpa Bertol. species
-    44  3588741               Aristolochia polyrrhizos Spreng. species
-    45  3588522                  Aristolochia punjabensis Lace species
-    46  3589507                     Aristolochia saccata Wall. species
-    47  3588731                    Aristolochia subglauca Lam. species
-    48  7958325                 Aristolochia surinamensis Miq. species
-    49  3588610                Aristolochia tenuicauda S.Moore species
-    50  4938926                 Aristolochia westlandii Hemsl. species
-    51  3588616                 Aristolochia mexicana D.Dietr. species
-    52  9646352                         Aristolochia decursive species
-    53  8008177                  Aristolochia pubescens Willd. species
-    54 11833166                        Pachliopta aristolochia species
-                    status matchtype                                  canonicalname
-    2             ACCEPTED     FUZZY                           Aristolochia ringens
-    3              SYNONYM     FUZZY                           Aristolochia egensis
-    4              SYNONYM     FUZZY                           Aristolochia egensis
-    5              SYNONYM     FUZZY                            Aristolochia repens
-    6              SYNONYM     FUZZY                           Aristolochia ringens
-    7             ACCEPTED     EXACT                                   Aristolochia
-    8             DOUBTFUL     EXACT                                   Aristolochia
-    9              SYNONYM     FUZZY                             Aristolochia longa
-    10             SYNONYM     FUZZY                             Aristolochia picta
-    11            ACCEPTED     FUZZY                        Aristolochia acutifolia
-    12            ACCEPTED     FUZZY                    Aristolochia binhthuanensis
-    13            ACCEPTED     FUZZY                         Aristolochia burkartii
-    14            ACCEPTED     FUZZY                        Aristolochia cardiantha
-    15            ACCEPTED     FUZZY Aristolochia clusii x Aristolochia paucinervis
-    16            ACCEPTED     FUZZY                         Aristolochia cortinata
-    17            ACCEPTED     FUZZY                      Aristolochia daemoninoxia
-    18            ACCEPTED     FUZZY                           Aristolochia fosteri
-    19            ACCEPTED     FUZZY                       Aristolochia macgregorii
-    20            ACCEPTED     FUZZY                      Aristolochia odoratissima
-    21            ACCEPTED     FUZZY                        Aristolochia styoglossa
-    22            ACCEPTED     FUZZY                      Aristolochia triangularis
-    23             SYNONYM     FUZZY                         Aristolochia alpestris
-    24             SYNONYM     FUZZY                           Aristolochia caudata
-    25             SYNONYM     FUZZY                         Aristolochia coadunata
-    26             SYNONYM     FUZZY                        Aristolochia cuyabensis
-    27             SYNONYM     FUZZY                       Aristolochia cyclochilia
-    28             SYNONYM     FUZZY                        Aristolochia dammeriana
-    29             SYNONYM     FUZZY                      Aristolochia dongnaiensis
-    30             SYNONYM     FUZZY                        Aristolochia emarginata
-    31             SYNONYM     FUZZY                     Aristolochia eschscholtzii
-    32             SYNONYM     FUZZY                       Aristolochia forrestiana
-    33             SYNONYM     FUZZY                         Aristolochia fuertesii
-    34             SYNONYM     FUZZY                           Aristolochia giraffa
-    35             SYNONYM     FUZZY                          Aristolochia guntheri
-    36             SYNONYM     FUZZY                           Aristolochia juruana
-    37             SYNONYM     FUZZY                       Aristolochia macrophylla
-    38             SYNONYM     FUZZY                      Aristolochia malacophylla
-    39             SYNONYM     FUZZY                         Aristolochia milhomens
-    40             SYNONYM     FUZZY                       Aristolochia multinervis
-    41             SYNONYM     FUZZY                           Aristolochia oblonga
-    42             SYNONYM     FUZZY                        Aristolochia panamensis
-    43             SYNONYM     FUZZY                         Aristolochia podocarpa
-    44             SYNONYM     FUZZY                       Aristolochia polyrrhizos
-    45             SYNONYM     FUZZY                       Aristolochia punjabensis
-    46             SYNONYM     FUZZY                           Aristolochia saccata
-    47             SYNONYM     FUZZY                         Aristolochia subglauca
-    48             SYNONYM     FUZZY                      Aristolochia surinamensis
-    49             SYNONYM     FUZZY                        Aristolochia tenuicauda
-    50             SYNONYM     FUZZY                        Aristolochia westlandii
-    51 HETEROTYPIC_SYNONYM     FUZZY                          Aristolochia mexicana
-    52            DOUBTFUL     FUZZY                         Aristolochia decursive
-    53            DOUBTFUL     FUZZY                         Aristolochia pubescens
-    54            ACCEPTED     FUZZY                        Pachliopta aristolochia
-       confidence  kingdom       phylum       order           family        genus
-    2          10  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    3           9  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    4           9  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    5           9  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    6           9  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    7          92  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    8          90  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    9           3  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    10          3  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    11          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    12          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    13          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    14          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    15          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    16          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    17          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    18          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    19          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    20          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    21          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    22          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    23          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    24          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    25          0  Plantae Tracheophyta   Piperales Aristolochiaceae     Isotrema
-    26          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    27          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    28          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    29          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    30          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    31          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    32          0  Plantae Tracheophyta   Piperales Aristolochiaceae     Isotrema
-    33          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    34          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    35          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    36          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    37          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    38          0  Plantae Tracheophyta   Piperales Aristolochiaceae     Isotrema
-    39          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    40          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    41          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    42          0  Plantae Tracheophyta   Piperales Aristolochiaceae     Isotrema
-    43          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    44          0  Plantae Tracheophyta   Piperales Aristolochiaceae     Endodeca
-    45          0  Plantae Tracheophyta   Piperales Aristolochiaceae     Isotrema
-    46          0  Plantae Tracheophyta   Piperales Aristolochiaceae     Isotrema
-    47          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    48          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    49          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    50          0  Plantae Tracheophyta   Piperales Aristolochiaceae     Isotrema
-    51          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    52          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    53          0  Plantae Tracheophyta   Piperales Aristolochiaceae Aristolochia
-    54          0 Animalia   Arthropoda Lepidoptera     Papilionidae   Pachliopta
-       kingdomkey phylumkey classkey orderkey familykey genuskey         class
-    2           6   7707728      220      404      3066  2873978 Magnoliopsida
-    3           6   7707728      220      404      3066  2873978 Magnoliopsida
-    4           6   7707728      220      404      3066  2873978 Magnoliopsida
-    5           6   7707728      220      404      3066  2873978 Magnoliopsida
-    6           6   7707728      220      404      3066  2873978 Magnoliopsida
-    7           6   7707728      220      404      3066  2873978 Magnoliopsida
-    8           6   7707728      220      404      3066  2873978 Magnoliopsida
-    9           6   7707728      220      404      3066  2873978 Magnoliopsida
-    10          6   7707728      220      404      3066  2873978 Magnoliopsida
-    11          6   7707728      220      404      3066  2873978 Magnoliopsida
-    12          6   7707728      220      404      3066  2873978 Magnoliopsida
-    13          6   7707728      220      404      3066  2873978 Magnoliopsida
-    14          6   7707728      220      404      3066  2873978 Magnoliopsida
-    15          6   7707728      220      404      3066  2873978 Magnoliopsida
-    16          6   7707728      220      404      3066  2873978 Magnoliopsida
-    17          6   7707728      220      404      3066  2873978 Magnoliopsida
-    18          6   7707728      220      404      3066  2873978 Magnoliopsida
-    19          6   7707728      220      404      3066  2873978 Magnoliopsida
-    20          6   7707728      220      404      3066  2873978 Magnoliopsida
-    21          6   7707728      220      404      3066  2873978 Magnoliopsida
-    22          6   7707728      220      404      3066  2873978 Magnoliopsida
-    23          6   7707728      220      404      3066  2873978 Magnoliopsida
-    24          6   7707728      220      404      3066  2873978 Magnoliopsida
-    25          6   7707728      220      404      3066  7313702 Magnoliopsida
-    26          6   7707728      220      404      3066  2873978 Magnoliopsida
-    27          6   7707728      220      404      3066  2873978 Magnoliopsida
-    28          6   7707728      220      404      3066  2873978 Magnoliopsida
-    29          6   7707728      220      404      3066  2873978 Magnoliopsida
-    30          6   7707728      220      404      3066  2873978 Magnoliopsida
-    31          6   7707728      220      404      3066  2873978 Magnoliopsida
-    32          6   7707728      220      404      3066  7313702 Magnoliopsida
-    33          6   7707728      220      404      3066  2873978 Magnoliopsida
-    34          6   7707728      220      404      3066  2873978 Magnoliopsida
-    35          6   7707728      220      404      3066  2873978 Magnoliopsida
-    36          6   7707728      220      404      3066  2873978 Magnoliopsida
-    37          6   7707728      220      404      3066  2873978 Magnoliopsida
-    38          6   7707728      220      404      3066  7313702 Magnoliopsida
-    39          6   7707728      220      404      3066  2873978 Magnoliopsida
-    40          6   7707728      220      404      3066  2873978 Magnoliopsida
-    41          6   7707728      220      404      3066  2873978 Magnoliopsida
-    42          6   7707728      220      404      3066  7313702 Magnoliopsida
-    43          6   7707728      220      404      3066  2873978 Magnoliopsida
-    44          6   7707728      220      404      3066  7313617 Magnoliopsida
-    45          6   7707728      220      404      3066  7313702 Magnoliopsida
-    46          6   7707728      220      404      3066  7313702 Magnoliopsida
-    47          6   7707728      220      404      3066  2873978 Magnoliopsida
-    48          6   7707728      220      404      3066  2873978 Magnoliopsida
-    49          6   7707728      220      404      3066  2873978 Magnoliopsida
-    50          6   7707728      220      404      3066  7313702 Magnoliopsida
-    51          6   7707728      220      404      3066  2873978 Magnoliopsida
-    52          6   7707728      220      404      3066  2873978 Magnoliopsida
-    53          6   7707728      220      404      3066  2873978 Magnoliopsida
-    54          1        54      216      797      9417  1939152       Insecta
+       usagekey                                 scientificname    rank   status
+    2   2873998                      Aristolochia ringens Vahl species ACCEPTED
+    3   3588469           Aristolochia egensis Poepp. ex Duch. species  SYNONYM
+    4   8506015                    Aristolochia egensis Poepp. species  SYNONYM
+    5   3589760                      Aristolochia repens Mill. species  SYNONYM
+    6   8227923               Aristolochia ringens Link & Otto species  SYNONYM
+    7  12119239               Aristolochia spec Linnaeus, 1753 species ACCEPTED
+    8  11642304               Aristolochia spec Boiss. & Reut. species DOUBTFUL
+    9   3588724                     Aristolochia poomae Phuph. species ACCEPTED
+    10  8029006                       Aristolochia mollis Dunn species  SYNONYM
+    11  2873985                    Aristolochia nashii Kearney species  SYNONYM
+    12  3588596                Aristolochia boliviensis Kuntze species ACCEPTED
+    13 11446535 Aristolochia clusii x Aristolochia paucinervis species ACCEPTED
+    14  3588995                     Aristolochia cornuta Mast. species ACCEPTED
+    15  3589846               Aristolochia ehrenbergiana Cham. species ACCEPTED
+    16  7313728                     Aristolochia lagesiana Ule species ACCEPTED
+    17  3589500                   Aristolochia leytensis Merr. species ACCEPTED
+    18  8134191                 Aristolochia linnemannii Warb. species ACCEPTED
+    19  3589256           Aristolochia longgangensis C.F.Liang species ACCEPTED
+    20  3589115                   Aristolochia lutescens Duch. species ACCEPTED
+    21  7313694                    Aristolochia pallida Willd. species ACCEPTED
+    22 11162565                  Aristolochia palmata C.L.Yang species ACCEPTED
+    23 11212851                 Aristolochia repanda D.Subram. species ACCEPTED
+    24  3588999              Aristolochia silvatica Barb.Rodr. species ACCEPTED
+    25  7590841                  Aristolochia abbreviata Mart. species  SYNONYM
+    26  7562724                 Aristolochia benadiriana Fiori species  SYNONYM
+    27  3589695                 Aristolochia calceiformis Urb. species  SYNONYM
+    28  3589323                    Aristolochia ciliosa Benth. species  SYNONYM
+    29  3589119                    Aristolochia conferta Mill. species  SYNONYM
+    30  8110607                    Aristolochia gigantea Hook. species  SYNONYM
+    31 11958267                           Aristolochia giraffa species  SYNONYM
+    32  3589081                 Aristolochia gracillima Hemsl. species  SYNONYM
+    33  3588997                          Aristolochia guntheri species  SYNONYM
+    34  7548876              Aristolochia hohuanensis S.S.Ying species  SYNONYM
+    35  3588521               Aristolochia insignis Verschaff. species  SYNONYM
+    36  3588453                     Aristolochia japonica Miq. species  SYNONYM
+    37  3589145                   Aristolochia loriflora Mast. species  SYNONYM
+    38  3589076                 Aristolochia macedonica Bornm. species  SYNONYM
+    39  3589012              Aristolochia macrorrhyncha Hoehne species  SYNONYM
+    40  7354909                      Aristolochia maxima Cham. species  SYNONYM
+    41  3589217                 Aristolochia paracleta Pfeifer species  SYNONYM
+    42  3589188                     Aristolochia pardina Duch. species  SYNONYM
+    43  3588927                Aristolochia pfeiferi Barringer species  SYNONYM
+    44  3588510                Aristolochia purpusii Brandegee species  SYNONYM
+    45  3589836                Aristolochia racemosa Brandegee species  SYNONYM
+    46  3589807                Aristolochia recurvilabra Hance species  SYNONYM
+    47 11255744                    Aristolochia sprucei Hoehne species  SYNONYM
+    48  3589741              Aristolochia tribrachiata S.Moore species  SYNONYM
+    49  3589641                 Aristolochia tripartita Backer species  SYNONYM
+    50  8351193                 Aristolochia chilensis Bridges species DOUBTFUL
+    51  9646352                         Aristolochia decursive species DOUBTFUL
+    52  3588632                 Aristolochia hyperborea Paxton species DOUBTFUL
+    53  3588867             Aristolochia marsupiiflora Schrad. species DOUBTFUL
+    54 11833166                        Pachliopta aristolochia species ACCEPTED
+       matchtype                                  canonicalname confidence  kingdom
+    2      FUZZY                           Aristolochia ringens         10  Plantae
+    3      FUZZY                           Aristolochia egensis          9  Plantae
+    4      FUZZY                           Aristolochia egensis          9  Plantae
+    5      FUZZY                            Aristolochia repens          9  Plantae
+    6      FUZZY                           Aristolochia ringens          9  Plantae
+    7      EXACT                                   Aristolochia         92  Plantae
+    8      EXACT                                   Aristolochia         90  Plantae
+    9      FUZZY                            Aristolochia poomae         29  Plantae
+    10     FUZZY                            Aristolochia mollis         28  Plantae
+    11     FUZZY                            Aristolochia nashii          3  Plantae
+    12     FUZZY                       Aristolochia boliviensis          0  Plantae
+    13     FUZZY Aristolochia clusii x Aristolochia paucinervis          0  Plantae
+    14     FUZZY                           Aristolochia cornuta          0  Plantae
+    15     FUZZY                     Aristolochia ehrenbergiana          0  Plantae
+    16     FUZZY                         Aristolochia lagesiana          0  Plantae
+    17     FUZZY                         Aristolochia leytensis          0  Plantae
+    18     FUZZY                       Aristolochia linnemannii          0  Plantae
+    19     FUZZY                     Aristolochia longgangensis          0  Plantae
+    20     FUZZY                         Aristolochia lutescens          0  Plantae
+    21     FUZZY                           Aristolochia pallida          0  Plantae
+    22     FUZZY                           Aristolochia palmata          0  Plantae
+    23     FUZZY                           Aristolochia repanda          0  Plantae
+    24     FUZZY                         Aristolochia silvatica          0  Plantae
+    25     FUZZY                        Aristolochia abbreviata          0  Plantae
+    26     FUZZY                       Aristolochia benadiriana          0  Plantae
+    27     FUZZY                      Aristolochia calceiformis          0  Plantae
+    28     FUZZY                           Aristolochia ciliosa          0  Plantae
+    29     FUZZY                          Aristolochia conferta          0  Plantae
+    30     FUZZY                          Aristolochia gigantea          0  Plantae
+    31     FUZZY                           Aristolochia giraffa          0  Plantae
+    32     FUZZY                        Aristolochia gracillima          0  Plantae
+    33     FUZZY                          Aristolochia guntheri          0  Plantae
+    34     FUZZY                       Aristolochia hohuanensis          0  Plantae
+    35     FUZZY                          Aristolochia insignis          0  Plantae
+    36     FUZZY                          Aristolochia japonica          0  Plantae
+    37     FUZZY                         Aristolochia loriflora          0  Plantae
+    38     FUZZY                        Aristolochia macedonica          0  Plantae
+    39     FUZZY                     Aristolochia macrorrhyncha          0  Plantae
+    40     FUZZY                            Aristolochia maxima          0  Plantae
+    41     FUZZY                         Aristolochia paracleta          0  Plantae
+    42     FUZZY                           Aristolochia pardina          0  Plantae
+    43     FUZZY                          Aristolochia pfeiferi          0  Plantae
+    44     FUZZY                          Aristolochia purpusii          0  Plantae
+    45     FUZZY                          Aristolochia racemosa          0  Plantae
+    46     FUZZY                      Aristolochia recurvilabra          0  Plantae
+    47     FUZZY                           Aristolochia sprucei          0  Plantae
+    48     FUZZY                      Aristolochia tribrachiata          0  Plantae
+    49     FUZZY                        Aristolochia tripartita          0  Plantae
+    50     FUZZY                         Aristolochia chilensis          0  Plantae
+    51     FUZZY                         Aristolochia decursive          0  Plantae
+    52     FUZZY                        Aristolochia hyperborea          0  Plantae
+    53     FUZZY                     Aristolochia marsupiiflora          0  Plantae
+    54     FUZZY                        Pachliopta aristolochia          0 Animalia
+             phylum       order           family        genus kingdomkey phylumkey
+    2  Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    3  Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    4  Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    5  Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    6  Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    7  Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    8  Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    9  Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    10 Tracheophyta   Piperales Aristolochiaceae     Isotrema          6   7707728
+    11 Tracheophyta   Piperales Aristolochiaceae     Endodeca          6   7707728
+    12 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    13 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    14 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    15 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    16 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    17 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    18 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    19 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    20 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    21 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    22 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    23 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    24 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    25 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    26 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    27 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    28 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    29 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    30 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    31 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    32 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    33 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    34 Tracheophyta   Piperales Aristolochiaceae     Isotrema          6   7707728
+    35 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    36 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    37 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    38 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    39 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    40 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    41 Tracheophyta   Piperales Aristolochiaceae     Isotrema          6   7707728
+    42 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    43 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    44 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    45 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    46 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    47 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    48 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    49 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    50 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    51 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    52 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    53 Tracheophyta   Piperales Aristolochiaceae Aristolochia          6   7707728
+    54   Arthropoda Lepidoptera     Papilionidae   Pachliopta          1        54
+       classkey orderkey familykey genuskey         class
+    2       220      404      3066  2873978 Magnoliopsida
+    3       220      404      3066  2873978 Magnoliopsida
+    4       220      404      3066  2873978 Magnoliopsida
+    5       220      404      3066  2873978 Magnoliopsida
+    6       220      404      3066  2873978 Magnoliopsida
+    7       220      404      3066  2873978 Magnoliopsida
+    8       220      404      3066  2873978 Magnoliopsida
+    9       220      404      3066  2873978 Magnoliopsida
+    10      220      404      3066  7313702 Magnoliopsida
+    11      220      404      3066  7313617 Magnoliopsida
+    12      220      404      3066  2873978 Magnoliopsida
+    13      220      404      3066  2873978 Magnoliopsida
+    14      220      404      3066  2873978 Magnoliopsida
+    15      220      404      3066  2873978 Magnoliopsida
+    16      220      404      3066  2873978 Magnoliopsida
+    17      220      404      3066  2873978 Magnoliopsida
+    18      220      404      3066  2873978 Magnoliopsida
+    19      220      404      3066  2873978 Magnoliopsida
+    20      220      404      3066  2873978 Magnoliopsida
+    21      220      404      3066  2873978 Magnoliopsida
+    22      220      404      3066  2873978 Magnoliopsida
+    23      220      404      3066  2873978 Magnoliopsida
+    24      220      404      3066  2873978 Magnoliopsida
+    25      220      404      3066  2873978 Magnoliopsida
+    26      220      404      3066  2873978 Magnoliopsida
+    27      220      404      3066  2873978 Magnoliopsida
+    28      220      404      3066  2873978 Magnoliopsida
+    29      220      404      3066  2873978 Magnoliopsida
+    30      220      404      3066  2873978 Magnoliopsida
+    31      220      404      3066  2873978 Magnoliopsida
+    32      220      404      3066  2873978 Magnoliopsida
+    33      220      404      3066  2873978 Magnoliopsida
+    34      220      404      3066  7313702 Magnoliopsida
+    35      220      404      3066  2873978 Magnoliopsida
+    36      220      404      3066  2873978 Magnoliopsida
+    37      220      404      3066  2873978 Magnoliopsida
+    38      220      404      3066  2873978 Magnoliopsida
+    39      220      404      3066  2873978 Magnoliopsida
+    40      220      404      3066  2873978 Magnoliopsida
+    41      220      404      3066  7313702 Magnoliopsida
+    42      220      404      3066  2873978 Magnoliopsida
+    43      220      404      3066  2873978 Magnoliopsida
+    44      220      404      3066  2873978 Magnoliopsida
+    45      220      404      3066  2873978 Magnoliopsida
+    46      220      404      3066  2873978 Magnoliopsida
+    47      220      404      3066  2873978 Magnoliopsida
+    48      220      404      3066  2873978 Magnoliopsida
+    49      220      404      3066  2873978 Magnoliopsida
+    50      220      404      3066  2873978 Magnoliopsida
+    51      220      404      3066  2873978 Magnoliopsida
+    52      220      404      3066  2873978 Magnoliopsida
+    53      220      404      3066  2873978 Magnoliopsida
+    54      216      797      9417  1939152       Insecta
                                                                                                note
     2  Similarity: name=5; authorship=0; classification=-2; rank=6; status=1; score=10; nextMatch=0
     3                Similarity: name=5; authorship=0; classification=-2; rank=6; status=0; score=9
@@ -5686,9 +5686,9 @@ checkGbSpecies[resN>1]
     6                Similarity: name=5; authorship=0; classification=-2; rank=6; status=0; score=9
     7                           Similarity: name=100; classification=-2; rank=0; status=1; score=99
     8                          Similarity: name=100; classification=-2; rank=0; status=-5; score=93
-    9                              Similarity: name=5; classification=-2; rank=0; status=0; score=3
-    10                             Similarity: name=5; classification=-2; rank=0; status=0; score=3
-    11                            Similarity: name=0; classification=-2; rank=0; status=1; score=-1
+    9                            Similarity: name=30; classification=-2; rank=0; status=1; score=29
+    10                           Similarity: name=30; classification=-2; rank=0; status=0; score=28
+    11                             Similarity: name=5; classification=-2; rank=0; status=0; score=3
     12                            Similarity: name=0; classification=-2; rank=0; status=1; score=-1
     13                            Similarity: name=0; classification=-2; rank=0; status=1; score=-1
     14                            Similarity: name=0; classification=-2; rank=0; status=1; score=-1
@@ -5700,8 +5700,8 @@ checkGbSpecies[resN>1]
     20                            Similarity: name=0; classification=-2; rank=0; status=1; score=-1
     21                            Similarity: name=0; classification=-2; rank=0; status=1; score=-1
     22                            Similarity: name=0; classification=-2; rank=0; status=1; score=-1
-    23                            Similarity: name=0; classification=-2; rank=0; status=0; score=-2
-    24                            Similarity: name=0; classification=-2; rank=0; status=0; score=-2
+    23                            Similarity: name=0; classification=-2; rank=0; status=1; score=-1
+    24                            Similarity: name=0; classification=-2; rank=0; status=1; score=-1
     25                            Similarity: name=0; classification=-2; rank=0; status=0; score=-2
     26                            Similarity: name=0; classification=-2; rank=0; status=0; score=-2
     27                            Similarity: name=0; classification=-2; rank=0; status=0; score=-2
@@ -5727,8 +5727,8 @@ checkGbSpecies[resN>1]
     47                            Similarity: name=0; classification=-2; rank=0; status=0; score=-2
     48                            Similarity: name=0; classification=-2; rank=0; status=0; score=-2
     49                            Similarity: name=0; classification=-2; rank=0; status=0; score=-2
-    50                            Similarity: name=0; classification=-2; rank=0; status=0; score=-2
-    51                           Similarity: name=0; classification=-2; rank=0; status=-1; score=-3
+    50                           Similarity: name=0; classification=-2; rank=0; status=-5; score=-7
+    51                           Similarity: name=0; classification=-2; rank=0; status=-5; score=-7
     52                           Similarity: name=0; classification=-2; rank=0; status=-5; score=-7
     53                           Similarity: name=0; classification=-2; rank=0; status=-5; score=-7
     54                         Similarity: name=-15; classification=-2; rank=0; status=1; score=-16
@@ -5740,51 +5740,51 @@ checkGbSpecies[resN>1]
     6                            Aristolochia labiata    2874002          2874002
     7                                    Aristolochia   12119239               NA
     8                                    Aristolochia   11642304               NA
-    9                            Aristolochia debilis    3588727          3588727
-    10                      Aristolochia odoratissima    2874003          2874003
-    11                        Aristolochia acutifolia    3589307               NA
-    12                    Aristolochia binhthuanensis   10773854               NA
-    13                         Aristolochia burkartii    3589732               NA
-    14                        Aristolochia cardiantha    3589634               NA
-    15 Aristolochia clusii x Aristolochia paucinervis   11446535               NA
-    16                         Aristolochia cortinata    3588989               NA
-    17                      Aristolochia daemoninoxia    3588776               NA
-    18                           Aristolochia fosteri    3589492               NA
-    19                       Aristolochia macgregorii    3589071               NA
-    20                      Aristolochia odoratissima    2874003               NA
-    21                        Aristolochia styoglossa    3588750               NA
-    22                      Aristolochia triangularis    7313743               NA
-    23                         Aristolochia smilacina    3588954          3588954
-    24                          Aristolochia macroura    7313636          7313636
-    25                            Isotrema coadunatum   10920242         10920242
-    26                          Aristolochia ridicula    3589712          3589712
-    27                   Aristolochia passiflorifolia    3589157          3589157
-    28                            Aristolochia maxima    2873997          2873997
-    29                        Aristolochia cambodiana    3589676          3589676
-    30                    Aristolochia nummularifolia    3589667          3589667
-    31                         Aristolochia acuminata    8207569          8207569
-    32                          Isotrema forrestianum   10930060         10930060
-    33                          Aristolochia punctata    3588530          3588530
-    34                          Aristolochia wankeana   10680955         10680955
-    35                         Aristolochia guentheri    3589023          3589023
-    36                        Aristolochia floribunda    3589552          3589552
-    37                        Aristolochia iquitensis    3588490          3588490
-    38                         Isotrema malacophyllum   11077541         11077541
-    39                         Aristolochia cymbifera    7313609          7313609
-    40                        Aristolochia fontanesii    3589517          3589517
-    41                       Aristolochia rumicifolia    7473737          7473737
-    42                             Isotrema panamense   11018266         11018266
-    43                           Aristolochia inflata    3588528          3588528
-    44                           Endodeca serpentaria    3588874          3588874
-    45                            Isotrema punjabense   11103748         11103748
-    46                              Isotrema saccatum   10971475         10971475
-    47                           Aristolochia baetica    3588865          3588865
-    48                      Aristolochia surinamensis    2873987          2873987
-    49                          Aristolochia promissa    3588660          3588660
-    50                            Isotrema westlandii    3589367          3589367
-    51                            Aristolochia maxima    2873997               NA
-    52                         Aristolochia decursive    9646352               NA
-    53                         Aristolochia pubescens    8008177               NA
+    9                             Aristolochia poomae    3588724               NA
+    10                                 Isotrema molle   11100505         11100505
+    11                           Endodeca serpentaria    3588874          3588874
+    12                       Aristolochia boliviensis    3588596               NA
+    13 Aristolochia clusii x Aristolochia paucinervis   11446535               NA
+    14                           Aristolochia cornuta    3588995               NA
+    15                     Aristolochia ehrenbergiana    3589846               NA
+    16                         Aristolochia lagesiana    7313728               NA
+    17                         Aristolochia leytensis    3589500               NA
+    18                       Aristolochia linnemannii    8134191               NA
+    19                     Aristolochia longgangensis    3589256               NA
+    20                         Aristolochia lutescens    3589115               NA
+    21                           Aristolochia pallida    7313694               NA
+    22                           Aristolochia palmata   11162565               NA
+    23                           Aristolochia repanda   11212851               NA
+    24                         Aristolochia silvatica    3588999               NA
+    25                         Aristolochia cymbifera    7313609          7313609
+    26                       Aristolochia bracteolata    3588540          3588540
+    27                         Aristolochia oblongata    2874013          3589618
+    28                         Aristolochia fimbriata    3589582          3589582
+    29                         Aristolochia pentandra    2874020          2874020
+    30                       Aristolochia grandiflora    2874014          2874014
+    31                          Aristolochia wankeana   10680955         10680955
+    32                         Aristolochia tubiflora    3589599          3589599
+    33                         Aristolochia guentheri    3589023          3589023
+    34                            Isotrema hohuanense   12184765         12184765
+    35                         Aristolochia fimbriata    3589582          3589582
+    36                         Aristolochia acuminata    8207569          8207569
+    37                         Aristolochia anguicida    2873992          2873992
+    38                           Aristolochia pallida    7313694          7313694
+    39                           Aristolochia labiata    2874002          2874002
+    40                       Aristolochia chamissonis    7313713          7313713
+    41                            Isotrema paracletum   11000129         11000129
+    42                         Aristolochia taliscana    3588671          3588671
+    43                          Aristolochia tonduzii    3588463          3588463
+    44                        Aristolochia variifolia    3589502          3589502
+    45                         Aristolochia pentandra    2874020          2874020
+    46                           Aristolochia debilis    3588727          3588727
+    47                            Aristolochia maxima    2873997          2873997
+    48                        Aristolochia macrocarpa    3589050          3589050
+    49                            Aristolochia jackii    3588461          3588461
+    50                         Aristolochia chilensis    8351193               NA
+    51                         Aristolochia decursive    9646352               NA
+    52                        Aristolochia hyperborea    3588632               NA
+    53                     Aristolochia marsupiiflora    3588867               NA
     54                        Pachliopta aristolochia   11833166               NA
 
     $`Bauhinia glabra`
@@ -5950,14 +5950,14 @@ checkGbSpecies[resN>1]
 
     $`Clusia umbellata`
       usagekey           scientificname    rank  status matchtype acceptedusagekey
-    1  5617077   Cassia umbellata Rchb. species SYNONYM     FUZZY          3977118
-    2  7726511 Cassia umbellata Bertol. species SYNONYM     FUZZY          3977118
+    1  7726511 Cassia umbellata Bertol. species SYNONYM     FUZZY          3977118
+    2  5617077   Cassia umbellata Rchb. species SYNONYM     FUZZY          3977118
          canonicalname confidence
-    1 Cassia umbellata          0
-    2 Cassia umbellata         -6
+    1 Cassia umbellata         -6
+    2 Cassia umbellata          0
                                                                                                                     note
-    1 Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6; 2 synonym homonyms; nextMatch=0
-    2                                  Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6
+    1                                  Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6
+    2 Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6; 2 synonym homonyms; nextMatch=0
       kingdom       phylum   order   family genus             species kingdomkey
     1 Plantae Tracheophyta Fabales Fabaceae Senna Senna barronfieldii          6
     2 Plantae Tracheophyta Fabales Fabaceae Senna Senna barronfieldii          6
@@ -6048,8 +6048,8 @@ checkGbSpecies[resN>1]
       usagekey                    scientificname    rank   status matchtype
     1  5341264            Cordia gerascanthus L. species ACCEPTED     EXACT
     2  7410306         Cordia gerascanthus Kunth species  SYNONYM     EXACT
-    3  8691149         Cordia gerascanthus Jacq. species  SYNONYM     EXACT
-    4  7866030 Cordia gerascanthus Griseb., 1861 species  SYNONYM     EXACT
+    3  7866030 Cordia gerascanthus Griseb., 1861 species  SYNONYM     EXACT
+    4  8691149         Cordia gerascanthus Jacq. species  SYNONYM     EXACT
     5  5662196        Cordia geraschanthus Jacq. species  SYNONYM     FUZZY
              canonicalname confidence kingdom       phylum       order     family
     1  Cordia gerascanthus         97 Plantae Tracheophyta Boraginales Cordiaceae
@@ -6177,9 +6177,9 @@ checkGbSpecies[resN>1]
     4 12222193 Eugenia pubiflora N.Snow & Callm. species ACCEPTED     FUZZY
     5  5417803     Eugenia triflora (Jacq.) Ham. species ACCEPTED     FUZZY
     6  5556990           Eugenia biniflora Ridl. species  SYNONYM     FUZZY
-    7  8454118           Eugenia triflora Willd. species  SYNONYM     FUZZY
+    7  7954036     Eugenia triflora Sessé & Moc. species  SYNONYM     FUZZY
     8  7898014 Eugenia triflora Willd. ex O.Berg species  SYNONYM     FUZZY
-    9  7954036     Eugenia triflora Sessé & Moc. species  SYNONYM     FUZZY
+    9  8454118           Eugenia triflora Willd. species  SYNONYM     FUZZY
           canonicalname confidence kingdom       phylum    order    family
     1  Eugenia uniflora         97 Plantae Tracheophyta Myrtales Myrtaceae
     2  Eugenia uniflora         97 Plantae Tracheophyta Myrtales Myrtaceae
@@ -6197,9 +6197,9 @@ checkGbSpecies[resN>1]
     4      Eugenia      Eugenia pubiflora          6   7707728      220      690
     5      Eugenia       Eugenia triflora          6   7707728      220      690
     6     Syzygium    Syzygium biniflorum          6   7707728      220      690
-    7 Campomanesia Campomanesia dichotoma          6   7707728      220      690
+    7  Myrcianthes   Myrcianthes fragrans          6   7707728      220      690
     8 Campomanesia Campomanesia dichotoma          6   7707728      220      690
-    9  Myrcianthes   Myrcianthes fragrans          6   7707728      220      690
+    9 Campomanesia Campomanesia dichotoma          6   7707728      220      690
       familykey genuskey specieskey         class acceptedusagekey
     1      5014  3177662    5416458 Magnoliopsida               NA
     2      5014  3177662    5416456 Magnoliopsida          5416456
@@ -6207,9 +6207,9 @@ checkGbSpecies[resN>1]
     4      5014  3177662   12222193 Magnoliopsida               NA
     5      5014  3177662    5417803 Magnoliopsida               NA
     6      5014  3029010    9291673 Magnoliopsida          9291673
-    7      5014  3180879    3181118 Magnoliopsida          3181118
+    7      5014  3188150    9920389 Magnoliopsida          9920389
     8      5014  3180879    3181118 Magnoliopsida          3181118
-    9      5014  3188150    9920389 Magnoliopsida          9920389
+    9      5014  3180879    3181118 Magnoliopsida          3181118
                                                                                     note
     1                                                                               <NA>
     2 Similarity: name=110; authorship=0; classification=-2; rank=6; status=0; score=114
@@ -6470,8 +6470,8 @@ checkGbSpecies[resN>1]
 
     $`Pachira quinata`
       usagekey                       scientificname    rank              status
-    2 12389859 Pachira quinata (Jacq.) W.S.Alverson species HETEROTYPIC_SYNONYM
-    3  4073616 Pachira quinata (Jacq.) W.S.Alverson species HETEROTYPIC_SYNONYM
+    2  4073616 Pachira quinata (Jacq.) W.S.Alverson species HETEROTYPIC_SYNONYM
+    3 12389859 Pachira quinata (Jacq.) W.S.Alverson species HETEROTYPIC_SYNONYM
       matchtype   canonicalname confidence kingdom       phylum    order    family
     2     EXACT Pachira quinata         97 Plantae Tracheophyta Malvales Malvaceae
     3     EXACT Pachira quinata         97 Plantae Tracheophyta Malvales Malvaceae
@@ -6482,8 +6482,8 @@ checkGbSpecies[resN>1]
     2 Similarity: name=110; authorship=0; classification=-2; rank=6; status=-1; score=113
     3 Similarity: name=110; authorship=0; classification=-2; rank=6; status=-1; score=113
         genus          species genuskey specieskey
-    2  Bombax     Bombax ceiba  2874861    3152226
-    3 Pochota Pochota fendleri  7296119    9158473
+    2 Pochota Pochota fendleri  7296119    9158473
+    3  Bombax     Bombax ceiba  2874861    3152226
 
     $`Phanera guianensis`
       usagekey                          scientificname    rank   status matchtype
@@ -6649,106 +6649,106 @@ checkGbSpecies[resN>1]
     2 Similarity: name=65; authorship=0; classification=-2; rank=6; status=0; score=69
 
     $`Swartzia triae`
-       usagekey                  scientificname    rank   status matchtype
-    2   5351959         Swartzia trianae Benth. species ACCEPTED     FUZZY
-    7   5352106             Swartzia ulei Harms species ACCEPTED     FUZZY
-    8   5351868     Swartzia sumorum Ant.Molina species ACCEPTED     FUZZY
-    9   5351925          Swartzia apetala Raddi species ACCEPTED     FUZZY
-    10  5351841             Swartzia aptera DC. species ACCEPTED     FUZZY
-    11  5351932      Swartzia auriculata Poepp. species ACCEPTED     FUZZY
-    12  5351848       Swartzia benthamiana Miq. species ACCEPTED     FUZZY
-    13  7577541        Swartzia bracteosa Mart. species ACCEPTED     FUZZY
-    14  5351976    Swartzia buntingii R.S.Cowan species ACCEPTED     FUZZY
-    15  5352049      Swartzia calophylla Poepp. species ACCEPTED     FUZZY
-    16  5352013       Swartzia flaemingii Raddi species ACCEPTED     FUZZY
-    17  5351988      Swartzia flavescens Suess. species ACCEPTED     FUZZY
-    18  5352079      Swartzia froesii R.S.Cowan species ACCEPTED     FUZZY
-    19  5630353    Swartzia humboldtiana Cuello species ACCEPTED     FUZZY
-    20  5352096       Swartzia ingaefolia Ducke species ACCEPTED     FUZZY
-    21  5616842      Swartzia invenusta Barneby species ACCEPTED     FUZZY
-    22  5616838           Swartzia jorori Harms species ACCEPTED     FUZZY
-    23  5351920        Swartzia lamellata Ducke species ACCEPTED     FUZZY
-    24  5351887     Swartzia langsdorffii Raddi species ACCEPTED     FUZZY
-    25  5352131       Swartzia latifolia Benth. species ACCEPTED     FUZZY
-    26  5352125     Swartzia longicarpa Amshoff species ACCEPTED     FUZZY
-    27  5351853    Swartzia macrostachya Benth. species ACCEPTED     FUZZY
-    28  5351995     Swartzia maguirei R.S.Cowan species ACCEPTED     FUZZY
-    29  5630319      Swartzia manausensis Torke species ACCEPTED     FUZZY
-    30  5351989       Swartzia oblata R.S.Cowan species ACCEPTED     FUZZY
-    31  5351966      Swartzia parvifolia Schery species ACCEPTED     FUZZY
-    32  5630237       Swartzia remigera Amshoff species ACCEPTED     FUZZY
-    33  5352119    Swartzia schomburgkii Benth. species ACCEPTED     FUZZY
-    34  5351866 Swartzia steyermarkii R.S.Cowan species ACCEPTED     FUZZY
-    35  5351931      Swartzia blanchetii Benth. species  SYNONYM     FUZZY
-    36  5352063    Swartzia darienensis Pittier species  SYNONYM     FUZZY
-    37  5351928           Swartzia glabra Vogel species  SYNONYM     FUZZY
-    38  5352055    Swartzia macrosperma Bertol. species  SYNONYM     FUZZY
-    39  5630314       Swartzia marginata Benth. species  SYNONYM     FUZZY
-    40 10955335         Swartzia montana Lindb. species  SYNONYM     FUZZY
-    41  8246219      Swartzia multijuga A.Rich. species  SYNONYM     FUZZY
-    42  7992332         Swartzia pilifera Brid. species  SYNONYM     FUZZY
-    43  5352012          Swartzia pulchra Vogel species  SYNONYM     FUZZY
-    44  5616745              Swartzia remigifer species  SYNONYM     FUZZY
-    45  5352086      Swartzia stipulifera Harms species  SYNONYM     FUZZY
-    46  5352112        Swartzia theiodora Taub. species  SYNONYM     FUZZY
-    47  8086188        Swartzia argentea Spruce species DOUBTFUL     FUZZY
-    48  7787725 Swartzia flabellipetala Pittier species DOUBTFUL     FUZZY
-    49  7398823        Swartzia laxiflora Bong. species DOUBTFUL     FUZZY
-    50  5616741         Swartzia rucurva Poepp. species DOUBTFUL     FUZZY
-    51  5630213  Swartzia surinamensis Klotzsch species DOUBTFUL     FUZZY
-    52  5595133           Tachia swartzia G.Don species  SYNONYM     FUZZY
+       usagekey                    scientificname    rank   status matchtype
+    2   5351959           Swartzia trianae Benth. species ACCEPTED     FUZZY
+    7   5351925            Swartzia apetala Raddi species ACCEPTED     FUZZY
+    8   5351890      Swartzia apiculata R.S.Cowan species ACCEPTED     FUZZY
+    9   5351847      Swartzia bahiensis R.S.Cowan species ACCEPTED     FUZZY
+    10  7577541          Swartzia bracteosa Mart. species ACCEPTED     FUZZY
+    11  5351964         Swartzia cowanii Steyerm. species ACCEPTED     FUZZY
+    12  5351963      Swartzia fanshawei R.S.Cowan species ACCEPTED     FUZZY
+    13  5351988        Swartzia flavescens Suess. species ACCEPTED     FUZZY
+    14  5351905      Swartzia foliolosa R.S.Cowan species ACCEPTED     FUZZY
+    15  5352079        Swartzia froesii R.S.Cowan species ACCEPTED     FUZZY
+    16  7278368           Swartzia ingens Barneby species ACCEPTED     FUZZY
+    17  5352000        Swartzia jenmanii Sandwith species ACCEPTED     FUZZY
+    18  5630350            Swartzia juruana Torke species ACCEPTED     FUZZY
+    19  5352099       Swartzia laevicarpa Amshoff species ACCEPTED     FUZZY
+    20  5351920          Swartzia lamellata Ducke species ACCEPTED     FUZZY
+    21  5352131         Swartzia latifolia Benth. species ACCEPTED     FUZZY
+    22  5351940         Swartzia lucida R.S.Cowan species ACCEPTED     FUZZY
+    23  5352065  Swartzia mangabalensis R.S.Cowan species ACCEPTED     FUZZY
+    24  5351998       Swartzia microstylis Benth. species ACCEPTED     FUZZY
+    25  5352084     Swartzia monachiana R.S.Cowan species ACCEPTED     FUZZY
+    26  5351979    Swartzia mucronifera R.S.Cowan species ACCEPTED     FUZZY
+    27  5351891           Swartzia oblonga Benth. species ACCEPTED     FUZZY
+    28  5616782          Swartzia oedipus Barneby species ACCEPTED     FUZZY
+    29  5352071 Swartzia oriximinaensis R.S.Cowan species ACCEPTED     FUZZY
+    30  5351956    Swartzia pinheiroana R.S.Cowan species ACCEPTED     FUZZY
+    31  5351880           Swartzia polyphylla DC. species ACCEPTED     FUZZY
+    32  5351935         Swartzia reticulata Ducke species ACCEPTED     FUZZY
+    33  5351984       Swartzia riedelii R.S.Cowan species ACCEPTED     FUZZY
+    34  5351874        Swartzia roraimae Sandwith species ACCEPTED     FUZZY
+    35  5352119      Swartzia schomburgkii Benth. species ACCEPTED     FUZZY
+    36  5352075            Swartzia sericea Vogel species ACCEPTED     FUZZY
+    37  5351975      Swartzia tillettii R.S.Cowan species ACCEPTED     FUZZY
+    38  5617056         Swartzia triptera Barneby species ACCEPTED     FUZZY
+    39  5342590        Swartzia brachystachya DC. species  SYNONYM     FUZZY
+    40  5351888       Swartzia brasiliensis Vogel species  SYNONYM     FUZZY
+    41  5351843       Swartzia melanocardia Ducke species  SYNONYM     FUZZY
+    42  5351911        Swartzia melanoxylon Ducke species  SYNONYM     FUZZY
+    43  5352012            Swartzia pulchra Vogel species  SYNONYM     FUZZY
+    44  5351962          Swartzia remiger Amshoff species  SYNONYM     FUZZY
+    45  5616745                Swartzia remigifer species  SYNONYM     FUZZY
+    46  5630235       Swartzia remigifera Amshoff species  SYNONYM     FUZZY
+    47  5352038          Swartzia similis Benoist species  SYNONYM     FUZZY
+    48  5352086        Swartzia stipulifera Harms species  SYNONYM     FUZZY
+    49  7535717          Swartzia arenarium Ducke species DOUBTFUL     FUZZY
+    50 11260354     Swartzia calophylla R.S.Cowan species DOUBTFUL     FUZZY
+    51  7398823          Swartzia laxiflora Bong. species DOUBTFUL     FUZZY
+    52  7555519              Swartzia rosea Mart. species DOUBTFUL     FUZZY
                  canonicalname confidence kingdom kingdomkey
     2         Swartzia trianae         15 Plantae          6
-    7            Swartzia ulei         41 Plantae          6
-    8         Swartzia sumorum         12 Plantae          6
-    9         Swartzia apetala          0 Plantae          6
-    10         Swartzia aptera          0 Plantae          6
-    11     Swartzia auriculata          0 Plantae          6
-    12    Swartzia benthamiana          0 Plantae          6
-    13      Swartzia bracteosa          0 Plantae          6
-    14      Swartzia buntingii          0 Plantae          6
-    15     Swartzia calophylla          0 Plantae          6
-    16     Swartzia flaemingii          0 Plantae          6
-    17     Swartzia flavescens          0 Plantae          6
-    18        Swartzia froesii          0 Plantae          6
-    19   Swartzia humboldtiana          0 Plantae          6
-    20     Swartzia ingaefolia          0 Plantae          6
-    21      Swartzia invenusta          0 Plantae          6
-    22         Swartzia jorori          0 Plantae          6
-    23      Swartzia lamellata          0 Plantae          6
-    24   Swartzia langsdorffii          0 Plantae          6
-    25      Swartzia latifolia          0 Plantae          6
-    26     Swartzia longicarpa          0 Plantae          6
-    27   Swartzia macrostachya          0 Plantae          6
-    28       Swartzia maguirei          0 Plantae          6
-    29    Swartzia manausensis          0 Plantae          6
-    30         Swartzia oblata          0 Plantae          6
-    31     Swartzia parvifolia          0 Plantae          6
-    32       Swartzia remigera          0 Plantae          6
-    33   Swartzia schomburgkii          0 Plantae          6
-    34   Swartzia steyermarkii          0 Plantae          6
-    35     Swartzia blanchetii          0 Plantae          6
-    36    Swartzia darienensis          0 Plantae          6
-    37         Swartzia glabra          0 Plantae          6
-    38    Swartzia macrosperma          0 Plantae          6
-    39      Swartzia marginata          0 Plantae          6
-    40        Swartzia montana          0 Plantae          6
-    41      Swartzia multijuga          0 Plantae          6
-    42       Swartzia pilifera          0 Plantae          6
+    7         Swartzia apetala          0 Plantae          6
+    8       Swartzia apiculata          0 Plantae          6
+    9       Swartzia bahiensis          0 Plantae          6
+    10      Swartzia bracteosa          0 Plantae          6
+    11        Swartzia cowanii          0 Plantae          6
+    12      Swartzia fanshawei          0 Plantae          6
+    13     Swartzia flavescens          0 Plantae          6
+    14      Swartzia foliolosa          0 Plantae          6
+    15        Swartzia froesii          0 Plantae          6
+    16         Swartzia ingens          0 Plantae          6
+    17       Swartzia jenmanii          0 Plantae          6
+    18        Swartzia juruana          0 Plantae          6
+    19     Swartzia laevicarpa          0 Plantae          6
+    20      Swartzia lamellata          0 Plantae          6
+    21      Swartzia latifolia          0 Plantae          6
+    22         Swartzia lucida          0 Plantae          6
+    23  Swartzia mangabalensis          0 Plantae          6
+    24    Swartzia microstylis          0 Plantae          6
+    25     Swartzia monachiana          0 Plantae          6
+    26    Swartzia mucronifera          0 Plantae          6
+    27        Swartzia oblonga          0 Plantae          6
+    28        Swartzia oedipus          0 Plantae          6
+    29 Swartzia oriximinaensis          0 Plantae          6
+    30    Swartzia pinheiroana          0 Plantae          6
+    31     Swartzia polyphylla          0 Plantae          6
+    32     Swartzia reticulata          0 Plantae          6
+    33       Swartzia riedelii          0 Plantae          6
+    34       Swartzia roraimae          0 Plantae          6
+    35   Swartzia schomburgkii          0 Plantae          6
+    36        Swartzia sericea          0 Plantae          6
+    37      Swartzia tillettii          0 Plantae          6
+    38       Swartzia triptera          0 Plantae          6
+    39  Swartzia brachystachya          0 Plantae          6
+    40   Swartzia brasiliensis          0 Plantae          6
+    41   Swartzia melanocardia          0 Plantae          6
+    42    Swartzia melanoxylon          0 Plantae          6
     43        Swartzia pulchra          0 Plantae          6
-    44      Swartzia remigifer          0 Plantae          6
-    45    Swartzia stipulifera          0 Plantae          6
-    46      Swartzia theiodora          0 Plantae          6
-    47       Swartzia argentea          0 Plantae          6
-    48 Swartzia flabellipetala          0 Plantae          6
-    49      Swartzia laxiflora          0 Plantae          6
-    50        Swartzia rucurva          0 Plantae          6
-    51   Swartzia surinamensis          0 Plantae          6
-    52         Tachia swartzia          0 Plantae          6
+    44        Swartzia remiger          0 Plantae          6
+    45      Swartzia remigifer          0 Plantae          6
+    46     Swartzia remigifera          0 Plantae          6
+    47        Swartzia similis          0 Plantae          6
+    48    Swartzia stipulifera          0 Plantae          6
+    49      Swartzia arenarium          0 Plantae          6
+    50     Swartzia calophylla          0 Plantae          6
+    51      Swartzia laxiflora          0 Plantae          6
+    52          Swartzia rosea          0 Plantae          6
                                                                                                  note
     2  Similarity: name=5; authorship=0; classification=-2; rank=6; status=1; score=10; singleMatch=5
-    7                              Similarity: name=42; classification=-2; rank=0; status=1; score=41
-    8                              Similarity: name=13; classification=-2; rank=0; status=1; score=12
+    7                               Similarity: name=0; classification=-2; rank=0; status=1; score=-1
+    8                               Similarity: name=0; classification=-2; rank=0; status=1; score=-1
     9                               Similarity: name=0; classification=-2; rank=0; status=1; score=-1
     10                              Similarity: name=0; classification=-2; rank=0; status=1; score=-1
     11                              Similarity: name=0; classification=-2; rank=0; status=1; score=-1
@@ -6775,10 +6775,10 @@ checkGbSpecies[resN>1]
     32                              Similarity: name=0; classification=-2; rank=0; status=1; score=-1
     33                              Similarity: name=0; classification=-2; rank=0; status=1; score=-1
     34                              Similarity: name=0; classification=-2; rank=0; status=1; score=-1
-    35                              Similarity: name=0; classification=-2; rank=0; status=0; score=-2
-    36                              Similarity: name=0; classification=-2; rank=0; status=0; score=-2
-    37                              Similarity: name=0; classification=-2; rank=0; status=0; score=-2
-    38                              Similarity: name=0; classification=-2; rank=0; status=0; score=-2
+    35                              Similarity: name=0; classification=-2; rank=0; status=1; score=-1
+    36                              Similarity: name=0; classification=-2; rank=0; status=1; score=-1
+    37                              Similarity: name=0; classification=-2; rank=0; status=1; score=-1
+    38                              Similarity: name=0; classification=-2; rank=0; status=1; score=-1
     39                              Similarity: name=0; classification=-2; rank=0; status=0; score=-2
     40                              Similarity: name=0; classification=-2; rank=0; status=0; score=-2
     41                              Similarity: name=0; classification=-2; rank=0; status=0; score=-2
@@ -6787,156 +6787,156 @@ checkGbSpecies[resN>1]
     44                              Similarity: name=0; classification=-2; rank=0; status=0; score=-2
     45                              Similarity: name=0; classification=-2; rank=0; status=0; score=-2
     46                              Similarity: name=0; classification=-2; rank=0; status=0; score=-2
-    47                             Similarity: name=0; classification=-2; rank=0; status=-5; score=-7
-    48                             Similarity: name=0; classification=-2; rank=0; status=-5; score=-7
+    47                              Similarity: name=0; classification=-2; rank=0; status=0; score=-2
+    48                              Similarity: name=0; classification=-2; rank=0; status=0; score=-2
     49                             Similarity: name=0; classification=-2; rank=0; status=-5; score=-7
     50                             Similarity: name=0; classification=-2; rank=0; status=-5; score=-7
     51                             Similarity: name=0; classification=-2; rank=0; status=-5; score=-7
-    52                           Similarity: name=-15; classification=-2; rank=0; status=0; score=-17
-             phylum        order        family      genus
-    2  Tracheophyta      Fabales      Fabaceae   Swartzia
-    7  Tracheophyta      Fabales      Fabaceae   Swartzia
-    8  Tracheophyta      Fabales      Fabaceae   Swartzia
-    9  Tracheophyta      Fabales      Fabaceae   Swartzia
-    10 Tracheophyta      Fabales      Fabaceae   Swartzia
-    11 Tracheophyta      Fabales      Fabaceae   Swartzia
-    12 Tracheophyta      Fabales      Fabaceae   Swartzia
-    13 Tracheophyta      Fabales      Fabaceae   Swartzia
-    14 Tracheophyta      Fabales      Fabaceae   Swartzia
-    15 Tracheophyta      Fabales      Fabaceae   Swartzia
-    16 Tracheophyta      Fabales      Fabaceae   Swartzia
-    17 Tracheophyta      Fabales      Fabaceae   Swartzia
-    18 Tracheophyta      Fabales      Fabaceae   Swartzia
-    19 Tracheophyta      Fabales      Fabaceae   Swartzia
-    20 Tracheophyta      Fabales      Fabaceae   Swartzia
-    21 Tracheophyta      Fabales      Fabaceae   Swartzia
-    22 Tracheophyta      Fabales      Fabaceae   Swartzia
-    23 Tracheophyta      Fabales      Fabaceae   Swartzia
-    24 Tracheophyta      Fabales      Fabaceae   Swartzia
-    25 Tracheophyta      Fabales      Fabaceae   Swartzia
-    26 Tracheophyta      Fabales      Fabaceae   Swartzia
-    27 Tracheophyta      Fabales      Fabaceae   Swartzia
-    28 Tracheophyta      Fabales      Fabaceae   Swartzia
-    29 Tracheophyta      Fabales      Fabaceae   Swartzia
-    30 Tracheophyta      Fabales      Fabaceae   Swartzia
-    31 Tracheophyta      Fabales      Fabaceae   Swartzia
-    32 Tracheophyta      Fabales      Fabaceae   Swartzia
-    33 Tracheophyta      Fabales      Fabaceae   Swartzia
-    34 Tracheophyta      Fabales      Fabaceae   Swartzia
-    35 Tracheophyta      Fabales      Fabaceae   Swartzia
-    36 Tracheophyta      Fabales      Fabaceae   Swartzia
-    37 Tracheophyta      Fabales      Fabaceae   Swartzia
-    38 Tracheophyta      Fabales      Fabaceae   Swartzia
-    39 Tracheophyta      Fabales      Fabaceae  Bobgunnia
-    40    Bryophyta Scouleriales Distichiaceae Distichium
-    41 Tracheophyta      Fabales      Fabaceae    Ateleia
-    42    Bryophyta    Pottiales    Pottiaceae    Tortula
-    43 Tracheophyta      Fabales      Fabaceae   Swartzia
-    44 Tracheophyta      Fabales      Fabaceae   Swartzia
-    45 Tracheophyta      Fabales      Fabaceae   Swartzia
-    46 Tracheophyta      Fabales      Fabaceae   Swartzia
-    47 Tracheophyta      Fabales      Fabaceae   Swartzia
-    48 Tracheophyta      Fabales      Fabaceae   Swartzia
-    49 Tracheophyta      Fabales      Fabaceae   Swartzia
-    50 Tracheophyta      Fabales      Fabaceae   Swartzia
-    51 Tracheophyta      Fabales      Fabaceae   Swartzia
-    52 Tracheophyta  Gentianales  Gentianaceae Lisianthus
-                          species phylumkey classkey orderkey familykey genuskey
-    2            Swartzia trianae   7707728      220     1370      5386  2950920
-    7               Swartzia ulei   7707728      220     1370      5386  2950920
-    8            Swartzia sumorum   7707728      220     1370      5386  2950920
-    9            Swartzia apetala   7707728      220     1370      5386  2950920
-    10            Swartzia aptera   7707728      220     1370      5386  2950920
-    11        Swartzia auriculata   7707728      220     1370      5386  2950920
-    12       Swartzia benthamiana   7707728      220     1370      5386  2950920
-    13         Swartzia bracteosa   7707728      220     1370      5386  2950920
-    14         Swartzia buntingii   7707728      220     1370      5386  2950920
-    15        Swartzia calophylla   7707728      220     1370      5386  2950920
-    16        Swartzia flaemingii   7707728      220     1370      5386  2950920
-    17        Swartzia flavescens   7707728      220     1370      5386  2950920
-    18           Swartzia froesii   7707728      220     1370      5386  2950920
-    19      Swartzia humboldtiana   7707728      220     1370      5386  2950920
-    20        Swartzia ingaefolia   7707728      220     1370      5386  2950920
-    21         Swartzia invenusta   7707728      220     1370      5386  2950920
-    22            Swartzia jorori   7707728      220     1370      5386  2950920
-    23         Swartzia lamellata   7707728      220     1370      5386  2950920
-    24      Swartzia langsdorffii   7707728      220     1370      5386  2950920
-    25         Swartzia latifolia   7707728      220     1370      5386  2950920
-    26        Swartzia longicarpa   7707728      220     1370      5386  2950920
-    27      Swartzia macrostachya   7707728      220     1370      5386  2950920
-    28          Swartzia maguirei   7707728      220     1370      5386  2950920
-    29       Swartzia manausensis   7707728      220     1370      5386  2950920
-    30            Swartzia oblata   7707728      220     1370      5386  2950920
-    31        Swartzia parvifolia   7707728      220     1370      5386  2950920
-    32          Swartzia remigera   7707728      220     1370      5386  2950920
-    33      Swartzia schomburgkii   7707728      220     1370      5386  2950920
-    34      Swartzia steyermarkii   7707728      220     1370      5386  2950920
-    35           Swartzia apetala   7707728      220     1370      5386  2950920
-    36           Swartzia simplex   7707728      220     1370      5386  2950920
-    37           Swartzia apetala   7707728      220     1370      5386  2950920
-    38           Swartzia simplex   7707728      220     1370      5386  2950920
-    39 Bobgunnia madagascariensis   7707728      220     1370      5386  2981737
-    40     Distichium capillaceum        35      327 12213836   6096596  2673117
-    41           Ateleia cubensis   7707728      220     1370      5386  7832695
-    42             Tortula cernua        35      327      621      4671  9549878
-    43        Swartzia myrtifolia   7707728      220     1370      5386  2950920
-    44          Swartzia remigera   7707728      220     1370      5386  2950920
-    45        Swartzia laurifolia   7707728      220     1370      5386  2950920
-    46         Swartzia multijuga   7707728      220     1370      5386  2950920
-    47          Swartzia argentea   7707728      220     1370      5386  2950920
-    48    Swartzia flabellipetala   7707728      220     1370      5386  2950920
-    49         Swartzia laxiflora   7707728      220     1370      5386  2950920
-    50           Swartzia rucurva   7707728      220     1370      5386  2950920
-    51      Swartzia surinamensis   7707728      220     1370      5386  2950920
-    52        Lisianthus exsertus   7707728      220      412      2503  7270152
-       specieskey         class acceptedusagekey
-    2     5351959 Magnoliopsida               NA
-    7     5352106 Magnoliopsida               NA
-    8     5351868 Magnoliopsida               NA
-    9     5351925 Magnoliopsida               NA
-    10    5351841 Magnoliopsida               NA
-    11    5351932 Magnoliopsida               NA
-    12    5351848 Magnoliopsida               NA
-    13    7577541 Magnoliopsida               NA
-    14    5351976 Magnoliopsida               NA
-    15    5352049 Magnoliopsida               NA
-    16    5352013 Magnoliopsida               NA
-    17    5351988 Magnoliopsida               NA
-    18    5352079 Magnoliopsida               NA
-    19    5630353 Magnoliopsida               NA
-    20    5352096 Magnoliopsida               NA
-    21    5616842 Magnoliopsida               NA
-    22    5616838 Magnoliopsida               NA
-    23    5351920 Magnoliopsida               NA
-    24    5351887 Magnoliopsida               NA
-    25    5352131 Magnoliopsida               NA
-    26    5352125 Magnoliopsida               NA
-    27    5351853 Magnoliopsida               NA
-    28    5351995 Magnoliopsida               NA
-    29    5630319 Magnoliopsida               NA
-    30    5351989 Magnoliopsida               NA
-    31    5351966 Magnoliopsida               NA
-    32    5630237 Magnoliopsida               NA
-    33    5352119 Magnoliopsida               NA
-    34    5351866 Magnoliopsida               NA
-    35    5351925 Magnoliopsida          5351930
-    36    5352047 Magnoliopsida          5352047
-    37    5351925 Magnoliopsida          5351927
-    38    5352047 Magnoliopsida          5352047
-    39    2981738 Magnoliopsida          2981738
-    40    2675901     Bryopsida          2675901
-    41    5361701 Magnoliopsida          5361701
-    42    5280682     Bryopsida          5280682
-    43    5352005 Magnoliopsida          5352010
-    44    5630237 Magnoliopsida          5630237
-    45    5352085 Magnoliopsida          5352085
-    46    5352110 Magnoliopsida          5352110
-    47    8086188 Magnoliopsida               NA
-    48    7787725 Magnoliopsida               NA
-    49    7398823 Magnoliopsida               NA
-    50    5616741 Magnoliopsida               NA
-    51    5630213 Magnoliopsida               NA
-    52    3842483 Magnoliopsida          3842483
+    52                             Similarity: name=0; classification=-2; rank=0; status=-5; score=-7
+             phylum   order   family            genus
+    2  Tracheophyta Fabales Fabaceae         Swartzia
+    7  Tracheophyta Fabales Fabaceae         Swartzia
+    8  Tracheophyta Fabales Fabaceae         Swartzia
+    9  Tracheophyta Fabales Fabaceae         Swartzia
+    10 Tracheophyta Fabales Fabaceae         Swartzia
+    11 Tracheophyta Fabales Fabaceae         Swartzia
+    12 Tracheophyta Fabales Fabaceae         Swartzia
+    13 Tracheophyta Fabales Fabaceae         Swartzia
+    14 Tracheophyta Fabales Fabaceae         Swartzia
+    15 Tracheophyta Fabales Fabaceae         Swartzia
+    16 Tracheophyta Fabales Fabaceae         Swartzia
+    17 Tracheophyta Fabales Fabaceae         Swartzia
+    18 Tracheophyta Fabales Fabaceae         Swartzia
+    19 Tracheophyta Fabales Fabaceae         Swartzia
+    20 Tracheophyta Fabales Fabaceae         Swartzia
+    21 Tracheophyta Fabales Fabaceae         Swartzia
+    22 Tracheophyta Fabales Fabaceae         Swartzia
+    23 Tracheophyta Fabales Fabaceae         Swartzia
+    24 Tracheophyta Fabales Fabaceae         Swartzia
+    25 Tracheophyta Fabales Fabaceae         Swartzia
+    26 Tracheophyta Fabales Fabaceae         Swartzia
+    27 Tracheophyta Fabales Fabaceae         Swartzia
+    28 Tracheophyta Fabales Fabaceae         Swartzia
+    29 Tracheophyta Fabales Fabaceae         Swartzia
+    30 Tracheophyta Fabales Fabaceae         Swartzia
+    31 Tracheophyta Fabales Fabaceae         Swartzia
+    32 Tracheophyta Fabales Fabaceae         Swartzia
+    33 Tracheophyta Fabales Fabaceae         Swartzia
+    34 Tracheophyta Fabales Fabaceae         Swartzia
+    35 Tracheophyta Fabales Fabaceae         Swartzia
+    36 Tracheophyta Fabales Fabaceae         Swartzia
+    37 Tracheophyta Fabales Fabaceae         Swartzia
+    38 Tracheophyta Fabales Fabaceae         Swartzia
+    39 Tracheophyta Fabales Fabaceae Candolleodendron
+    40 Tracheophyta Fabales Fabaceae         Swartzia
+    41 Tracheophyta Fabales Fabaceae         Swartzia
+    42 Tracheophyta Fabales Fabaceae         Swartzia
+    43 Tracheophyta Fabales Fabaceae         Swartzia
+    44 Tracheophyta Fabales Fabaceae         Swartzia
+    45 Tracheophyta Fabales Fabaceae         Swartzia
+    46 Tracheophyta Fabales Fabaceae         Swartzia
+    47 Tracheophyta Fabales Fabaceae         Swartzia
+    48 Tracheophyta Fabales Fabaceae         Swartzia
+    49 Tracheophyta Fabales Fabaceae         Swartzia
+    50 Tracheophyta Fabales Fabaceae         Swartzia
+    51 Tracheophyta Fabales Fabaceae         Swartzia
+    52 Tracheophyta Fabales Fabaceae         Swartzia
+                               species phylumkey classkey orderkey familykey
+    2                 Swartzia trianae   7707728      220     1370      5386
+    7                 Swartzia apetala   7707728      220     1370      5386
+    8               Swartzia apiculata   7707728      220     1370      5386
+    9               Swartzia bahiensis   7707728      220     1370      5386
+    10              Swartzia bracteosa   7707728      220     1370      5386
+    11                Swartzia cowanii   7707728      220     1370      5386
+    12              Swartzia fanshawei   7707728      220     1370      5386
+    13             Swartzia flavescens   7707728      220     1370      5386
+    14              Swartzia foliolosa   7707728      220     1370      5386
+    15                Swartzia froesii   7707728      220     1370      5386
+    16                 Swartzia ingens   7707728      220     1370      5386
+    17               Swartzia jenmanii   7707728      220     1370      5386
+    18                Swartzia juruana   7707728      220     1370      5386
+    19             Swartzia laevicarpa   7707728      220     1370      5386
+    20              Swartzia lamellata   7707728      220     1370      5386
+    21              Swartzia latifolia   7707728      220     1370      5386
+    22                 Swartzia lucida   7707728      220     1370      5386
+    23          Swartzia mangabalensis   7707728      220     1370      5386
+    24            Swartzia microstylis   7707728      220     1370      5386
+    25             Swartzia monachiana   7707728      220     1370      5386
+    26            Swartzia mucronifera   7707728      220     1370      5386
+    27                Swartzia oblonga   7707728      220     1370      5386
+    28                Swartzia oedipus   7707728      220     1370      5386
+    29         Swartzia oriximinaensis   7707728      220     1370      5386
+    30            Swartzia pinheiroana   7707728      220     1370      5386
+    31             Swartzia polyphylla   7707728      220     1370      5386
+    32             Swartzia reticulata   7707728      220     1370      5386
+    33               Swartzia riedelii   7707728      220     1370      5386
+    34               Swartzia roraimae   7707728      220     1370      5386
+    35           Swartzia schomburgkii   7707728      220     1370      5386
+    36                Swartzia sericea   7707728      220     1370      5386
+    37              Swartzia tillettii   7707728      220     1370      5386
+    38               Swartzia triptera   7707728      220     1370      5386
+    39 Candolleodendron brachystachyum   7707728      220     1370      5386
+    40           Swartzia langsdorffii   7707728      220     1370      5386
+    41                Swartzia obscura   7707728      220     1370      5386
+    42            Swartzia leptopetala   7707728      220     1370      5386
+    43             Swartzia myrtifolia   7707728      220     1370      5386
+    44               Swartzia remigera   7707728      220     1370      5386
+    45               Swartzia remigera   7707728      220     1370      5386
+    46               Swartzia remigera   7707728      220     1370      5386
+    47               Swartzia panacoco   7707728      220     1370      5386
+    48             Swartzia laurifolia   7707728      220     1370      5386
+    49              Swartzia arenarium   7707728      220     1370      5386
+    50             Swartzia calophylla   7707728      220     1370      5386
+    51              Swartzia laxiflora   7707728      220     1370      5386
+    52                  Swartzia rosea   7707728      220     1370      5386
+       genuskey specieskey         class acceptedusagekey
+    2   2950920    5351959 Magnoliopsida               NA
+    7   2950920    5351925 Magnoliopsida               NA
+    8   2950920    5351890 Magnoliopsida               NA
+    9   2950920    5351847 Magnoliopsida               NA
+    10  2950920    7577541 Magnoliopsida               NA
+    11  2950920    5351964 Magnoliopsida               NA
+    12  2950920    5351963 Magnoliopsida               NA
+    13  2950920    5351988 Magnoliopsida               NA
+    14  2950920    5351905 Magnoliopsida               NA
+    15  2950920    5352079 Magnoliopsida               NA
+    16  2950920    7278368 Magnoliopsida               NA
+    17  2950920    5352000 Magnoliopsida               NA
+    18  2950920    5630350 Magnoliopsida               NA
+    19  2950920    5352099 Magnoliopsida               NA
+    20  2950920    5351920 Magnoliopsida               NA
+    21  2950920    5352131 Magnoliopsida               NA
+    22  2950920    5351940 Magnoliopsida               NA
+    23  2950920    5352065 Magnoliopsida               NA
+    24  2950920    5351998 Magnoliopsida               NA
+    25  2950920    5352084 Magnoliopsida               NA
+    26  2950920    5351979 Magnoliopsida               NA
+    27  2950920    5351891 Magnoliopsida               NA
+    28  2950920    5616782 Magnoliopsida               NA
+    29  2950920    5352071 Magnoliopsida               NA
+    30  2950920    5351956 Magnoliopsida               NA
+    31  2950920    5351880 Magnoliopsida               NA
+    32  2950920    5351935 Magnoliopsida               NA
+    33  2950920    5351984 Magnoliopsida               NA
+    34  2950920    5351874 Magnoliopsida               NA
+    35  2950920    5352119 Magnoliopsida               NA
+    36  2950920    5352075 Magnoliopsida               NA
+    37  2950920    5351975 Magnoliopsida               NA
+    38  2950920    5617056 Magnoliopsida               NA
+    39  2933834    2933835 Magnoliopsida          2933835
+    40  2950920    5351887 Magnoliopsida          5351887
+    41  2950920    5351842 Magnoliopsida          5351842
+    42  2950920    5351907 Magnoliopsida          5351907
+    43  2950920    5352005 Magnoliopsida          5352010
+    44  2950920    5630237 Magnoliopsida          5630237
+    45  2950920    5630237 Magnoliopsida          5630237
+    46  2950920    5630237 Magnoliopsida          5630237
+    47  2950920    5352021 Magnoliopsida          7224381
+    48  2950920    5352085 Magnoliopsida          5352085
+    49  2950920    7535717 Magnoliopsida               NA
+    50  2950920   11260354 Magnoliopsida               NA
+    51  2950920    7398823 Magnoliopsida               NA
+    52  2950920    7555519 Magnoliopsida               NA
 
     $`Terminalia amazonia`
       usagekey                         scientificname    rank   status matchtype
@@ -6958,13 +6958,13 @@ checkGbSpecies[resN>1]
     $`Triplaris america`
       usagekey                     scientificname    rank   status matchtype
     2  4038608             Triplaris americana L. species ACCEPTED     FUZZY
-    3  8368341       Triplaris americana Beauverd species  SYNONYM     FUZZY
-    4  8161857 Triplaris americana Pav. ex Meisn. species  SYNONYM     FUZZY
-    5 11342164         Triplaris americana Rottb. species  SYNONYM     FUZZY
-    6  8026797           Triplaris americana Vahl species  SYNONYM     FUZZY
-    7  8655496           Triplaris americana Pav. species  SYNONYM     FUZZY
+    3  8026797           Triplaris americana Vahl species  SYNONYM     FUZZY
+    4  8368341       Triplaris americana Beauverd species  SYNONYM     FUZZY
+    5  8161857 Triplaris americana Pav. ex Meisn. species  SYNONYM     FUZZY
+    6  8655496           Triplaris americana Pav. species  SYNONYM     FUZZY
+    7  7924081    Triplaris americana Rob.Schomb. species  SYNONYM     FUZZY
     8  8422788          Triplaris americana Aubl. species  SYNONYM     FUZZY
-    9  7924081    Triplaris americana Rob.Schomb. species  SYNONYM     FUZZY
+    9 11342164         Triplaris americana Rottb. species  SYNONYM     FUZZY
             canonicalname confidence kingdom       phylum kingdomkey phylumkey
     2 Triplaris americana         91 Plantae Tracheophyta          6   7707728
     3 Triplaris americana         90 Plantae Tracheophyta          6   7707728
@@ -6985,22 +6985,22 @@ checkGbSpecies[resN>1]
     9 Similarity: name=90; authorship=0; classification=-2; rank=6; status=0; score=94
                order       family     genus               species classkey orderkey
     2 Caryophyllales Polygonaceae Triplaris   Triplaris americana      220      422
-    3         Poales      Poaceae Triplasis   Triplasis americana      196     1369
-    4 Caryophyllales Polygonaceae Triplaris  Triplaris cumingiana      220      422
-    5 Caryophyllales Polygonaceae Triplaris Triplaris weigeltiana      220      422
-    6 Caryophyllales Polygonaceae Triplaris Triplaris weigeltiana      220      422
-    7 Caryophyllales Polygonaceae Triplaris  Triplaris cumingiana      220      422
+    3 Caryophyllales Polygonaceae Triplaris Triplaris weigeltiana      220      422
+    4         Poales      Poaceae Triplasis   Triplasis americana      196     1369
+    5 Caryophyllales Polygonaceae Triplaris  Triplaris cumingiana      220      422
+    6 Caryophyllales Polygonaceae Triplaris  Triplaris cumingiana      220      422
+    7 Caryophyllales Polygonaceae Triplaris   Triplaris americana      220      422
     8 Caryophyllales Polygonaceae Triplaris Triplaris weigeltiana      220      422
-    9 Caryophyllales Polygonaceae Triplaris   Triplaris americana      220      422
+    9 Caryophyllales Polygonaceae Triplaris Triplaris weigeltiana      220      422
       familykey genuskey specieskey         class acceptedusagekey
     2      2416  6390747    4038608 Magnoliopsida               NA
-    3      3073  2706384    2706385    Liliopsida          2706385
-    4      2416  6390747    4038399 Magnoliopsida          4038399
-    5      2416  6390747    4037419 Magnoliopsida          4037419
-    6      2416  6390747    4037419 Magnoliopsida          4037419
-    7      2416  6390747    4038399 Magnoliopsida          4038399
+    3      2416  6390747    4037419 Magnoliopsida          4037419
+    4      3073  2706384    2706385    Liliopsida          2706385
+    5      2416  6390747    4038399 Magnoliopsida          4038399
+    6      2416  6390747    4038399 Magnoliopsida          4038399
+    7      2416  6390747    4038608 Magnoliopsida          4038608
     8      2416  6390747    4037419 Magnoliopsida          4037419
-    9      2416  6390747    4038608 Magnoliopsida          4038608
+    9      2416  6390747    4037419 Magnoliopsida          4037419
 
     $`Vigna caracalla`
       usagekey              scientificname    rank  status matchtype
@@ -7201,19 +7201,19 @@ stopifnot(TDFtaxonomy$infrasp_epithet[!is.na(TDFtaxonomy$infrasp_epithet)] %in% 
 ``` r
 simpTaxo<-TDFtaxonomy[c("family","genus","sp_epithet")]
 # manual correction for families
-familyCorrection<-data.frame(
-error=c("Acardiaceae", "Polygoceae", "Apocyceae", "Annoceae", "Boragiceae", "Rhamceae","Primuliaceae", "Thymeleaceae", "Pricramniaceae", "Myrsinaceae", "Leguminosae"),
-correction=c("Anacardiaceae","Polygonaceae", "Apocynaceae", "Annonaceae", "Boraginaceae", "Rhamnaceae", "Primulaceae", "Thymelaeaceae", "Picramniaceae", "Primulaceae","Fabaceae")
-)
-m<-match(simpTaxo$family,familyCorrection$error)
-simpTaxo$family[!is.na(m)]<-familyCorrection$correction[m[!is.na(m)]]
+# familyCorrection<-data.frame(
+# error=c("Acardiaceae", "Polygoceae", "Apocyceae", "Annoceae", "Boragiceae", "Rhamceae","Primuliaceae", "Thymeleaceae", "Pricramniaceae", "Myrsinaceae", "Leguminosae"),
+# correction=c("Anacardiaceae","Polygonaceae", "Apocynaceae", "Annonaceae", "Boraginaceae", "Rhamnaceae", "Primulaceae", "Thymelaeaceae", "Picramniaceae", "Primulaceae","Fabaceae")
+# )
+# m<-match(simpTaxo$family,familyCorrection$error)
+# simpTaxo$family[!is.na(m)]<-familyCorrection$correction[m[!is.na(m)]]
 
-genusCorrection <- data.frame(
-  error=c("Acardium","Cinmomun","Psicotria","Termilia","Anno"),
-  correction=c("Anacardium","Cinnamomum","Psychotria","Terminalia","Annona")
-)
-m<-match(simpTaxo$genus, genusCorrection$error)
-simpTaxo$genus[!is.na(m)]<-genusCorrection$correction[m[!is.na(m)]]
+# genusCorrection <- data.frame(
+#   error=c("Acardium","Cinmomun","Psicotria","Termilia","Anno"),
+#   correction=c("Anacardium","Cinnamomum","Psychotria","Terminalia","Annona")
+# )
+# m<-match(simpTaxo$genus, genusCorrection$error)
+# simpTaxo$genus[!is.na(m)]<-genusCorrection$correction[m[!is.na(m)]]
 
 
 simpTaxo$family[familyUnknown]<-NA
@@ -7499,24 +7499,16 @@ higherRanks_tab <- unique(Reduce(rbind,higherRanks))
 ### Generos
 
 ``` r
-genusFamily<-tapply(simpTaxo$family[!is.na(simpTaxo$genus)],simpTaxo$genus[!is.na(simpTaxo$genus)],function(x){
-  A<-sort(table(x),decreasing = T)
+# genusFamily<-tapply(simpTaxo$family[!is.na(simpTaxo$genus)],simpTaxo$genus[!is.na(simpTaxo$genus)],function(x){
+#   A<-sort(table(x),decreasing = T)
+#   names(A)[1]
+# })
+
+genusFamily<-tapply(simpTaxo$family[!is.na(simpTaxo$genus)&is.na(simpTaxo$sp_epithet)],simpTaxo$genus[!is.na(simpTaxo$genus)&is.na(simpTaxo$sp_epithet)],function(x){A<-sort(table(x),decreasing = T)
   names(A)[1]
 })
 gbGenus<-get_gbifid_(names(genusFamily))
 ```
-
-
-    Retrieving data for taxon 'Acalypha'
-
-
-    Retrieving data for taxon 'Acanthocereus'
-
-
-    Retrieving data for taxon 'Achatocarpus'
-
-
-    Retrieving data for taxon 'Adenocalymma'
 
 
     Retrieving data for taxon 'Aegiphila'
@@ -7534,43 +7526,13 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Allophylus'
 
 
-    Retrieving data for taxon 'Alseis'
-
-
-    Retrieving data for taxon 'Amaioua'
-
-
-    Retrieving data for taxon 'Amanoa'
-
-
     Retrieving data for taxon 'Ampelocera'
-
-
-    Retrieving data for taxon 'Amphilophium'
-
-
-    Retrieving data for taxon 'Amyris'
-
-
-    Retrieving data for taxon 'Anacardium'
 
 
     Retrieving data for taxon 'Anemopaegma'
 
 
     Retrieving data for taxon 'Annona'
-
-
-    Retrieving data for taxon 'Anredera'
-
-
-    Retrieving data for taxon 'Apeiba'
-
-
-    Retrieving data for taxon 'Aralia'
-
-
-    Retrieving data for taxon 'Ardisia'
 
 
     Retrieving data for taxon 'Aristolochia'
@@ -7585,67 +7547,13 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Aspidosperma'
 
 
-    Retrieving data for taxon 'Astronium'
-
-
-    Retrieving data for taxon 'Attalea'
-
-
-    Retrieving data for taxon 'Bactris'
-
-
-    Retrieving data for taxon 'Banara'
-
-
-    Retrieving data for taxon 'Bauhinia'
-
-
     Retrieving data for taxon 'Bentamantha'
-
-
-    Retrieving data for taxon 'Bignonia'
-
-
-    Retrieving data for taxon 'Bonellia'
-
-
-    Retrieving data for taxon 'Bronwenia'
 
 
     Retrieving data for taxon 'Brosimum'
 
 
-    Retrieving data for taxon 'Brownea'
-
-
-    Retrieving data for taxon 'Bulnesia'
-
-
     Retrieving data for taxon 'Bunchosia'
-
-
-    Retrieving data for taxon 'Bursera'
-
-
-    Retrieving data for taxon 'Caesalpinia'
-
-
-    Retrieving data for taxon 'Calliandra'
-
-
-    Retrieving data for taxon 'Callicarpa'
-
-
-    Retrieving data for taxon 'Callichlamys'
-
-
-    Retrieving data for taxon 'Calycophyllum'
-
-
-    Retrieving data for taxon 'Calyptranthes'
-
-
-    Retrieving data for taxon 'Capparidastrum'
 
 
     Retrieving data for taxon 'Capparis'
@@ -7657,21 +7565,6 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Cassia'
 
 
-    Retrieving data for taxon 'Castilla'
-
-
-    Retrieving data for taxon 'Cavanillesia'
-
-
-    Retrieving data for taxon 'Cecropia'
-
-
-    Retrieving data for taxon 'Ceiba'
-
-
-    Retrieving data for taxon 'Celtis'
-
-
     Retrieving data for taxon 'Cestrum'
 
 
@@ -7681,58 +7574,16 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Chiococca'
 
 
-    Retrieving data for taxon 'Chomelia'
-
-
-    Retrieving data for taxon 'Chromolaena'
-
-
     Retrieving data for taxon 'Cissus'
-
-
-    Retrieving data for taxon 'Citharexylum'
-
-
-    Retrieving data for taxon 'Clarisia'
-
-
-    Retrieving data for taxon 'Clathrotropis'
-
-
-    Retrieving data for taxon 'Clusia'
 
 
     Retrieving data for taxon 'Coccoloba'
 
 
-    Retrieving data for taxon 'Cochlospermum'
-
-
-    Retrieving data for taxon 'Coffea'
-
-
-    Retrieving data for taxon 'Combretum'
-
-
-    Retrieving data for taxon 'Connarus'
-
-
     Retrieving data for taxon 'Cordia'
 
 
-    Retrieving data for taxon 'Cordiera'
-
-
-    Retrieving data for taxon 'Coursetia'
-
-
-    Retrieving data for taxon 'Coussarea'
-
-
     Retrieving data for taxon 'Coutarea'
-
-
-    Retrieving data for taxon 'Crateva'
 
 
     Retrieving data for taxon 'Croton'
@@ -7741,13 +7592,7 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Cupania'
 
 
-    Retrieving data for taxon 'Cynophalla'
-
-
     Retrieving data for taxon 'Daphnopsis'
-
-
-    Retrieving data for taxon 'Dilodendron'
 
 
     Retrieving data for taxon 'Dioclea'
@@ -7759,9 +7604,6 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Discophora'
 
 
-    Retrieving data for taxon 'Duguetia'
-
-
     Retrieving data for taxon 'Elaeoluma'
 
 
@@ -7771,22 +7613,10 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Enterolobium'
 
 
-    Retrieving data for taxon 'Erythrina'
-
-
-    Retrieving data for taxon 'Erythroxylum'
-
-
     Retrieving data for taxon 'Eschweilera'
 
 
-    Retrieving data for taxon 'Esenbeckia'
-
-
     Retrieving data for taxon 'Eugenia'
-
-
-    Retrieving data for taxon 'Euphorbia'
 
 
     Retrieving data for taxon 'Ficus'
@@ -7801,64 +7631,19 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Galipea'
 
 
-    Retrieving data for taxon 'Genipa'
-
-
-    Retrieving data for taxon 'Gliricidia'
-
-
-    Retrieving data for taxon 'Graffenrieda'
-
-
     Retrieving data for taxon 'Guapira'
 
 
     Retrieving data for taxon 'Guarea'
 
 
-    Retrieving data for taxon 'Guatteria'
-
-
-    Retrieving data for taxon 'Guazuma'
-
-
-    Retrieving data for taxon 'Guettarda'
-
-
     Retrieving data for taxon 'Gustavia'
-
-
-    Retrieving data for taxon 'Gyrocarpus'
-
-
-    Retrieving data for taxon 'Hampea'
-
-
-    Retrieving data for taxon 'Handroanthus'
-
-
-    Retrieving data for taxon 'Heisteria'
-
-
-    Retrieving data for taxon 'Helianthostylis'
-
-
-    Retrieving data for taxon 'Herrania'
-
-
-    Retrieving data for taxon 'Himatanthus'
 
 
     Retrieving data for taxon 'Hippocratea'
 
 
     Retrieving data for taxon 'Hiraea'
-
-
-    Retrieving data for taxon 'Hirtella'
-
-
-    Retrieving data for taxon 'Hura'
 
 
     Retrieving data for taxon 'Inga'
@@ -7873,73 +7658,25 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Ixora'
 
 
-    Retrieving data for taxon 'Jacaranda'
-
-
-    Retrieving data for taxon 'Jatropha'
-
-
     Retrieving data for taxon 'Ladenbergia'
-
-
-    Retrieving data for taxon 'Lantana'
-
-
-    Retrieving data for taxon 'Lecythis'
 
 
     Retrieving data for taxon 'Leonia'
 
 
-    Retrieving data for taxon 'Leucaena'
-
-
     Retrieving data for taxon 'Licania'
-
-
-    Retrieving data for taxon 'Licaria'
-
-
-    Retrieving data for taxon 'Lindackeria'
-
-
-    Retrieving data for taxon 'Lippia'
-
-
-    Retrieving data for taxon 'Lonchocarpus'
-
-
-    Retrieving data for taxon 'Luehea'
-
-
-    Retrieving data for taxon 'Lycoseris'
-
-
-    Retrieving data for taxon 'Mabea'
 
 
     Retrieving data for taxon 'Machaerium'
 
 
-    Retrieving data for taxon 'Maclura'
-
-
     Retrieving data for taxon 'Malmea'
-
-
-    Retrieving data for taxon 'Malpighia'
 
 
     Retrieving data for taxon 'Mandevilla'
 
 
-    Retrieving data for taxon 'Manihot'
-
-
     Retrieving data for taxon 'Manilkara'
-
-
-    Retrieving data for taxon 'Margaritaria'
 
 
     Retrieving data for taxon 'Marsdenia'
@@ -7948,28 +7685,7 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Matayba'
 
 
-    Retrieving data for taxon 'Mayna'
-
-
-    Retrieving data for taxon 'Melicoccus'
-
-
-    Retrieving data for taxon 'Memora'
-
-
-    Retrieving data for taxon 'Miconia'
-
-
-    Retrieving data for taxon 'Morisonia'
-
-
-    Retrieving data for taxon 'Muellera'
-
-
     Retrieving data for taxon 'Myrcia'
-
-
-    Retrieving data for taxon 'Myriocarpa'
 
 
     Retrieving data for taxon 'Myrospermum'
@@ -7984,15 +7700,6 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Neea'
 
 
-    Retrieving data for taxon 'Ochroma'
-
-
-    Retrieving data for taxon 'Ocotea'
-
-
-    Retrieving data for taxon 'Omphalea'
-
-
     Retrieving data for taxon 'Opuntia'
 
 
@@ -8002,34 +7709,16 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Oxandra'
 
 
-    Retrieving data for taxon 'Pachira'
-
-
-    Retrieving data for taxon 'Palicourea'
-
-
     Retrieving data for taxon 'Paullinia'
 
 
     Retrieving data for taxon 'Peltogyne'
 
 
-    Retrieving data for taxon 'Pereskia'
-
-
     Retrieving data for taxon 'Petrea'
 
 
-    Retrieving data for taxon 'Phanera'
-
-
     Retrieving data for taxon 'Phryganocydia'
-
-
-    Retrieving data for taxon 'Phyllanthus'
-
-
-    Retrieving data for taxon 'Pilosocereus'
 
 
     Retrieving data for taxon 'Piper'
@@ -8041,31 +7730,13 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Pisonia'
 
 
-    Retrieving data for taxon 'Pithecellobium'
-
-
     Retrieving data for taxon 'Pittoniotis'
-
-
-    Retrieving data for taxon 'Platymiscium'
 
 
     Retrieving data for taxon 'Pouteria'
 
 
-    Retrieving data for taxon 'Pradosia'
-
-
     Retrieving data for taxon 'Prestonia'
-
-
-    Retrieving data for taxon 'Prosopis'
-
-
-    Retrieving data for taxon 'Protium'
-
-
-    Retrieving data for taxon 'Pseudobombax'
 
 
     Retrieving data for taxon 'Pseudolmedia'
@@ -8074,19 +7745,10 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Pseudomalmea'
 
 
-    Retrieving data for taxon 'Pseudosamanea'
-
-
-    Retrieving data for taxon 'Psidium'
-
-
     Retrieving data for taxon 'Psychotria'
 
 
     Retrieving data for taxon 'Pterocarpus'
-
-
-    Retrieving data for taxon 'Quadrella'
 
 
     Retrieving data for taxon 'Randia'
@@ -8095,22 +7757,10 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Rinorea'
 
 
-    Retrieving data for taxon 'Rollinia'
-
-
     Retrieving data for taxon 'Rudgea'
 
 
     Retrieving data for taxon 'Ruprechtia'
-
-
-    Retrieving data for taxon 'Sapindus'
-
-
-    Retrieving data for taxon 'Sapium'
-
-
-    Retrieving data for taxon 'Seguieria'
 
 
     Retrieving data for taxon 'Senegalia'
@@ -8122,16 +7772,7 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Serjania'
 
 
-    Retrieving data for taxon 'Simira'
-
-
-    Retrieving data for taxon 'Siparuna'
-
-
     Retrieving data for taxon 'Smilax'
-
-
-    Retrieving data for taxon 'Solanum'
 
 
     Retrieving data for taxon 'Sorocea'
@@ -8140,49 +7781,13 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Spathelia'
 
 
-    Retrieving data for taxon 'Spondias'
-
-
-    Retrieving data for taxon 'Stenocereus'
-
-
-    Retrieving data for taxon 'Styphnolobium'
-
-
     Retrieving data for taxon 'Swartzia'
-
-
-    Retrieving data for taxon 'Syagrus'
-
-
-    Retrieving data for taxon 'Tabebuia'
 
 
     Retrieving data for taxon 'Tabernaemontana'
 
 
-    Retrieving data for taxon 'Tachigali'
-
-
-    Retrieving data for taxon 'Tanaecium'
-
-
-    Retrieving data for taxon 'Tapirira'
-
-
-    Retrieving data for taxon 'Terminalia'
-
-
-    Retrieving data for taxon 'Trichilia'
-
-
-    Retrieving data for taxon 'Trichostigma'
-
-
     Retrieving data for taxon 'Triplaris'
-
-
-    Retrieving data for taxon 'Urera'
 
 
     Retrieving data for taxon 'Vachellia'
@@ -8191,28 +7796,10 @@ gbGenus<-get_gbifid_(names(genusFamily))
     Retrieving data for taxon 'Verbesina'
 
 
-    Retrieving data for taxon 'Vernonanthura'
-
-
-    Retrieving data for taxon 'Vigna'
-
-
     Retrieving data for taxon 'Vitex'
 
 
-    Retrieving data for taxon 'Vochysia'
-
-
-    Retrieving data for taxon 'Xylophragma'
-
-
-    Retrieving data for taxon 'Xylosma'
-
-
     Retrieving data for taxon 'Zanthoxylum'
-
-
-    Retrieving data for taxon 'Ziziphus'
 
 
     Retrieving data for taxon 'Zygia'
@@ -8283,74 +7870,6 @@ checkGbGenus[resN>1]
     2     <NA>         NA
     49    <NA>         NA
 
-    $Cochlospermum
-       usagekey               scientificname  rank   status  matchtype
-    1   2874864          Cochlospermum Kunth genus ACCEPTED HIGHERRANK
-    2   9123835          Cochliospermum Lag. genus  SYNONYM      FUZZY
-    3   7721974 Cochliospermum Lagasca, 1817 genus DOUBTFUL      FUZZY
-    40  2897071           Coelospermum Blume genus ACCEPTED      FUZZY
-    41  5371893            Cyclospermum Lag. genus ACCEPTED      FUZZY
-    42  6423677            Ciclospermum Lag. genus  SYNONYM      FUZZY
-    43  9128212   Ciclospermum Lagasca, 1821 genus  SYNONYM      FUZZY
-    48  2853045        Collospermum Skottsb. genus  SYNONYM      FUZZY
-    49  7237371    Cyclospermum Seward, 1917 genus DOUBTFUL      FUZZY
-    50  8741595   Cyclospermum Lagasca, 1821 genus DOUBTFUL      FUZZY
-        canonicalname confidence kingdom       phylum          order
-    1   Cochlospermum         94 Plantae Tracheophyta       Malvales
-    2  Cochliospermum         73 Plantae Tracheophyta Caryophyllales
-    3  Cochliospermum         68 Plantae Tracheophyta Caryophyllales
-    40   Coelospermum          0 Plantae Tracheophyta    Gentianales
-    41   Cyclospermum          0 Plantae Tracheophyta        Apiales
-    42   Ciclospermum          0 Plantae Tracheophyta        Apiales
-    43   Ciclospermum          0 Plantae Tracheophyta        Apiales
-    48   Collospermum          0 Plantae Tracheophyta    Asparagales
-    49   Cyclospermum          0 Plantae         <NA>           <NA>
-    50   Cyclospermum          0 Plantae Tracheophyta        Apiales
-                 family          genus kingdomkey phylumkey classkey orderkey
-    1  Cochlospermaceae  Cochlospermum          6   7707728      220      941
-    2     Amaranthaceae         Suaeda          6   7707728      220      422
-    3     Amaranthaceae Cochliospermum          6   7707728      220      422
-    40        Rubiaceae   Coelospermum          6   7707728      220      412
-    41         Apiaceae   Cyclospermum          6   7707728      220     1351
-    42         Apiaceae   Cyclospermum          6   7707728      220     1351
-    43         Apiaceae   Cyclospermum          6   7707728      220     1351
-    48      Asteliaceae        Astelia          6   7707728      196     1169
-    49             <NA>   Cyclospermum          6        NA       NA       NA
-    50         Apiaceae   Cyclospermum          6   7707728      220     1351
-       familykey genuskey         class acceptedusagekey
-    1    3702383  2874864 Magnoliopsida               NA
-    2       3064  3083525 Magnoliopsida          3083525
-    3       3064  7721974 Magnoliopsida               NA
-    40      8798  2897071 Magnoliopsida               NA
-    41      6720  5371893 Magnoliopsida               NA
-    42      6720  5371893 Magnoliopsida          5371893
-    43      6720  8741595 Magnoliopsida          8741595
-    48      7684  2765628    Liliopsida          2765628
-    49        NA  7237371          <NA>               NA
-    50      6720  8741595 Magnoliopsida               NA
-                                                                                     note
-    1                                                                                <NA>
-    2    Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-    3   Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-    40   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=1; score=-6
-    41   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=1; score=-6
-    42   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=0; score=-7
-    43   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=0; score=-7
-    48   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=0; score=-7
-    49 Similarity: name=-5; authorship=0; classification=-2; rank=0; status=-5; score=-12
-    50 Similarity: name=-5; authorship=0; classification=-2; rank=0; status=-5; score=-12
-       species specieskey
-    1     <NA>         NA
-    2     <NA>         NA
-    3     <NA>         NA
-    40    <NA>         NA
-    41    <NA>         NA
-    42    <NA>         NA
-    43    <NA>         NA
-    48    <NA>         NA
-    49    <NA>         NA
-    50    <NA>         NA
-
     $Cordia
        usagekey              scientificname  rank   status matchtype canonicalname
     1   2900865                   Cordia L. genus ACCEPTED     EXACT        Cordia
@@ -8372,7 +7891,7 @@ checkGbGenus[resN>1]
     17  2000890      Corydia Serville, 1831 genus  SYNONYM     FUZZY       Corydia
     18  4059758              Corda St.-Lag. genus DOUBTFUL     FUZZY         Corda
     19  4059953       Coredia Hook.f., 1857 genus DOUBTFUL     FUZZY       Coredia
-    47  7333786 Codia J.R.Forst. & G.Forst. genus ACCEPTED     FUZZY         Codia
+    45  7333786 Codia J.R.Forst. & G.Forst. genus ACCEPTED     FUZZY         Codia
        confidence
     1          99
     2          99
@@ -8393,7 +7912,7 @@ checkGbGenus[resN>1]
     17         73
     18         68
     19         68
-    47         -6
+    45         -6
                                                                                      note
     1   Similarity: name=100; authorship=0; classification=-2; rank=0; status=1; score=99
     2   Similarity: name=100; authorship=0; classification=-2; rank=0; status=1; score=99
@@ -8414,7 +7933,7 @@ checkGbGenus[resN>1]
     17   Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
     18  Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
     19  Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-    47   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=1; score=-6
+    45   Similarity: name=-5; authorship=0; classification=-2; rank=0; status=1; score=-6
         kingdom       phylum          order          family       genus kingdomkey
     1   Plantae Tracheophyta    Boraginales      Cordiaceae      Cordia          6
     2  Animalia   Arthropoda      Hemiptera   Aphrophoridae      Cordia          1
@@ -8435,7 +7954,7 @@ checkGbGenus[resN>1]
     17 Animalia   Arthropoda      Blattodea      Corydiidae      Therea          1
     18  Plantae Tracheophyta    Boraginales    Boraginaceae       Corda          6
     19  Plantae Tracheophyta    Boraginales    Boraginaceae     Coredia          6
-    47  Plantae Tracheophyta     Oxalidales     Cunoniaceae       Codia          6
+    45  Plantae Tracheophyta     Oxalidales     Cunoniaceae       Codia          6
        phylumkey classkey orderkey familykey genuskey         class
     1    7707728      220  7226464   4930453  2900865 Magnoliopsida
     2         54      216      809      3764  2016303       Insecta
@@ -8456,7 +7975,7 @@ checkGbGenus[resN>1]
     17        54      216      800   4802592  2000748       Insecta
     18   7707728      220  7226464      2498  4059758 Magnoliopsida
     19   7707728      220  7226464      2498  4059953 Magnoliopsida
-    47   7707728      220  7224021      2405  7333786 Magnoliopsida
+    45   7707728      220  7224021      2405  7333786 Magnoliopsida
        acceptedusagekey species specieskey
     1                NA    <NA>         NA
     2                NA    <NA>         NA
@@ -8477,306 +7996,13 @@ checkGbGenus[resN>1]
     17          2000748    <NA>         NA
     18               NA    <NA>         NA
     19               NA    <NA>         NA
-    47               NA    <NA>         NA
-
-    $Euphorbia
-      usagekey                   scientificname  rank   status  matchtype
-    1 11397237                     Euphorbia L. genus DOUBTFUL HIGHERRANK
-    2  1076499        Euphoria Burmeister, 1842 genus ACCEPTED      FUZZY
-    3  4924299                         Euphorbi genus  SYNONYM      FUZZY
-    4  1529493 Euphoria Robineau-Desvoidy, 1863 genus  SYNONYM      FUZZY
-    5  7264658          Euphoria Comm. ex Juss. genus  SYNONYM      FUZZY
-    6  7513611            Euphoria Klages, 1894 genus  SYNONYM      FUZZY
-    7  4793144         Euphormia Townsend, 1919 genus DOUBTFUL      FUZZY
-      canonicalname confidence  kingdom       phylum        order        family
-    1     Euphorbia         92  Plantae Tracheophyta Malpighiales Euphorbiaceae
-    2      Euphoria         74 Animalia   Arthropoda   Coleoptera  Scarabaeidae
-    3      Euphorbi         73  Plantae Tracheophyta Malpighiales Euphorbiaceae
-    4      Euphoria         73 Animalia   Arthropoda      Diptera      Muscidae
-    5      Euphoria         73  Plantae Tracheophyta   Sapindales   Sapindaceae
-    6      Euphoria         73 Animalia   Arthropoda   Coleoptera  Scarabaeidae
-    7     Euphormia         68 Animalia   Arthropoda      Diptera          <NA>
-          genus kingdomkey phylumkey classkey orderkey familykey genuskey
-    1 Euphorbia          6   7707728      220     1414      4691 11397237
-    2  Euphoria          1        54      216     1470      5840  1076499
-    3 Euphorbia          6   7707728      220     1414      4691 11397237
-    4   Neomyia          1        54      216      811      5564  1527624
-    5    Litchi          6   7707728      220      933      6657  3190001
-    6  Euphoria          1        54      216     1470      5840  1076499
-    7 Euphormia          1        54      216      811        NA  4793144
-              class
-    1 Magnoliopsida
-    2       Insecta
-    3 Magnoliopsida
-    4       Insecta
-    5 Magnoliopsida
-    6       Insecta
-    7       Insecta
-                                                                                   note
-    1                                                                              <NA>
-    2  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
-    3  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-    4  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-    5  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-    6  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-    7 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-      acceptedusagekey species specieskey
-    1               NA    <NA>         NA
-    2               NA    <NA>         NA
-    3         11397237    <NA>         NA
-    4          1527624    <NA>         NA
-    5          3190001    <NA>         NA
-    6          1076499    <NA>         NA
-    7               NA    <NA>         NA
-
-    $Heisteria
-      usagekey                scientificname  rank   status matchtype canonicalname
-    2  3232590               Heisteria Jacq. genus ACCEPTED     EXACT     Heisteria
-    3  3230495               Heisteria Fabr. genus  SYNONYM     EXACT     Heisteria
-    4  3233149                  Heisteria L. genus  SYNONYM     EXACT     Heisteria
-    5  9295409 Heiseria E.E.Schill. & Panero genus ACCEPTED     FUZZY      Heiseria
-    6  7293322                      Heistera genus ACCEPTED     FUZZY      Heistera
-    7  8143654              Heistera Schreb. genus  SYNONYM     FUZZY      Heistera
-      confidence kingdom       phylum kingdomkey phylumkey
-    2         92 Plantae Tracheophyta          6   7707728
-    3         92 Plantae Tracheophyta          6   7707728
-    4         92 Plantae Tracheophyta          6   7707728
-    5         74 Plantae Tracheophyta          6   7707728
-    6         74 Plantae Tracheophyta          6   7707728
-    7         73 Plantae Tracheophyta          6   7707728
-                                                                                   note
-    2 Similarity: name=100; authorship=0; classification=-2; rank=0; status=1; score=99
-    3 Similarity: name=100; authorship=0; classification=-2; rank=0; status=0; score=98
-    4 Similarity: name=100; authorship=0; classification=-2; rank=0; status=0; score=98
-    5  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
-    6  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
-    7  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-            order          family      genus classkey orderkey familykey genuskey
-    2  Santalales Erythropalaceae  Heisteria      220      934   4924615  3232590
-    3 Asparagales    Asparagaceae Veltheimia      196     1169      7683  2767959
-    4     Fabales    Polygalaceae   Muraltia      220     1370      2417  7130220
-    5   Asterales      Asteraceae   Heiseria      220      414      3065  9295409
-    6     Fabales    Polygalaceae   Heistera      220     1370      2417  7293322
-    7  Santalales Erythropalaceae  Heisteria      220      934   4924615  3232590
-              class acceptedusagekey species specieskey
-    2 Magnoliopsida               NA    <NA>         NA
-    3    Liliopsida          2767959    <NA>         NA
-    4 Magnoliopsida          7130220    <NA>         NA
-    5 Magnoliopsida               NA    <NA>         NA
-    6 Magnoliopsida               NA    <NA>         NA
-    7 Magnoliopsida          3232590    <NA>         NA
-
-    $Hirtella
-       usagekey                               scientificname  rank   status
-    1   8690066 Hirtella Pereira, Zanata, Cetra & Reis, 2014 genus ACCEPTED
-    2   8057116                                     Hirtella genus DOUBTFUL
-    3   2944960                                  Hirtella L. genus DOUBTFUL
-    4   4637903                       Hartella Matthew, 1885 genus ACCEPTED
-    5   9424271        Hartella Georgescu & Abramovich, 2009 genus ACCEPTED
-    6   7086476                             Hertella Henssen genus ACCEPTED
-    7   8035393                          Hiatella Bosc, 1801 genus ACCEPTED
-    8   4314377                         Hircella Mayer, 1882 genus ACCEPTED
-    9  10632189                        Hiatella Daudin, 1801 genus DOUBTFUL
-    10  4815362                       Hirella Cossmann, 1920 genus DOUBTFUL
-    11  3745316                      Hirtellia Dumort., 1829 genus DOUBTFUL
-        matchtype canonicalname confidence   kingdom       phylum         order
-    1  HIGHERRANK      Hirtella         94  Animalia     Chordata  Siluriformes
-    2       EXACT      Hirtella         90   Plantae Tracheophyta   Boraginales
-    3       EXACT      Hirtella         90   Plantae Tracheophyta  Malpighiales
-    4       FUZZY      Hartella         74  Animalia   Arthropoda Ptychopariida
-    5       FUZZY      Hartella         74 Chromista Foraminifera     Rotaliida
-    6       FUZZY      Hertella         74     Fungi   Ascomycota  Peltigerales
-    7       FUZZY      Hiatella         74  Animalia     Mollusca    Adapedonta
-    8       FUZZY      Hircella         74  Animalia   Arthropoda     Amphipoda
-    9       FUZZY      Hiatella         68  Animalia     Mollusca    Adapedonta
-    10      FUZZY       Hirella         68  Animalia     Chordata          <NA>
-    11      FUZZY     Hirtellia         68   Plantae Tracheophyta  Malpighiales
-                 family     genus kingdomkey phylumkey orderkey familykey genuskey
-    1      Loricariidae  Hirtella          1        44      708      5158  8690066
-    2        Cordiaceae  Hirtella          6   7707728  7226464   4930453  8057116
-    3  Chrysobalanaceae  Hirtella          6   7707728     1414      9111  2944960
-    4    Conocoryphidae  Hartella          1        54  9583276   3266934  4637903
-    5   Heterohelicidae  Hartella          4   8376456  7692889   7401666  9424271
-    6    Placynthiaceae  Hertella          5        95     1055      4118  7086476
-    7       Hiatellidae  Hiatella          1        52  9584178      6882  8035393
-    8       Caprellidae  Hircella          1        54     1231      4420  4314377
-    9       Hiatellidae  Hiatella          1        52  9584178      6882 10632189
-    10   Ateleaspididae   Hirella          1        44       NA   3237912  4815362
-    11 Chrysobalanaceae Hirtellia          6   7707728     1414      9111  3745316
-                                                                                     note
-    1                                                                                <NA>
-    2  Similarity: name=100; authorship=0; classification=-2; rank=0; status=-5; score=93
-    3  Similarity: name=100; authorship=0; classification=-2; rank=0; status=-5; score=93
-    4    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
-    5    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
-    6    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
-    7    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
-    8    Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
-    9   Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-    10  Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-    11  Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-       classkey           class species specieskey acceptedusagekey
-    1        NA            <NA>    <NA>         NA               NA
-    2       220   Magnoliopsida    <NA>         NA               NA
-    3       220   Magnoliopsida    <NA>         NA               NA
-    4   9273948       Trilobita    <NA>         NA               NA
-    5   7434778   Globothalamea    <NA>         NA               NA
-    6       180 Lecanoromycetes    <NA>         NA               NA
-    7       137        Bivalvia    <NA>         NA               NA
-    8       229    Malacostraca    <NA>         NA               NA
-    9       137        Bivalvia    <NA>         NA               NA
-    10       NA            <NA>    <NA>         NA               NA
-    11      220   Magnoliopsida    <NA>         NA               NA
-
-    $Memora
-      usagekey                      scientificname  rank   status  matchtype
-    1  7298469                        Memora Miers genus  SYNONYM HIGHERRANK
-    2  3243940      Medora H.Adams & A.Adams, 1855 genus ACCEPTED      FUZZY
-    3  4702525                 Melora Walker, 1855 genus ACCEPTED      FUZZY
-    4  2068252                 Menora Medler, 1999 genus ACCEPTED      FUZZY
-    5  2773872                        Medora Kunth genus  SYNONYM      FUZZY
-    6  3919160                 Mebora Steud., 1841 genus DOUBTFUL      FUZZY
-    7  3251033                Medora Agassiz, 1862 genus DOUBTFUL      FUZZY
-    8  4807878 Memoria Mandelshtam & Masumov, 1968 genus DOUBTFUL      FUZZY
-    9  4674801               Mesora Foerster, 1862 genus DOUBTFUL      FUZZY
-      acceptedusagekey canonicalname confidence  kingdom       phylum
-    1          6401106        Memora         94  Plantae Tracheophyta
-    2               NA        Medora         74 Animalia     Mollusca
-    3               NA        Melora         74 Animalia   Arthropoda
-    4               NA        Menora         74 Animalia   Arthropoda
-    5          9608430        Medora         73  Plantae Tracheophyta
-    6               NA        Mebora         68  Plantae Tracheophyta
-    7               NA        Medora         68 Animalia     Cnidaria
-    8               NA       Memoria         68 Animalia   Arthropoda
-    9               NA        Mesora         68 Animalia   Arthropoda
-                order        family        genus kingdomkey phylumkey classkey
-    1        Lamiales  Bignoniaceae Adenocalymma          6   7707728      220
-    2 Stylommatophora  Clausiliidae       Medora          1        52      225
-    3     Lepidoptera          <NA>       Melora          1        54      216
-    4       Hemiptera      Flatidae       Menora          1        54      216
-    5     Asparagales  Asparagaceae  Maianthemum          6   7707728      196
-    6    Malpighiales Euphorbiaceae       Mebora          6   7707728      220
-    7            <NA>          <NA>       Medora          1        43       NA
-    8      Podocopida          <NA>      Memoria          1        54      353
-    9     Hymenoptera          <NA>       Mesora          1        54      216
-      orderkey familykey genuskey         class
-    1      408      6655  6401106 Magnoliopsida
-    2     1456   3243939  3243940    Gastropoda
-    3      797        NA  4702525       Insecta
-    4      809      8502  2068252       Insecta
-    5     1169      7683  9608430    Liliopsida
-    6     1414      4691  3919160 Magnoliopsida
-    7       NA        NA  3251033          <NA>
-    8     1438        NA  4807878     Ostracoda
-    9     1457        NA  4674801       Insecta
-                                                                                   note
-    1                                                                              <NA>
-    2  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
-    3  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
-    4  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
-    5  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-    6 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-    7 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-    8 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-    9 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-      species specieskey
-    1    <NA>         NA
-    2    <NA>         NA
-    3    <NA>         NA
-    4    <NA>         NA
-    5    <NA>         NA
-    6    <NA>         NA
-    7    <NA>         NA
-    8    <NA>         NA
-    9    <NA>         NA
-
-    $Rollinia
-      usagekey       scientificname  rank   status  matchtype acceptedusagekey
-    1  7507748  Rollinia A.St.-Hil. genus  SYNONYM HIGHERRANK          3155252
-    2 11861229             Roslinia genus ACCEPTED      FUZZY               NA
-    3  3050997 Rollinsia Al-Shehbaz genus  SYNONYM      FUZZY          3049366
-    4  3780795       Roslinia Neck. genus  SYNONYM      FUZZY          2904597
-    5  3230943      Roulinia Decne. genus  SYNONYM      FUZZY          3170354
-    6  9521105     Roulinia Brongn. genus  SYNONYM      FUZZY          2776982
-    7  7667129       Roslinia G.Don genus DOUBTFUL      FUZZY               NA
-      canonicalname confidence  kingdom       phylum        order        family
-    1      Rollinia         94  Plantae Tracheophyta  Magnoliales    Annonaceae
-    2      Roslinia         74 Bacteria Firmicutes_A Monoglobales Monoglobaceae
-    3     Rollinsia         73  Plantae Tracheophyta  Brassicales  Brassicaceae
-    4      Roslinia         73  Plantae Tracheophyta     Lamiales   Acanthaceae
-    5      Roulinia         73  Plantae Tracheophyta  Gentianales   Apocynaceae
-    6      Roulinia         73  Plantae Tracheophyta  Asparagales  Asparagaceae
-    7      Roslinia         68  Plantae Tracheophyta  Gentianales  Gentianaceae
-            genus kingdomkey phylumkey classkey orderkey familykey genuskey
-    1      Annona          6   7707728      220      718      9291  3155252
-    2    Roslinia          3  11371390      304 10847295  10671835 11861229
-    3 Dryopetalon          6   7707728      220  7225535      3112  3049366
-    4    Justicia          6   7707728      220      408      2393  2904597
-    5   Cynanchum          6   7707728      220      412      6701  3170354
-    6      Nolina          6   7707728      196     1169      7683  2776982
-    7    Roslinia          6   7707728      220      412      2503  7667129
-              class
-    1 Magnoliopsida
-    2    Clostridia
-    3 Magnoliopsida
-    4 Magnoliopsida
-    5 Magnoliopsida
-    6    Liliopsida
-    7 Magnoliopsida
-                                                                                   note
-    1                                                                              <NA>
-    2  Similarity: name=75; authorship=0; classification=-2; rank=0; status=1; score=74
-    3  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-    4  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-    5  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-    6  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-    7 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-      species specieskey
-    1    <NA>         NA
-    2    <NA>         NA
-    3    <NA>         NA
-    4    <NA>         NA
-    5    <NA>         NA
-    6    <NA>         NA
-    7    <NA>         NA
-
-    $Seguieria
-      usagekey          scientificname  rank   status  matchtype canonicalname
-    1  7309605        Seguieria Loefl. genus ACCEPTED HIGHERRANK     Seguieria
-    2  7327024 Seguiera Rchb. ex Oliv. genus  SYNONYM      FUZZY      Seguiera
-    3  6008611 Seguiera O.Kuntze, 1891 genus  SYNONYM      FUZZY      Seguiera
-    4  7430994   Seguiera Adans., 1763 genus DOUBTFUL      FUZZY      Seguiera
-      confidence kingdom       phylum          order         family       genus
-    1         94 Plantae Tracheophyta Caryophyllales Phytolaccaceae   Seguieria
-    2         73 Plantae Tracheophyta       Myrtales   Combretaceae   Combretum
-    3         73 Plantae Tracheophyta    Gentianales   Gentianaceae Blackstonia
-    4         68 Plantae Tracheophyta Caryophyllales Phytolaccaceae    Seguiera
-      kingdomkey phylumkey classkey orderkey familykey genuskey         class
-    1          6   7707728      220      422      2516  7309605 Magnoliopsida
-    2          6   7707728      220      690      2431  2986357 Magnoliopsida
-    3          6   7707728      220      412      2503  6366885 Magnoliopsida
-    4          6   7707728      220      422      2516  7430994 Magnoliopsida
-      acceptedusagekey
-    1               NA
-    2          2986357
-    3          6366885
-    4               NA
-                                                                                   note
-    1                                                                              <NA>
-    2  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-    3  Similarity: name=75; authorship=0; classification=-2; rank=0; status=0; score=73
-    4 Similarity: name=75; authorship=0; classification=-2; rank=0; status=-5; score=68
-      species specieskey
-    1    <NA>         NA
-    2    <NA>         NA
-    3    <NA>         NA
-    4    <NA>         NA
+    45               NA    <NA>         NA
 
 ``` r
 cat(names(checkGbGenus[resN>1]))
 ```
 
-    Ampelocera Arrabidaea Cochlospermum Cordia Euphorbia Heisteria Hirtella Memora Rollinia Seguieria
+    Ampelocera Arrabidaea Cordia
 
 ``` r
 # (familyPb<-
@@ -9799,14 +9025,14 @@ checkGbSpecies[resN>1]
 
     $`Clusia umbellata`
       usagekey           scientificname    rank  status matchtype acceptedusagekey
-    1  5617077   Cassia umbellata Rchb. species SYNONYM     FUZZY          3977118
-    2  7726511 Cassia umbellata Bertol. species SYNONYM     FUZZY          3977118
+    1  7726511 Cassia umbellata Bertol. species SYNONYM     FUZZY          3977118
+    2  5617077   Cassia umbellata Rchb. species SYNONYM     FUZZY          3977118
          canonicalname confidence
-    1 Cassia umbellata          0
-    2 Cassia umbellata         -6
+    1 Cassia umbellata         -6
+    2 Cassia umbellata          0
                                                                                                                     note
-    1 Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6; 2 synonym homonyms; nextMatch=0
-    2                                  Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6
+    1                                  Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6
+    2 Similarity: name=-10; authorship=0; classification=-2; rank=6; status=0; score=-6; 2 synonym homonyms; nextMatch=0
       kingdom       phylum   order   family genus             species kingdomkey
     1 Plantae Tracheophyta Fabales Fabaceae Senna Senna barronfieldii          6
     2 Plantae Tracheophyta Fabales Fabaceae Senna Senna barronfieldii          6
@@ -9877,8 +9103,8 @@ checkGbSpecies[resN>1]
       usagekey                    scientificname    rank   status matchtype
     1  5341264            Cordia gerascanthus L. species ACCEPTED     EXACT
     2  7410306         Cordia gerascanthus Kunth species  SYNONYM     EXACT
-    3  8691149         Cordia gerascanthus Jacq. species  SYNONYM     EXACT
-    4  7866030 Cordia gerascanthus Griseb., 1861 species  SYNONYM     EXACT
+    3  7866030 Cordia gerascanthus Griseb., 1861 species  SYNONYM     EXACT
+    4  8691149         Cordia gerascanthus Jacq. species  SYNONYM     EXACT
     5  5662196        Cordia geraschanthus Jacq. species  SYNONYM     FUZZY
              canonicalname confidence kingdom       phylum       order     family
     1  Cordia gerascanthus         97 Plantae Tracheophyta Boraginales Cordiaceae
@@ -9958,8 +9184,8 @@ checkGbSpecies[resN>1]
 
     $`Pachira quinata`
       usagekey                       scientificname    rank              status
-    2 12389859 Pachira quinata (Jacq.) W.S.Alverson species HETEROTYPIC_SYNONYM
-    3  4073616 Pachira quinata (Jacq.) W.S.Alverson species HETEROTYPIC_SYNONYM
+    2  4073616 Pachira quinata (Jacq.) W.S.Alverson species HETEROTYPIC_SYNONYM
+    3 12389859 Pachira quinata (Jacq.) W.S.Alverson species HETEROTYPIC_SYNONYM
       matchtype   canonicalname confidence kingdom       phylum    order    family
     2     EXACT Pachira quinata         97 Plantae Tracheophyta Malvales Malvaceae
     3     EXACT Pachira quinata         97 Plantae Tracheophyta Malvales Malvaceae
@@ -9970,8 +9196,8 @@ checkGbSpecies[resN>1]
     2 Similarity: name=110; authorship=0; classification=-2; rank=6; status=-1; score=113
     3 Similarity: name=110; authorship=0; classification=-2; rank=6; status=-1; score=113
         genus          species genuskey specieskey
-    2  Bombax     Bombax ceiba  2874861    3152226
-    3 Pochota Pochota fendleri  7296119    9158473
+    2 Pochota Pochota fendleri  7296119    9158473
+    3  Bombax     Bombax ceiba  2874861    3152226
 
     $`Phanera guianensis`
       usagekey                          scientificname    rank   status matchtype
@@ -10099,6 +9325,13 @@ suggestedOther[]
 | problem         | suggested       |
 |:----------------|:----------------|
 | Pachira quinata | Pachira quinata |
+
+Clusia umbellata no existe, Gbif hace un match con otro genero
+Terminalia se queda amazonia Pachira quinata se queda así
+
+Clusia umbellata -\> Tovomita umbellata
+
+KEW: WCVP
 
 ``` r
 dbDisconnect(dbpp)
