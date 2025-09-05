@@ -1,0 +1,54 @@
+---
+title: "Ejemplo de incorporación de datos a la base de datos: Red BST-Col"
+author: "Marius Bottin"
+lang: es
+format: 
+  gfm:
+    df-print: kable
+knitr: 
+  opts_chunk: 
+    fig.path: "./Fig/Incor_3parcelas"
+---
+
+```{r}
+DIR_DATA <- "../../otherData/"
+dir(DIR_DATA)
+plots<-c("LaPaz","Matitas","Plato")
+parcelas<-lapply(paste(DIR_DATA,paste(plots,"csv",sep="."),sep="/"),read.csv,dec=",",sep=";")
+names(parcelas)<-plots
+```
+
+## Taxonomy
+
+```{r}
+library(rdsTaxVal)
+taxo_parcelas<-new_taxo_oneTab(obj=parcelas,currentFormat = "listPlot", taxonRanks_names = c(family="family",genus="genus",species="specificEpithet"), taxonRanks_epithetized = "specificEpithet",taxoCode = NA, comments = "comments",plot = "plot")
+suggested_parcelas<-fullTaxonomicDiagnostic(taxo_parcelas,argsCheckFunction = list())
+corrected_parcelas<-correct(taxo_parcelas,suggested_parcelas)
+```
+
+```{r}
+suggestTAB<-suggested_parcelas$suggested
+
+```
+
+Comparing with the TDF reference:
+
+```{r}
+load("../../otherData/TDF_taxonomicReference.RData")
+notInTdfRef<-which(!getLowerTax(corrected_parcelas) %in% tdfTaxa$canonicalname)
+correctNotInTdfRef<-intersect(suggestTAB$row,notInTdfRef)
+```
+
+Los casos que corresponden a correcciones automaticas,que no resultan en taxones que ya se validaron en TDF y que no son simplemente "misplaced qualifiers":
+```{r}
+kableExtra::kable(unique(suggestTAB[suggestTAB$row%in%correctNotInTdfRef & !suggestTAB$suggestDescription=="misplaced qualifiers for undetermined taxa",c("suggestDescription","family","genus","specificEpithet","suggest_family","suggest_genus","suggest_specificEpithet","suggest_verbatimTaxonRank")]))
+```
+
+```{r}
+completeClassifparcelas<-extractCompleteTaxo(suggested_parcelas$analysedGbif)
+finalTaxParcelas<-getLowerTax(corrected_parcelas)
+casesToAdd<-extract(corrected_parcelas,"taxonRanks")[!is.na(finalTaxParcelas) &!finalTaxParcelas %in% completeClassifparcelas$canonicalname,]
+stopifnot(nrow(casesToAdd)==0)
+```
+
