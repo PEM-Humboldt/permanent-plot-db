@@ -46,9 +46,28 @@ kableExtra::kable(unique(suggestTAB[suggestTAB$row%in%correctNotInTdfRef & !sugg
 ```
 
 ```{r}
-completeClassifparcelas<-extractCompleteTaxo(suggested_parcelas$analysedGbif)
+completeClassifparcelas<-extractCompleteTaxo(suggested_parcelas$analysedGbif,addLocalId = T,addAvailableAuthorship = T)
 finalTaxParcelas<-getLowerTax(corrected_parcelas)
 casesToAdd<-extract(corrected_parcelas,"taxonRanks")[!is.na(finalTaxParcelas) &!finalTaxParcelas %in% completeClassifparcelas$canonicalname,]
 stopifnot(nrow(casesToAdd)==0)
+# TODO: add in function arg, add all authorship
+w_missingAuthorship<-which(!is.na(completeClassifparcelas$gbifid)&is.na(completeClassifparcelas$authorship))
+gbifid_missingAuthorship<-completeClassifparcelas$gbifid[w_missingAuthorship]
+A<-lapply(gbifid_missingAuthorship,function(x)taxize::gbif_name_usage(x))
+sapply(A,function(x)x$authorship)
+
+tabSyno<-Reduce(rbind,lapply(suggested_parcelas$analysedGbif,function(x)if(nrow(x$synonym)==0){return(NULL)}else{return(data.frame(accepted_gbifid=x$gbifid,x$synonym))}))
+if(nrow(tabSyno)>0)
+{
+  taxize_usage<-lapply(tabSyno$gbifid,taxize::gbif_name_usage)
+  tabSyno$canonicalname<-sapply(taxize_usage,function(x)x$canonicalName)
+  tabSyno$authorship<-sapply(taxize_usage,function(x)x$authorship)
+}
+```
+
+```{r}
+library(RPostgres)
+pp_bst<-dbConnect(Postgres(),dbname="pp_bst_col")
+dbWriteTable(pp_bst,dbQuoteIdentifier(pp_bst,Id(schema="main",table="tmpclassif")),completeClassifparcelas)
 ```
 
