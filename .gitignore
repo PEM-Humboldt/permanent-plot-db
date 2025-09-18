@@ -50,3 +50,7 @@ rsconnect/
 
 # vim swap files
 **/**.swp
+
+# Rproject
+
+*.Rproj
