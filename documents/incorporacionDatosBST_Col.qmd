@@ -850,6 +850,25 @@ save(list=c("tdfTaxa" , "synonymsTDF") , file= "../../otherData/TDF_taxonomicRef
 ```
 
 
+# Morpho-taxa
+
+```{r}
+taxoBST <- new_taxo_oneTab(rdsBST$taxonomy, currentFormat = "listPlot")
+suggestedBST <- fullTaxonomicDiagnostic(taxoBST)
+correctedBST <- correct(taxoBST,suggestedBST)
+```
+
+
+
+
+```{r}
+correctedBST$verbatimTaxonRank[!is.na(correctedBST$identificationQualifier)]<-NA
+getMorphoTaxo(correctedTDF)
+getMorphoTaxo(correctedBST)
+```
+
+
+
 
 KEW: WCVP
 ```{r}

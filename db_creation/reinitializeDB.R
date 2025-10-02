@@ -1,14 +1,15 @@
 # This script objective is to create an empty database with the architecture defined in sql/table_creation.sql
 
 require(RPostgres)
-admin_db_param <- list(drv=Postgres(),dbname="postgres") 
+admin_db_param <- list(drv=Postgres(),dbname="postgres")
 if("dbname" %in% ls())
 {
   warning("database ", get("dbname")," will be reinitialized, if this is not what you want, please do something, fast!")
   make_sleep<-T
 }else{
-  dbname <- "iavh_biol" 
+  dbname <- "iavh_biol"
 }
+if(!"make_sleep" %in% ls()) {make_sleep<-T}
 if(make_sleep)
 {
   Sys.sleep(10)

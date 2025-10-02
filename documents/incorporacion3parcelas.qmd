@@ -1,5 +1,5 @@
 ---
-title: "Ejemplo de incorporación de datos a la base de datos: Red BST-Col"
+title: "Ejemplo de incorporación de datos a la base de datos: Parcelas La Paz, Matitas y Plato"
 author: "Marius Bottin"
 lang: es
 format: 
@@ -40,31 +40,34 @@ notInTdfRef<-which(!getLowerTax(corrected_parcelas) %in% tdfTaxa$canonicalname)
 correctNotInTdfRef<-intersect(suggestTAB$row,notInTdfRef)
 ```
 
-Los casos que corresponden a correcciones automáticas,que no resultan en taxones que ya se validaron en TDF y que no son simplemente "misplaced qualifiers":
+Los casos que corresponden a correcciones automaticas,que no resultan en taxones que ya se validaron en TDF y que no son simplemente "misplaced qualifiers":
 ```{r}
 kableExtra::kable(unique(suggestTAB[suggestTAB$row%in%correctNotInTdfRef & !suggestTAB$suggestDescription=="misplaced qualifiers for undetermined taxa",c("suggestDescription","family","genus","specificEpithet","suggest_family","suggest_genus","suggest_specificEpithet","suggest_verbatimTaxonRank")]))
 ```
 
 ```{r}
-completeClassifparcelas<-extractCompleteTaxo(suggested_parcelas$analysedGbif,addLocalId = T,addAvailableAuthorship = T, getUnavailableAuthorship = T, getSynonyms = T)
+completeClassifparcelas<-extractCompleteTaxo(suggested_parcelas$analysedGbif,addLocalId = T,addAvailableAuthorship = T)
 finalTaxParcelas<-getLowerTax(corrected_parcelas)
 casesToAdd<-extract(corrected_parcelas,"taxonRanks")[!is.na(finalTaxParcelas) &!finalTaxParcelas %in% completeClassifparcelas$canonicalname,]
 stopifnot(nrow(casesToAdd)==0)
-completeClassifparcelas$parent_localId <- completeClassifparcelas$localId[match(completeClassifparcelas$parent_gbifid , completeClassifparcelas$gbifid)]
+# TODO: add in function arg, add all authorship
+w_missingAuthorship<-which(!is.na(completeClassifparcelas$gbifid)&is.na(completeClassifparcelas$authorship))
+gbifid_missingAuthorship<-completeClassifparcelas$gbifid[w_missingAuthorship]
+A<-lapply(gbifid_missingAuthorship,function(x)taxize::gbif_name_usage(x))
+sapply(A,function(x)x$authorship)
+
+tabSyno<-Reduce(rbind,lapply(suggested_parcelas$analysedGbif,function(x)if(nrow(x$synonym)==0){return(NULL)}else{return(data.frame(accepted_gbifid=x$gbifid,x$synonym))}))
+if(nrow(tabSyno)>0)
+{
+  taxize_usage<-lapply(tabSyno$gbifid,taxize::gbif_name_usage)
+  tabSyno$canonicalname<-sapply(taxize_usage,function(x)x$canonicalName)
+  tabSyno$authorship<-sapply(taxize_usage,function(x)x$authorship)
+}
 ```
 
 ```{r}
 library(RPostgres)
 pp_bst<-dbConnect(Postgres(),dbname="pp_bst_col")
 dbWriteTable(pp_bst,dbQuoteIdentifier(pp_bst,Id(schema="main",table="tmpclassif")),completeClassifparcelas)
-
-dbGetQuery(pp_bst,
-"SELECT tc.*, t.cd_tax, t2.cd_tax 
-FROM main.tmpclassif tc
-LEFT JOIN main.taxo t USING (gbifid)
-LEFT JOIN main.taxo t2 ON tc.canonicalname=t2.name_tax;"
-)
-
-
 ```
 
