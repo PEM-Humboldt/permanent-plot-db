@@ -43,7 +43,7 @@ require(rsvg)
 
     Loading required package: rsvg
 
-    Linking to librsvg 2.58.5
+    Linking to librsvg 2.60.0
 
 ``` r
 require(png)
@@ -242,7 +242,7 @@ tables_biol$org_lev [tables_biol$table_name %in% c("gp_event","gp_event_characte
 tables_biol$org_lev [tables_biol$table_name %in% c("project","proj_rel_type","project_characteristics","def_project_type")] <- "project"
 tables_biol$org_lev [tables_biol$table_name %in% c("def_gp_biol","def_method")] <- "methodology"
 tables_biol$org_lev [tables_biol$table_name %in% c("identification")] <- "identification"
-tables_biol$org_lev [tables_biol$table_name %in% c("def_tax_rank","taxo","taxon_characteristics")] <- "taxon"
+tables_biol$org_lev [tables_biol$table_name %in% c("def_tax_rank","taxo","taxon_characteristics","taxo_verbatim")] <- "taxon"
 tables_biol$org_lev [tables_biol$table_name %in% c("morfo_taxo")] <- "morfo-taxon"
 tables_biol$org_lev [tables_biol$table_name %in% c("people")] <- "person"
 tables_biol$org_lev [tables_biol$table_name %in% c("organization_type","organization","organization_characteristics")] <- "organization"
@@ -400,6 +400,7 @@ Tabla 1: Tipos de proyectos en la base de datos relacionales
 | 2 | collection field campaign | Project organized around a field campaign, usually included in a larger project with an institutional ID |
 | 3 | permanent plot | Project mostly useful to be able to filter a permanent plot, note that this kind of project should include various gp_event corresponding to various campaign on the same site |
 | 4 | data project | Meta-project with the objective of integrating data from various projects |
+| 5 | permanent plot set | Set of permanent plots which share characteristics, geographic or otherwise |
 
 </div>
 
@@ -471,14 +472,17 @@ flexibilidad de definición de las entidades taxonómicas. En la base de
 datos, manejamos esa flexibilidad a traves de una tabla de
 morfo-taxones, que llama a la tabla taxonomica. También instauramos una
 tabla de determinación que hace la relación entre registros y el sistema
-taxonomico. De esa manera, podemos asociar una determinación a una fecha
+taxonomico. Desde la tabla de determinación, se pueden referenciar taxa
+y morphotaxa, pero tambien la tabla taxo_verbatim, por si la taxonomía
+no está suficiente resuelta para poder incorporarla en la tabla de
+taxonomía. De esa manera, podemos asociar una determinación a una fecha
 particular, con la idea que la ultima determinación es la más
 importante, pero que puede ser importante tener un acceso al historial
 del trabajo de determinación.
 
 ``` r
 par(mar=rep(0,4))
-dm_obj_proj <- dm_from_con(biol,schema=c("main"), table_names = c("identification","taxo","morfo_taxo","def_tax_rank","taxon_characteristics","register"), learn_keys = T)
+dm_obj_proj <- dm_from_con(biol,schema=c("main"), table_names = c("identification","taxo","taxo_verbatim","morfo_taxo","def_tax_rank","taxon_characteristics","register"), learn_keys = T)
 A<-dm_obj_proj %>%
   dm_draw(view_type = "all")
 t_file<-tempfile(fileext = ".png")
