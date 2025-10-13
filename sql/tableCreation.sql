@@ -40,7 +40,8 @@ VALUES
 	(1,'Site point','POINT','Should represent the whole location, prefer the centroid than the first or last sampling location'),
 	(2,'Plot polygon','POLYGON','Polygon containing the whole sampling site'),
 	(3,'Transect','MULTILINESTRING','Follow the sampling path of the transect, the order of the geometry is important'),
-	(4,'Plot group','POLYGON','Convex Hull of the plot coordinates in a group of plots')
+	(4,'Plot group','POLYGON','Convex Hull of the plot coordinates in a group of plots'),
+	(5,'Subplot polygon','POLYGON','Polygon of a subplot (usually corresponding to the event)')
 	;
 
 -- it should be called sites and have the possibility to get real coordinates or spatial data
@@ -291,7 +292,7 @@ CREATE TABLE main.project
 	project_description text,
 	cd_proj_type smallint REFERENCES main.def_project_type,
 	cd_method int REFERENCES main.def_method,
-	cd_loc int REFERENCES main.location(cd_loc)
+	cd_loc int REFERENCES main.location(cd_loc) ON DELETE SET NULL
 );
 ALTER TABLE main.organization_relationship ADD COLUMN cd_project int REFERENCES main.project(cd_project);
 ALTER TABLE main.people_role ADD COLUMN cd_project int REFERENCES main.project(cd_project);
@@ -316,7 +317,7 @@ CREATE TABLE main.project_relationship
 CREATE TABLE main.gp_event
 (
     cd_gp_event serial PRIMARY KEY,
-    cd_project int REFERENCES main.project (cd_project),
+    cd_project int REFERENCES main.project (cd_project) ON DELETE CASCADE,
     cd_loc integer REFERENCES main.location(cd_loc) ON DELETE SET NULL ON UPDATE CASCADE,
     cd_gp_biol char(4) REFERENCES main.def_gp_biol(cd_gp_biol) ON DELETE CASCADE NOT NULL,
     cd_method int REFERENCES main.def_method(cd_method),
@@ -348,7 +349,7 @@ CREATE TABLE main.event
     event_remarks text,
     cds_creator integer[] ,-- note: we can't use foreign keys because more than  one person might have created the event, otherwise we need to make more tables.
     created date,
-    cd_loc int REFERENCES main.location(cd_loc),
+    cd_loc int REFERENCES main.location(cd_loc) ON DELETE SET NULL,
     UNIQUE (cd_gp_event, num_replicate)
 )
 ;
@@ -466,16 +467,20 @@ CREATE TABLE main.morfo_taxo
 (
     cd_morfo serial PRIMARY KEY,
     cd_tax int REFERENCES main.taxo(cd_tax) ON DELETE CASCADE ON UPDATE CASCADE,
-    morphotaxon_type text.
+    morphotaxon_type text,
     name_morfo text NOT NULL,
-    verbatim_taxon text,
     description text,
     --min_level int REFERENCES main.def_nivel_taxo(cd_niv_taxo),
     --max_level int REFERENCES main.def_nivel_taxo(cd_niv_taxo),
     pseudo_rank varchar(6) REFERENCES main.def_tax_rank(cd_rank) ON DELETE SET NULL ON UPDATE CASCADE,
     cds_tax_possibilities integer[],
     identification_qualifier text,
-    verbatim_taxon_rank text
+    verbatim_taxon_rank text,
+    def_for_project int REFERENCES main.project(cd_project) ON DELETE SET NULL ON UPDATE CASCADE,
+    def_for_gp_event int REFERENCES main.gp_event(cd_gp_event) ON DELETE SET NULL ON UPDATE CASCADE,
+    def_for_event int REFERENCES main.event(cd_event) ON DELETE SET NULL ON UPDATE CASCADE,
+    CHECK(CASE WHEN def_for_project IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN def_for_gp_event IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN def_for_event IS NOT NULL THEN 1 ELSE 0 END =1),
+    UNIQUE(name_morfo, def_for_project, def_for_gp_event, def_for_event)
 );
 -- CREATE INDEX morfo_taxo_cd_gp_biol_key ON main.morfo_taxo(cd_gp_biol);
 -- CREATE INDEX morfo_taxo_cd_tax_key ON main.morfo_taxo(cd_tax);
@@ -499,16 +504,17 @@ CREATE TABLE main.taxo_verbatim
 	taxon_rank text,
 	authorship text,
 	identification_qualifier text,
-	verbatim_taxon_rank text
+	verbatim_taxon_rank text,
+	UNIQUE(scientific_name, kingdom, phylum, "class", "order", family, genus, specific_epithet, infraspecific_epithet, subspecies_epithet, variety_epithet, species, taxon_rank, authorship, identification_qualifier, verbatim_taxon_rank)
 );
 
 CREATE TABLE main.identification -- note that in the case of identification reporting to individuals that are present in various registers, we have the problem of needing to go through the registers to apply these identification to the individuals. It will be complicated, but it actually represents better the reality of the data. It is particularly messy in the cases where there are various identifications through time: we will need to resolve the multiple registers + multiple identification mess before knowing the identity of the individual, let's add that sometimes there is a parent identification, and you got a very difficult problem to manage.
 (
 	cd_identif serial PRIMARY KEY,
-	cd_tax int REFERENCES main.taxo(cd_tax),
-	cd_morfo int REFERENCES main.morfo_taxo (cd_morfo),
-	cd_verb_taxo int REFERENCES main.taxo_verbatim(cd_verb_taxo),
-	parent_identif int REFERENCES main.identification(cd_identif), --I am not completely convinced here but having a parent identification allows to manage the fact that sometimes the identification based on a register applies to all the registers that have been noted as the same species
+	cd_tax int REFERENCES main.taxo(cd_tax) ON DELETE SET NULL ON UPDATE CASCADE,
+	cd_morfo int REFERENCES main.morfo_taxo (cd_morfo) ON DELETE SET NULL ON UPDATE CASCADE,
+	cd_verb_taxo int REFERENCES main.taxo_verbatim(cd_verb_taxo) ON DELETE SET NULL ON UPDATE CASCADE,
+	parent_identif int REFERENCES main.identification(cd_identif) ON DELETE SET NULL ON UPDATE CASCADE, --I am not completely convinced here but having a parent identification allows to manage the fact that sometimes the identification based on a register applies to all the registers that have been noted as the same species
 	taxon_code text,
 	date_identif date NOT NULL,
 	time_identif time,
@@ -517,6 +523,7 @@ CREATE TABLE main.identification -- note that in the case of identification repo
 	catalog text,
 	voucher text
 );
+
 
 CREATE TABLE main.register
 (
@@ -530,7 +537,6 @@ CREATE TABLE main.register
     qt_double double precision,
     remarks text,
     occurrence_id text UNIQUE,
-    cd_loc int REFERENCES main.location(cd_loc),
     UNIQUE (cd_event,occurrence_id)
 );
 -- CREATE INDEX registros_cd_event_idx ON main.registros USING GIST(the_geom);
@@ -538,16 +544,24 @@ CREATE TABLE main.register
 -- CREATE INDEX registros_cd_tax_fkey ON main.registros(cd_tax);
 -- CREATE INDEX registros_cd_morfo_fkey ON main.registros(cd_morfo);
 
+CREATE TABLE main.register_location
+(
+	cd_reg int PRIMARY KEY REFERENCES main.register(cd_reg) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+SELECT AddGeometryColumn('main', 'register_location', 'pt_geom', 3116, 'POINT', 2);
+CREATE INDEX register_pt_geom_idx ON main.register_location USING GIST (pt_geom);
 
 CREATE TABLE main.individual
 (
 	cd_ind serial PRIMARY KEY,
-    organism_id text,
+    	organism_id text,
+	tag text,
+	cd_loc int REFERENCES main.location(cd_loc),
 	uniq_in_project int REFERENCES main.project(cd_project),
 	uniq_in_gp_event int REFERENCES main.gp_event(cd_gp_event),
 	uniq_in_event int REFERENCES main.event(cd_event),
 	uniq_in_register int REFERENCES main.register(cd_reg),
-	tag text,
 	UNIQUE(uniq_in_project,uniq_in_gp_event,uniq_in_event,uniq_in_register,tag)
 );
 
