@@ -117,7 +117,7 @@ VALUES
     ('mass'),
     ('number'),
     ('presence/absence'),
-    ('longitude'),
+    ('length'),
     ('volume'),
     ('number concentration (density)'),
     ('mass concentration'),
@@ -476,9 +476,9 @@ CREATE TABLE main.morfo_taxo
     cds_tax_possibilities integer[],
     identification_qualifier text,
     verbatim_taxon_rank text,
-    def_for_project int REFERENCES main.project(cd_project) ON DELETE SET NULL ON UPDATE CASCADE,
-    def_for_gp_event int REFERENCES main.gp_event(cd_gp_event) ON DELETE SET NULL ON UPDATE CASCADE,
-    def_for_event int REFERENCES main.event(cd_event) ON DELETE SET NULL ON UPDATE CASCADE,
+    def_for_project int REFERENCES main.project(cd_project) ON DELETE CASCADE ON UPDATE CASCADE,
+    def_for_gp_event int REFERENCES main.gp_event(cd_gp_event) ON DELETE CASCADE ON UPDATE CASCADE,
+    def_for_event int REFERENCES main.event(cd_event) ON DELETE CASCADE ON UPDATE CASCADE,
     CHECK(CASE WHEN def_for_project IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN def_for_gp_event IS NOT NULL THEN 1 ELSE 0 END + CASE WHEN def_for_event IS NOT NULL THEN 1 ELSE 0 END =1),
     UNIQUE(name_morfo, def_for_project, def_for_gp_event, def_for_event)
 );
@@ -529,15 +529,15 @@ CREATE TABLE main.register
 (
     cd_reg serial PRIMARY KEY,
     cd_event int REFERENCES main.event(cd_event) ON DELETE CASCADE NOT NULL,
-    cd_identif int REFERENCES main.identification(cd_identif),
+    cd_identif int REFERENCES main.identification(cd_identif) ON DELETE SET NULL,
     cds_recorded_by int[],
-    date_time timestamp,
+    date_reg date,
+    time_reg time,
     locality_verb text,
     qt_int integer,
     qt_double double precision,
     remarks text,
-    occurrence_id text UNIQUE,
-    UNIQUE (cd_event,occurrence_id)
+    occurrence_id text UNIQUE
 );
 -- CREATE INDEX registros_cd_event_idx ON main.registros USING GIST(the_geom);
 -- CREATE INDEX registros_cd_event_fkey ON main.registros(cd_event);
@@ -557,14 +557,19 @@ CREATE TABLE main.individual
 	cd_ind serial PRIMARY KEY,
     	organism_id text,
 	tag text,
-	cd_loc int REFERENCES main.location(cd_loc),
-	uniq_in_project int REFERENCES main.project(cd_project),
-	uniq_in_gp_event int REFERENCES main.gp_event(cd_gp_event),
-	uniq_in_event int REFERENCES main.event(cd_event),
-	uniq_in_register int REFERENCES main.register(cd_reg),
+	uniq_in_project int REFERENCES main.project(cd_project) ON DELETE CASCADE,
+	uniq_in_gp_event int REFERENCES main.gp_event(cd_gp_event) ON DELETE CASCADE,
+	uniq_in_event int REFERENCES main.event(cd_event) ON DELETE CASCADE,
+	uniq_in_register int REFERENCES main.register(cd_reg) ON DELETE CASCADE,
 	UNIQUE(uniq_in_project,uniq_in_gp_event,uniq_in_event,uniq_in_register,tag)
 );
 
+CREATE TABLE main.reg_individual
+(
+	cd_ind int REFERENCES main.individual(cd_ind) ON DELETE CASCADE,
+	cd_reg int REFERENCES main.register(cd_reg) ON DELETE CASCADE,
+	UNIQUE(cd_ind,cd_reg)
+);
 
 CREATE TABLE main.def_subindividual_part
 (
@@ -577,27 +582,28 @@ CREATE TABLE main.def_subindividual_part
 CREATE TABLE main.subindividual
 (
 	cd_subind serial PRIMARY KEY,
-	cd_ind int REFERENCES main.individual (cd_ind),
-	cd_part smallint REFERENCES main.def_subindividual_part(cd_part),
+	cd_ind int REFERENCES main.individual (cd_ind) ON DELETE CASCADE,
+	cd_part smallint REFERENCES main.def_subindividual_part(cd_part) ON DELETE SET NULL,
 	part_number int,
 	parent_cd_subind int REFERENCES main.subindividual(cd_subind),
-	uniq_in_project int REFERENCES main.project(cd_project),
-	uniq_in_gp_event int REFERENCES main.gp_event(cd_gp_event),
-	uniq_in_event int REFERENCES main.event(cd_event),
-	uniq_in_register int REFERENCES main.register(cd_reg),
+	uniq_in_project int REFERENCES main.project(cd_project) ON DELETE CASCADE,
+	uniq_in_gp_event int REFERENCES main.gp_event(cd_gp_event) ON DELETE CASCADE,
+	uniq_in_event int REFERENCES main.event(cd_event) ON DELETE CASCADE,
+	uniq_in_register int REFERENCES main.register(cd_reg) ON DELETE CASCADE,
 	tag text,
-	UNIQUE(cd_ind,cd_part,part_number)
+	UNIQUE(cd_ind,cd_part,part_number),
+	UNIQUE(tag,uniq_in_project,uniq_in_gp_event,uniq_in_event,uniq_in_register)
 );
 
 CREATE TABLE main.individual_characteristics
 (
-    cd_reg int REFERENCES main.register(cd_reg),
-    cd_ind int REFERENCES main.individual(cd_ind),
-    cd_var smallint REFERENCES main.def_var,
+    cd_reg int REFERENCES main.register(cd_reg) ON DELETE CASCADE,
+    cd_ind int REFERENCES main.individual(cd_ind) ON DELETE CASCADE,
+    cd_var smallint REFERENCES main.def_var ON DELETE CASCADE,
     ind_char_int integer,
     ind_char_double double precision,
     ind_char_text text,
-    ind_char_categ integer REFERENCES main.controlled_vocab(cd_categ),
+    ind_char_categ integer REFERENCES main.controlled_vocab(cd_categ) ON DELETE SET NULL,
     ind_char_bool boolean,
     CHECK( ((ind_char_categ IS NOT NULL)::integer + (ind_char_int IS NOT NULL)::integer + (ind_char_int IS NOT NULL)::integer + (ind_char_categ IS NOT NULL)::integer + ind_char_bool::integer)=1)
     --UNIQUE (cd_reg,cd_var_ind_char,COALESCE(cd_categ::double,ind_char_int::double,ind_char_double))
@@ -607,15 +613,15 @@ CREATE TABLE main.individual_characteristics
 
 CREATE TABLE main.subindividual_characteristics
 (
-    cd_reg int REFERENCES main.register(cd_reg),
-    cd_subind int REFERENCES main.subindividual(cd_subind),
-    cd_var smallint REFERENCES main.def_var,
-    ind_char_int integer,
-    ind_char_double double precision,
-    ind_char_text text,
-    ind_char_categ integer REFERENCES main.controlled_vocab(cd_categ),
-    ind_char_bool boolean,
-    CHECK( ((ind_char_categ IS NOT NULL)::integer + (ind_char_int IS NOT NULL)::integer + (ind_char_int IS NOT NULL)::integer + (ind_char_categ IS NOT NULL)::integer + ind_char_bool::integer)=1)
+    cd_reg int REFERENCES main.register(cd_reg) ON DELETE CASCADE,
+    cd_subind int REFERENCES main.subindividual(cd_subind) ON DELETE CASCADE,
+    cd_var smallint REFERENCES main.def_var ON DELETE SET NULL,
+    subind_char_int integer,
+    subind_char_double double precision,
+    subind_char_text text,
+    subind_char_categ integer REFERENCES main.controlled_vocab(cd_categ),
+    subind_char_bool boolean,
+    CHECK( ((subind_char_categ IS NOT NULL)::integer + (subind_char_int IS NOT NULL)::integer + (subind_char_int IS NOT NULL)::integer + (subind_char_categ IS NOT NULL)::integer + subind_char_bool::integer)=1)
     --UNIQUE (cd_reg,cd_var_ind_char,COALESCE(cd_categ::double,ind_char_int::double,ind_char_double))
     --might be useful to create more specific constraints depending on whether it is an integer, double or categorial variable.
 );

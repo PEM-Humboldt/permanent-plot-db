@@ -7412,8 +7412,9 @@ dbGetQuery(dbpp,
 
 ``` r
 correctedTDF_extraRanks<-addHigherRanks(correctedTDF,suggestedTDF$analysedGbif)
-tdfTaxa<-unique(extract(correctedTDF_extraRanks,"taxonRanks"))
+tdfTaxa<-unique(cbind(extract(correctedTDF_extraRanks,"taxonRanks"),canonicalname=getLowerTax(correctedTDF_extraRanks)))
 tdfTaxa<-tdfTaxa[do.call(order,as.list(tdfTaxa)),]
+
 analysedSynonym<-suggestedTDF$analysedGbif[sapply(suggestedTDF$analysedGbif,function(x)nrow(x$synonym))>0]
 synonymsTDF<-Reduce(rbind,lapply(analysedSynonym,function(x){
   tab<-x$synonym
@@ -7430,6 +7431,3439 @@ saveInExcel("../../TDF_taxonomicReference.xlsx",c("tdfTaxa","synonymsTDF"),overw
 ``` r
 save(list=c("tdfTaxa" , "synonymsTDF") , file= "../../otherData/TDF_taxonomicReference.RData") 
 ```
+
+# Morpho-taxa
+
+``` r
+taxoBST <- new_taxo_oneTab(rdsBST$taxonomy, currentFormat = "listPlot")
+suggestedBST <- fullTaxonomicDiagnostic(taxoBST)
+```
+
+    cleaning space characters
+
+    misplaced qualifiers for undetermined taxa
+
+    Warning in checkUndetermined(taxo = structure(list(plot =
+    c("AltoSanJorgeInicial", : Some taxa have an identifier of type "sp. n" in more
+    than one column see rows: 2470
+
+    Warning in checkUndetermined(taxo = structure(list(plot =
+    c("AltoSanJorgeInicial", : Some taxa have an identifier of type "sp." or "spp."
+    in more than one column see rows:2461 2471 2475 2477
+
+    unicity of genus in family
+
+    checking for unicity of taxonomic information associated with taxonomic code
+
+    Warning in checkUnicityCodetax(taxo = structure(list(plot = c("AltoSanJorgeInicial", : These codes corresponds to different information, but we were unable to find the most represented set of variables:
+    Anemsp Bignsp3 Cappsp2 Cnidsp Eugemont Ficuobtu indet1 Lundsp Machinun Malvsp Morfsp15 Morfsp17 Morfsp3 Morfsp6 Morfsp7 Morfsp8 Morpsp1 Morpsp2 Morpsp4 Morpsp6 Morpsp7 Morpsp8 Morpsp9 Nectline Paulglob Pipehisp Stylturb Termamaz Verbsp
+     Note that NO CORRECTION WILL BE SUGGESTED FOR THESE CASES
+
+    Comparing species information with gbif backbone
+
+    Searching for 697 taxa in the GBIF Backbone
+    ...
+
+    done
+
+    Analysing GBIF Backbone information
+
+    617 taxa are found without any modification needed
+
+    13 taxa are found with suggested orthographic changes
+
+    55 taxa are suggested synonyms
+
+    16 taxa are found with suggested higher rank changes
+
+    1 taxa were not found
+
+    Comparing genus information with gbif backbone
+
+    Searching for 184 taxa in the GBIF Backbone
+    ...
+
+    done
+
+    Analysing GBIF Backbone information
+
+    171 taxa are found without any modification needed
+
+    3 taxa are found with suggested orthographic changes
+
+    4 taxa are suggested synonyms
+
+    2 taxa are found with suggested higher rank changes
+
+    5 taxa were not found
+
+    Comparing family information with gbif backbone
+
+    Searching for 27 taxa in the GBIF Backbone
+    ...
+
+    done
+
+    Analysing GBIF Backbone information
+
+    27 taxa are found without any modification needed
+
+    0 taxa are found with suggested orthographic changes
+
+    0 taxa are suggested synonyms
+
+    0 taxa are found with suggested higher rank changes
+
+    0 taxa were not found
+
+``` r
+correctedBST <- correct(taxoBST,suggestedBST)
+```
+
+``` r
+correctedBST$verbatimTaxonRank[!is.na(correctedBST$identificationQualifier)]<-NA
+getMorphoTaxo(correctedTDF)
+```
+
+      [1] NA                    "Ampelocera sp1"      "Ampelocera sp1"     
+      [4] NA                    NA                    NA                   
+      [7] NA                    NA                    NA                   
+     [10] NA                    "Bunchosia sp."       NA                   
+     [13] NA                    NA                    NA                   
+     [16] NA                    "Casearia sp1"        NA                   
+     [19] NA                    NA                    NA                   
+     [22] NA                    "Coccoloba sp1"       NA                   
+     [25] NA                    NA                    "Croton sp."         
+     [28] NA                    NA                    NA                   
+     [31] "Diospyros sp2"       NA                    NA                   
+     [34] "Eugenia sp3"         "Forsteronia sp1"     NA                   
+     [37] NA                    NA                    NA                   
+     [40] NA                    NA                    "Machaerium sp1"     
+     [43] "Machaerium sp1"      "Machaerium sp6"      NA                   
+     [46] NA                    "Myrtaceae sp1"       "Neea sp1"           
+     [49] NA                    "Pouteria sp7"        "Pouteria sp7"       
+     [52] NA                    NA                    NA                   
+     [55] NA                    NA                    NA                   
+     [58] NA                    NA                    "Rinorea sp1"        
+     [61] "Ruprechtia sp1"      NA                    "Senegalia sp1"      
+     [64] NA                    NA                    NA                   
+     [67] NA                    NA                    NA                   
+     [70] NA                    NA                    NA                   
+     [73] NA                    NA                    NA                   
+     [76] "Zanthoxylum sp2"     NA                    NA                   
+     [79] NA                    NA                    NA                   
+     [82] "Aegiphila sp1"       "Ampelocera sp1"      "Ampelocera sp1"     
+     [85] NA                    NA                    NA                   
+     [88] NA                    NA                    NA                   
+     [91] NA                    NA                    NA                   
+     [94] NA                    NA                    NA                   
+     [97] NA                    NA                    NA                   
+    [100] "Coccoloba sp1"       NA                    NA                   
+    [103] "Cordia sp."          "Cordia sp."          NA                   
+    [106] NA                    "Dioclea sp1"         "Diospyros sp2"      
+    [109] NA                    NA                    "Eugenia sp5"        
+    [112] "Forsteronia sp1"     NA                    "Gustavia sp."       
+    [115] "Gustavia sp."        NA                    NA                   
+    [118] "Machaerium sp1"      NA                    NA                   
+    [121] NA                    NA                    "Rubiaceae sp49"     
+    [124] NA                    "Neea sp1"            NA                   
+    [127] NA                    NA                    NA                   
+    [130] "Pouteria sp7"        "Pouteria sp8"        NA                   
+    [133] NA                    "Ruprechtia sp1"      "Senegalia sp1"      
+    [136] NA                    NA                    NA                   
+    [139] NA                    NA                    NA                   
+    [142] NA                    NA                    NA                   
+    [145] NA                    NA                    NA                   
+    [148] "Zanthoxylum sp2"     NA                    NA                   
+    [151] "Aegiphila sp."       "Aiouea sp."          "Albizia sp2"        
+    [154] "Albizia sp2"         "Alibertia sp."       "Allophylus sp."     
+    [157] NA                    NA                    NA                   
+    [160] NA                    "Aristolochia sp."    NA                   
+    [163] NA                    NA                    NA                   
+    [166] NA                    NA                    NA                   
+    [169] NA                    NA                    "Brosimum sp."       
+    [172] NA                    NA                    NA                   
+    [175] NA                    NA                    NA                   
+    [178] NA                    NA                    NA                   
+    [181] NA                    NA                    "Chiococca sp."      
+    [184] NA                    "Cissus sp."          NA                   
+    [187] "Coccoloba sp1"       NA                    NA                   
+    [190] NA                    NA                    NA                   
+    [193] NA                    NA                    NA                   
+    [196] NA                    NA                    NA                   
+    [199] "Discophora sp."      "Discophora sp."      NA                   
+    [202] NA                    NA                    NA                   
+    [205] NA                    "Fridericia sp."      "Fridericia sp."     
+    [208] "Galipea sp."         "Guapira sp."         NA                   
+    [211] NA                    NA                    "Hippocratea sp."    
+    [214] NA                    NA                    NA                   
+    [217] NA                    "Iresine sp."         NA                   
+    [220] "Machaerium sp2"      "Machaerium sp3"      "Machaerium sp3"     
+    [223] NA                    NA                    NA                   
+    [226] "Manilkara sp."       NA                    NA                   
+    [229] NA                    NA                    NA                   
+    [232] "sp15"                "sp16"                "Rubiaceae sp17"     
+    [235] "Oxandra sp."         "Oxandra sp."         NA                   
+    [238] NA                    NA                    NA                   
+    [241] NA                    "Peltogyne sp."       "Peltogyne sp."      
+    [244] NA                    "Pisonia sp."         "Pittoniotis sp."    
+    [247] NA                    NA                    "Pouteria sp1"       
+    [250] "Pouteria sp1"        "Pouteria sp2"        "Pouteria sp3"       
+    [253] "Pouteria sp7"        "Pouteria sp7"        "Pouteria sp7"       
+    [256] NA                    "Prestonia sp."       NA                   
+    [259] NA                    NA                    NA                   
+    [262] NA                    "Rudgea sp."          NA                   
+    [265] NA                    "Senegalia sp."       NA                   
+    [268] "Smilax sp."          NA                    NA                   
+    [271] NA                    NA                    NA                   
+    [274] NA                    "Tabernaemontana sp1" "Tabernaemontana sp1"
+    [277] NA                    NA                    NA                   
+    [280] NA                    "Triplaris sp."       NA                   
+    [283] NA                    "Vitex sp."           NA                   
+    [286] NA                    "Zanthoxylum sp4"     "Zygia sp."          
+    [289] NA                    NA                    NA                   
+    [292] NA                    NA                    NA                   
+    [295] NA                    NA                    NA                   
+    [298] NA                    NA                    NA                   
+    [301] NA                    NA                    NA                   
+    [304] NA                    NA                    NA                   
+    [307] "Mandevilla sp."      NA                    "sp6"                
+    [310] NA                    NA                    NA                   
+    [313] NA                    NA                    NA                   
+    [316] NA                    NA                    NA                   
+    [319] NA                    NA                    "Ampelocera sp1"     
+    [322] "Ampelocera sp1"      "Ampelocera sp1"      "Ampelocera sp1"     
+    [325] "Ampelocera sp1"      NA                    NA                   
+    [328] NA                    "Asclepias sp."       NA                   
+    [331] NA                    NA                    NA                   
+    [334] NA                    "Bunchosia sp2"       "Bunchosia sp2"      
+    [337] "Bunchosia sp2"       NA                    NA                   
+    [340] NA                    NA                    NA                   
+    [343] NA                    "Casearia sp1"        NA                   
+    [346] NA                    "Coccoloba sp1"       "Coccoloba sp2"      
+    [349] "Coccoloba sp2"       "Coccoloba sp2"       "Coccoloba sp2"      
+    [352] "Coccoloba sp2"       NA                    NA                   
+    [355] NA                    NA                    NA                   
+    [358] "Diospyros sp2"       "Diospyros sp2"       NA                   
+    [361] "Guapira sp."         NA                    "Hiraea sp."         
+    [364] "Leonia sp1"          NA                    NA                   
+    [367] NA                    NA                    "Rubiaceae sp11"     
+    [370] "sp12"                "sp18"                NA                   
+    [373] NA                    NA                    "Piptadenia sp."     
+    [376] NA                    "Pouteria sp7"        NA                   
+    [379] NA                    NA                    NA                   
+    [382] NA                    "Ruprechtia sp1"      NA                   
+    [385] NA                    NA                    NA                   
+    [388] NA                    NA                    NA                   
+    [391] "Vachellia sp."       NA                    NA                   
+    [394] NA                    NA                    NA                   
+    [397] NA                    NA                    NA                   
+    [400] NA                    NA                    "Capparis sp2"       
+    [403] "Casearia sp6"        "Casearia sp6"        "Chiococca sp."      
+    [406] NA                    NA                    "Coccoloba sp."      
+    [409] NA                    NA                    "Coutarea sp."       
+    [412] NA                    NA                    NA                   
+    [415] NA                    NA                    NA                   
+    [418] NA                    NA                    NA                   
+    [421] NA                    "Ipomoea sp."         NA                   
+    [424] NA                    NA                    NA                   
+    [427] NA                    NA                    NA                   
+    [430] NA                    "Myrospermum sp."     "Neea sp."           
+    [433] NA                    NA                    "Phryganocydia sp1"  
+    [436] NA                    NA                    NA                   
+    [439] NA                    NA                    NA                   
+    [442] NA                    NA                    NA                   
+    [445] NA                    NA                    NA                   
+    [448] "Albizia sp2"         NA                    NA                   
+    [451] NA                    NA                    "Ampelocera sp1"     
+    [454] NA                    NA                    NA                   
+    [457] "Aspidosperma sp1"    NA                    NA                   
+    [460] NA                    NA                    NA                   
+    [463] NA                    NA                    NA                   
+    [466] NA                    NA                    NA                   
+    [469] NA                    NA                    NA                   
+    [472] "Cassia sp."          NA                    NA                   
+    [475] NA                    "Cestrum sp1"         "Cestrum sp1"        
+    [478] "Cestrum sp1"         NA                    NA                   
+    [481] NA                    NA                    NA                   
+    [484] NA                    NA                    NA                   
+    [487] "Diospyros sp1"       "Enterolobium sp1"    "Eugenia sp3"        
+    [490] "Eugenia sp3"         "Eugenia sp3"         "Eugenia sp4"        
+    [493] "Eugenia sp4"         "Eugenia sp4"         "Eugenia sp4"        
+    [496] "Eugenia sp4"         "Ficus sp."           "Guarea sp1"         
+    [499] NA                    NA                    NA                   
+    [502] NA                    NA                    NA                   
+    [505] NA                    NA                    NA                   
+    [508] NA                    "Hippocratea sp."     "Inga sp1"           
+    [511] "Inga sp1"            "Inga sp4"            "Inga sp6"           
+    [514] "Inga sp6"            "Inga sp6"            "Ixora sp."          
+    [517] NA                    "Ladenbergia sp."     "Licania sp1"        
+    [520] NA                    NA                    NA                   
+    [523] NA                    NA                    NA                   
+    [526] NA                    "Malmea sp."          "Malmea sp."         
+    [529] "Malmea sp."          "Matayba sp1"         "Matayba sp1"        
+    [532] NA                    NA                    NA                   
+    [535] "Rubiaceae sp47"      NA                    NA                   
+    [538] NA                    NA                    NA                   
+    [541] NA                    "Nectandra sp."       "Nectandra sp."      
+    [544] "Nectandra sp."       "Nectandra sp."       NA                   
+    [547] NA                    NA                    NA                   
+    [550] NA                    NA                    NA                   
+    [553] NA                    NA                    NA                   
+    [556] "Paullinia sp1"       "Paullinia sp1"       "Piper sp6"          
+    [559] "Piper sp6"           "Pouteria sp5"        NA                   
+    [562] NA                    NA                    NA                   
+    [565] "Pseudomalmea sp."    "Pseudomalmea sp."    "Pseudomalmea sp."   
+    [568] "Pseudomalmea sp."    NA                    NA                   
+    [571] NA                    NA                    NA                   
+    [574] NA                    NA                    "Randia sp."         
+    [577] "Rinorea sp1"         "Rinorea sp1"         NA                   
+    [580] NA                    NA                    NA                   
+    [583] NA                    "Ruprechtia sp1"      "Senegalia sp1"      
+    [586] NA                    NA                    "Sorocea sp."        
+    [589] "Sorocea sp."         "Spathelia sp."       NA                   
+    [592] NA                    NA                    NA                   
+    [595] NA                    NA                    "Swartzia sp1"       
+    [598] "Swartzia sp1"        NA                    NA                   
+    [601] NA                    NA                    NA                   
+    [604] NA                    NA                    NA                   
+    [607] NA                    NA                    NA                   
+    [610] NA                    NA                    NA                   
+    [613] NA                    NA                    NA                   
+    [616] NA                    NA                    NA                   
+    [619] NA                    NA                    NA                   
+    [622] NA                    "Opuntia sp."         NA                   
+    [625] NA                    NA                    NA                   
+    [628] NA                    NA                    NA                   
+    [631] NA                    NA                    NA                   
+    [634] NA                    NA                    NA                   
+    [637] NA                    NA                    NA                   
+    [640] NA                    NA                    NA                   
+    [643] NA                    NA                    NA                   
+    [646] NA                    NA                    NA                   
+    [649] NA                    "Cordia sp."          NA                   
+    [652] NA                    NA                    NA                   
+    [655] NA                    NA                    NA                   
+    [658] "Eschweilera sp."     "Eugenia sp1"         "Guapira sp."        
+    [661] NA                    NA                    NA                   
+    [664] NA                    NA                    NA                   
+    [667] NA                    NA                    "Machaerium sp1"     
+    [670] NA                    NA                    NA                   
+    [673] "Marsdenia sp."       NA                    NA                   
+    [676] NA                    "sp14"                NA                   
+    [679] NA                    NA                    "Paullinia sp2"      
+    [682] NA                    NA                    NA                   
+    [685] NA                    NA                    "Prestonia sp."      
+    [688] NA                    NA                    "Psychotria sp."     
+    [691] NA                    NA                    NA                   
+    [694] NA                    NA                    NA                   
+    [697] NA                    NA                    NA                   
+    [700] NA                    NA                    NA                   
+    [703] "Senna sp."           "Senna sp1"           NA                   
+    [706] NA                    NA                    NA                   
+    [709] NA                    NA                    NA                   
+    [712] NA                    "Anemopaegma sp."     "Annona sp."         
+    [715] NA                    "Fridericia sp."      NA                   
+    [718] NA                    NA                    "Coursetia sp."      
+    [721] NA                    NA                    NA                   
+    [724] NA                    NA                    "Cheiloclinium sp."  
+    [727] NA                    NA                    NA                   
+    [730] NA                    NA                    NA                   
+    [733] NA                    NA                    NA                   
+    [736] "Elaeoluma sp."       "Endlicheria sp."     NA                   
+    [739] NA                    NA                    NA                   
+    [742] NA                    NA                    NA                   
+    [745] "Ficus sp."           "Ficus sp1"           NA                   
+    [748] NA                    NA                    NA                   
+    [751] NA                    NA                    NA                   
+    [754] NA                    NA                    NA                   
+    [757] NA                    NA                    "Inga sp."           
+    [760] NA                    NA                    NA                   
+    [763] NA                    NA                    NA                   
+    [766] NA                    "Licania sp."         "Licania sp."        
+    [769] "Licania sp2"         NA                    NA                   
+    [772] NA                    NA                    "Matayba sp."        
+    [775] "Matayba sp."         NA                    NA                   
+    [778] "Myrtaceae sp2"       "Myrtaceae sp2"       "Myrtaceae sp2"      
+    [781] "Myrtaceae sp3"       "sp4"                 "Myrcia sp1"         
+    [784] "Myrcia sp1"          "Myrcia sp2"          NA                   
+    [787] NA                    NA                    NA                   
+    [790] "Ouratea sp."         NA                    NA                   
+    [793] "Petrea sp."          NA                    NA                   
+    [796] NA                    "Pouteria sp4"        "Pouteria sp4"       
+    [799] NA                    NA                    "Pseudolmedia sp1"   
+    [802] "Pterocarpus sp4"     NA                    NA                   
+    [805] NA                    NA                    NA                   
+    [808] NA                    NA                    NA                   
+    [811] NA                    NA                    NA                   
+    [814] NA                    NA                    NA                   
+    [817] NA                    NA                    NA                   
+    [820] NA                    NA                    NA                   
+    [823] NA                    NA                    NA                   
+    [826] NA                    NA                    NA                   
+    [829] NA                    NA                    NA                   
+    [832] NA                    NA                    NA                   
+    [835] "Cupania sp1"         NA                    "Daphnopsis sp."     
+    [838] "Enterolobium sp1"    NA                    NA                   
+    [841] NA                    NA                    NA                   
+    [844] NA                    NA                    NA                   
+    [847] NA                    NA                    NA                   
+    [850] "Guapira sp1"         "Guapira sp1"         NA                   
+    [853] NA                    NA                    NA                   
+    [856] NA                    "Amaranthaceae sp5"   "Myrsine sp1"        
+    [859] NA                    NA                    NA                   
+    [862] NA                    NA                    NA                   
+    [865] NA                    NA                    NA                   
+    [868] NA                    NA                    NA                   
+    [871] "Serjania sp1"        NA                    NA                   
+    [874] NA                    NA                    NA                   
+    [877] NA                    NA                    NA                   
+    [880] NA                    NA                    NA                   
+    [883] NA                    NA                    "Verbesina sp."      
+    [886] NA                    NA                    NA                   
+    [889] NA                    NA                    NA                   
+
+``` r
+getMorphoTaxo(correctedBST)
+```
+
+       [1] NA                               NA                              
+       [3] NA                               NA                              
+       [5] NA                               NA                              
+       [7] NA                               NA                              
+       [9] NA                               "Cordia sp2"                    
+      [11] "Cupania sp2"                    NA                              
+      [13] "Ficus sp."                      NA                              
+      [15] NA                               NA                              
+      [17] NA                               NA                              
+      [19] "Machaerium sp5"                 NA                              
+      [21] NA                               "sp14"                          
+      [23] "sp19"                           "sp20"                          
+      [25] "sp21"                           "sp24"                          
+      [27] "sp25"                           NA                              
+      [29] NA                               "Palicourea sp1"                
+      [31] NA                               NA                              
+      [33] "Solanum sp."                    NA                              
+      [35] NA                               NA                              
+      [37] NA                               NA                              
+      [39] NA                               NA                              
+      [41] NA                               NA                              
+      [43] NA                               NA                              
+      [45] NA                               NA                              
+      [47] "Cecropia sp."                   NA                              
+      [49] NA                               NA                              
+      [51] NA                               NA                              
+      [53] NA                               NA                              
+      [55] NA                               NA                              
+      [57] NA                               NA                              
+      [59] NA                               NA                              
+      [61] "Inga sp1"                       "Lauraceae sp3"                 
+      [63] NA                               "Machaerium sp4"                
+      [65] "Machaerium sp4"                 NA                              
+      [67] NA                               NA                              
+      [69] NA                               NA                              
+      [71] NA                               NA                              
+      [73] NA                               NA                              
+      [75] NA                               "Pittoniotis sp."               
+      [77] NA                               "Senna sp1"                     
+      [79] NA                               NA                              
+      [81] NA                               NA                              
+      [83] NA                               NA                              
+      [85] NA                               NA                              
+      [87] NA                               NA                              
+      [89] NA                               NA                              
+      [91] "Annona sp1"                     NA                              
+      [93] NA                               "Bactris sp1"                   
+      [95] NA                               NA                              
+      [97] NA                               NA                              
+      [99] "Dioclea sp."                    NA                              
+     [101] "Ficus sp3"                      NA                              
+     [103] NA                               NA                              
+     [105] NA                               "Inga sp2"                      
+     [107] "Inga sp2"                       NA                              
+     [109] NA                               NA                              
+     [111] NA                               "Nectandra sp2"                 
+     [113] NA                               NA                              
+     [115] NA                               NA                              
+     [117] NA                               NA                              
+     [119] NA                               NA                              
+     [121] NA                               "Aspidosperma sp1"              
+     [123] NA                               NA                              
+     [125] "Bignonia sp1"                   NA                              
+     [127] NA                               "Brosimum sp1"                  
+     [129] "Brosimum sp1"                   NA                              
+     [131] "Chrysophyllum sp."              NA                              
+     [133] NA                               NA                              
+     [135] NA                               NA                              
+     [137] NA                               NA                              
+     [139] NA                               "Duguetia sp."                  
+     [141] NA                               NA                              
+     [143] NA                               NA                              
+     [145] NA                               NA                              
+     [147] NA                               NA                              
+     [149] "Lauraceae sp2"                  "Lauraceae sp3"                 
+     [151] "Lauraceae sp4"                  NA                              
+     [153] "Machaerium sp4"                 "Malvaceae sp."                 
+     [155] NA                               NA                              
+     [157] "Nectandra sp2"                  NA                              
+     [159] NA                               NA                              
+     [161] NA                               NA                              
+     [163] NA                               "Sorocea sp."                   
+     [165] "Sorocea sp."                    NA                              
+     [167] NA                               NA                              
+     [169] NA                               NA                              
+     [171] NA                               NA                              
+     [173] NA                               NA                              
+     [175] NA                               NA                              
+     [177] NA                               NA                              
+     [179] NA                               "Casearia sp."                  
+     [181] NA                               NA                              
+     [183] NA                               NA                              
+     [185] NA                               NA                              
+     [187] NA                               NA                              
+     [189] NA                               NA                              
+     [191] NA                               NA                              
+     [193] NA                               NA                              
+     [195] NA                               NA                              
+     [197] NA                               NA                              
+     [199] NA                               "Eugenia sp3"                   
+     [201] NA                               NA                              
+     [203] NA                               NA                              
+     [205] NA                               NA                              
+     [207] NA                               NA                              
+     [209] NA                               NA                              
+     [211] NA                               NA                              
+     [213] NA                               "Prestonia sp."                 
+     [215] NA                               NA                              
+     [217] NA                               NA                              
+     [219] NA                               NA                              
+     [221] NA                               NA                              
+     [223] NA                               NA                              
+     [225] NA                               NA                              
+     [227] NA                               NA                              
+     [229] NA                               NA                              
+     [231] NA                               "Eugenia sp3"                   
+     [233] NA                               NA                              
+     [235] NA                               NA                              
+     [237] "Mayna sp."                      NA                              
+     [239] NA                               NA                              
+     [241] NA                               "Prestonia sp."                 
+     [243] NA                               NA                              
+     [245] NA                               NA                              
+     [247] NA                               NA                              
+     [249] NA                               NA                              
+     [251] NA                               NA                              
+     [253] NA                               NA                              
+     [255] NA                               NA                              
+     [257] NA                               NA                              
+     [259] NA                               NA                              
+     [261] NA                               NA                              
+     [263] NA                               NA                              
+     [265] NA                               NA                              
+     [267] NA                               NA                              
+     [269] NA                               NA                              
+     [271] NA                               NA                              
+     [273] NA                               NA                              
+     [275] "Eugenia sp1"                    "Eugenia sp3"                   
+     [277] NA                               NA                              
+     [279] "Guarea sp."                     NA                              
+     [281] NA                               NA                              
+     [283] NA                               NA                              
+     [285] NA                               NA                              
+     [287] NA                               NA                              
+     [289] NA                               NA                              
+     [291] NA                               NA                              
+     [293] NA                               NA                              
+     [295] NA                               NA                              
+     [297] "Prestonia sp."                  NA                              
+     [299] NA                               NA                              
+     [301] NA                               NA                              
+     [303] NA                               NA                              
+     [305] NA                               NA                              
+     [307] NA                               NA                              
+     [309] NA                               NA                              
+     [311] NA                               NA                              
+     [313] NA                               NA                              
+     [315] NA                               NA                              
+     [317] NA                               NA                              
+     [319] NA                               NA                              
+     [321] NA                               NA                              
+     [323] NA                               NA                              
+     [325] NA                               NA                              
+     [327] NA                               NA                              
+     [329] NA                               "Oenocarpus sp."                
+     [331] NA                               NA                              
+     [333] "Piper sp5"                      "Piper sp5"                     
+     [335] NA                               "Pterocarpus sp4"               
+     [337] NA                               NA                              
+     [339] NA                               NA                              
+     [341] NA                               NA                              
+     [343] NA                               NA                              
+     [345] NA                               NA                              
+     [347] NA                               NA                              
+     [349] NA                               NA                              
+     [351] NA                               NA                              
+     [353] NA                               NA                              
+     [355] NA                               NA                              
+     [357] NA                               NA                              
+     [359] "Piper sp5"                      NA                              
+     [361] NA                               "Ulmaceae sp1"                  
+     [363] NA                               NA                              
+     [365] NA                               NA                              
+     [367] NA                               NA                              
+     [369] NA                               NA                              
+     [371] "Bignoniaceae sp."               NA                              
+     [373] NA                               NA                              
+     [375] NA                               "Croton sp2"                    
+     [377] NA                               NA                              
+     [379] NA                               NA                              
+     [381] "Ficus sp2"                      "Ficus sp2"                     
+     [383] NA                               NA                              
+     [385] "Machaerium sp13"                NA                              
+     [387] NA                               NA                              
+     [389] NA                               NA                              
+     [391] NA                               NA                              
+     [393] NA                               NA                              
+     [395] NA                               NA                              
+     [397] NA                               NA                              
+     [399] NA                               NA                              
+     [401] NA                               NA                              
+     [403] NA                               NA                              
+     [405] NA                               NA                              
+     [407] NA                               NA                              
+     [409] NA                               NA                              
+     [411] NA                               NA                              
+     [413] NA                               NA                              
+     [415] "Banisteriopsis sp1"             NA                              
+     [417] NA                               NA                              
+     [419] NA                               NA                              
+     [421] NA                               NA                              
+     [423] NA                               NA                              
+     [425] NA                               NA                              
+     [427] NA                               NA                              
+     [429] NA                               "Bignoniaceae sp."              
+     [431] "Bunchosia sp."                  "Bunchosia sp."                 
+     [433] "Bunchosia sp."                  NA                              
+     [435] NA                               NA                              
+     [437] NA                               NA                              
+     [439] NA                               NA                              
+     [441] NA                               NA                              
+     [443] "Piper sp5"                      NA                              
+     [445] NA                               NA                              
+     [447] NA                               NA                              
+     [449] NA                               NA                              
+     [451] NA                               NA                              
+     [453] "Casearia sp1"                   NA                              
+     [455] "Cordia sp1"                     "Cordia sp2"                    
+     [457] NA                               NA                              
+     [459] "Machaerium sp4"                 NA                              
+     [461] NA                               "Amphilophium sp."              
+     [463] NA                               NA                              
+     [465] NA                               NA                              
+     [467] NA                               NA                              
+     [469] NA                               NA                              
+     [471] NA                               "Eugenia sp1"                   
+     [473] "Eugenia sp2"                    NA                              
+     [475] NA                               NA                              
+     [477] "Licaria sp."                    NA                              
+     [479] NA                               NA                              
+     [481] NA                               NA                              
+     [483] NA                               NA                              
+     [485] NA                               NA                              
+     [487] NA                               NA                              
+     [489] NA                               NA                              
+     [491] "Zanthoxylum sp."                "Adenocalymma sp."              
+     [493] NA                               NA                              
+     [495] NA                               NA                              
+     [497] NA                               NA                              
+     [499] NA                               NA                              
+     [501] NA                               NA                              
+     [503] NA                               NA                              
+     [505] NA                               NA                              
+     [507] NA                               "Rubiaceae sp1"                 
+     [509] NA                               "Neea sp."                      
+     [511] NA                               "Senegalia sp."                 
+     [513] NA                               NA                              
+     [515] NA                               "Tabernaemontana sp13"          
+     [517] NA                               NA                              
+     [519] NA                               NA                              
+     [521] NA                               "Tabernaemontana sp."           
+     [523] NA                               "Inga sp1"                      
+     [525] NA                               NA                              
+     [527] NA                               "Rubiaceae sp6"                 
+     [529] NA                               NA                              
+     [531] NA                               NA                              
+     [533] NA                               NA                              
+     [535] NA                               NA                              
+     [537] NA                               NA                              
+     [539] NA                               "sp3"                           
+     [541] "sp7"                            "sp8"                           
+     [543] NA                               NA                              
+     [545] NA                               NA                              
+     [547] "Bactris sp2"                    NA                              
+     [549] "Casearia sp1"                   NA                              
+     [551] NA                               NA                              
+     [553] NA                               NA                              
+     [555] NA                               NA                              
+     [557] NA                               "Fabaceae sp1"                  
+     [559] NA                               "Ficus sp2"                     
+     [561] "Ficus sp4"                      NA                              
+     [563] NA                               NA                              
+     [565] "Machaerium sp1"                 "Machaerium sp2"                
+     [567] NA                               NA                              
+     [569] NA                               NA                              
+     [571] NA                               NA                              
+     [573] NA                               NA                              
+     [575] "Pterocarpus sp3"                "Randia sp6"                    
+     [577] NA                               NA                              
+     [579] NA                               "Sapindaceae sp1"               
+     [581] NA                               "Senna sp2"                     
+     [583] NA                               "Zanthoxylum sp1"               
+     [585] NA                               NA                              
+     [587] NA                               NA                              
+     [589] NA                               "Apocynaceae sp1"               
+     [591] NA                               "Bactris sp2"                   
+     [593] NA                               NA                              
+     [595] NA                               NA                              
+     [597] NA                               NA                              
+     [599] NA                               NA                              
+     [601] "Ficus sp2"                      "Ficus sp4"                     
+     [603] NA                               NA                              
+     [605] NA                               NA                              
+     [607] "Inga sp2"                       NA                              
+     [609] NA                               NA                              
+     [611] NA                               NA                              
+     [613] NA                               NA                              
+     [615] "Oxandra sp."                    NA                              
+     [617] NA                               NA                              
+     [619] NA                               NA                              
+     [621] NA                               NA                              
+     [623] NA                               NA                              
+     [625] NA                               NA                              
+     [627] NA                               NA                              
+     [629] NA                               NA                              
+     [631] "Triplaris sp1"                  NA                              
+     [633] NA                               "Apocynaceae sp1"               
+     [635] "Aspidosperma sp2"               "Asteraceae sp."                
+     [637] NA                               NA                              
+     [639] NA                               NA                              
+     [641] NA                               NA                              
+     [643] NA                               NA                              
+     [645] NA                               NA                              
+     [647] NA                               NA                              
+     [649] NA                               NA                              
+     [651] NA                               "Connarus sp."                  
+     [653] NA                               NA                              
+     [655] NA                               NA                              
+     [657] NA                               NA                              
+     [659] "Ficus sp2"                      NA                              
+     [661] NA                               NA                              
+     [663] NA                               NA                              
+     [665] "Inga sp4"                       NA                              
+     [667] NA                               NA                              
+     [669] NA                               "Oxandra sp."                   
+     [671] NA                               "Pouteria sp3"                  
+     [673] NA                               NA                              
+     [675] NA                               "Sapotaceae sp."                
+     [677] NA                               NA                              
+     [679] NA                               NA                              
+     [681] "Swartzia sp1"                   NA                              
+     [683] "Ulmaceae sp."                   "Urticaceae sp."                
+     [685] NA                               NA                              
+     [687] NA                               NA                              
+     [689] NA                               NA                              
+     [691] "Machaerium sp."                 NA                              
+     [693] NA                               NA                              
+     [695] NA                               NA                              
+     [697] NA                               NA                              
+     [699] NA                               NA                              
+     [701] NA                               NA                              
+     [703] "Machaerium sp."                 NA                              
+     [705] NA                               "Apocynaceae sp2"               
+     [707] NA                               NA                              
+     [709] NA                               NA                              
+     [711] NA                               "Casearia sp2"                  
+     [713] NA                               NA                              
+     [715] NA                               NA                              
+     [717] NA                               NA                              
+     [719] NA                               NA                              
+     [721] NA                               NA                              
+     [723] NA                               NA                              
+     [725] NA                               NA                              
+     [727] NA                               NA                              
+     [729] NA                               NA                              
+     [731] NA                               NA                              
+     [733] NA                               NA                              
+     [735] NA                               NA                              
+     [737] NA                               NA                              
+     [739] NA                               NA                              
+     [741] NA                               NA                              
+     [743] NA                               NA                              
+     [745] NA                               NA                              
+     [747] "Swartzia sp4"                   "Zanthoxylum sp4"               
+     [749] NA                               NA                              
+     [751] "Bactris sp4"                    NA                              
+     [753] NA                               "Casearia sp2"                  
+     [755] NA                               NA                              
+     [757] NA                               NA                              
+     [759] NA                               NA                              
+     [761] NA                               NA                              
+     [763] "Ficus sp7"                      "Ficus sp8"                     
+     [765] NA                               NA                              
+     [767] NA                               NA                              
+     [769] NA                               NA                              
+     [771] "Lauraceae sp7"                  NA                              
+     [773] NA                               NA                              
+     [775] NA                               NA                              
+     [777] NA                               NA                              
+     [779] NA                               "Tetrapterys sp2"               
+     [781] NA                               NA                              
+     [783] NA                               NA                              
+     [785] NA                               NA                              
+     [787] NA                               "Casearia sp3"                  
+     [789] NA                               NA                              
+     [791] NA                               NA                              
+     [793] NA                               "Ficus sp5"                     
+     [795] "Gouania sp."                    NA                              
+     [797] "Inga sp9"                       "Inga sp9"                      
+     [799] "Lauraceae sp7"                  NA                              
+     [801] NA                               NA                              
+     [803] NA                               NA                              
+     [805] NA                               NA                              
+     [807] NA                               NA                              
+     [809] NA                               NA                              
+     [811] NA                               NA                              
+     [813] NA                               NA                              
+     [815] NA                               NA                              
+     [817] NA                               NA                              
+     [819] NA                               "Ampelocera sp."                
+     [821] NA                               NA                              
+     [823] NA                               NA                              
+     [825] NA                               NA                              
+     [827] NA                               NA                              
+     [829] "Cordia sp."                     NA                              
+     [831] NA                               "Eugenia sp3"                   
+     [833] NA                               NA                              
+     [835] NA                               NA                              
+     [837] NA                               NA                              
+     [839] NA                               NA                              
+     [841] NA                               NA                              
+     [843] "Pouteria sp."                   NA                              
+     [845] NA                               NA                              
+     [847] NA                               NA                              
+     [849] NA                               NA                              
+     [851] NA                               NA                              
+     [853] NA                               NA                              
+     [855] NA                               NA                              
+     [857] "Casearia sp2"                   "Casearia sp23"                 
+     [859] NA                               NA                              
+     [861] "Cordia sp1"                     "Cordia sp2"                    
+     [863] "Cupania sp1"                    NA                              
+     [865] NA                               NA                              
+     [867] NA                               "sp14"                          
+     [869] "Asteraceae sp15"                "sp17"                          
+     [871] "sp19"                           "sp21"                          
+     [873] "sp24"                           "sp26"                          
+     [875] "Nectandra sp2"                  NA                              
+     [877] NA                               "Palicourea sp1"                
+     [879] NA                               "Pouteria sp27"                 
+     [881] NA                               NA                              
+     [883] NA                               NA                              
+     [885] NA                               NA                              
+     [887] NA                               "Ampelocera sp1"                
+     [889] "Ampelocera sp1"                 NA                              
+     [891] NA                               NA                              
+     [893] NA                               NA                              
+     [895] NA                               NA                              
+     [897] "Bunchosia sp."                  NA                              
+     [899] NA                               NA                              
+     [901] NA                               NA                              
+     [903] "Casearia sp1"                   NA                              
+     [905] NA                               NA                              
+     [907] NA                               NA                              
+     [909] "Coccoloba sp1"                  NA                              
+     [911] NA                               NA                              
+     [913] "Croton sp."                     NA                              
+     [915] NA                               NA                              
+     [917] "Diospyros sp2"                  NA                              
+     [919] NA                               "Eugenia sp3"                   
+     [921] "Forsteronia sp1"                NA                              
+     [923] NA                               NA                              
+     [925] NA                               NA                              
+     [927] NA                               "Machaerium sp1"                
+     [929] "Machaerium sp1"                 "Machaerium sp6"                
+     [931] NA                               NA                              
+     [933] "Myrtaceae sp1"                  "Neea sp1"                      
+     [935] NA                               "Pouteria sp7"                  
+     [937] "Pouteria sp7"                   NA                              
+     [939] NA                               NA                              
+     [941] NA                               NA                              
+     [943] NA                               NA                              
+     [945] NA                               "Rinorea sp1"                   
+     [947] "Ruprechtia sp1"                 NA                              
+     [949] "Senegalia sp1"                  NA                              
+     [951] NA                               NA                              
+     [953] NA                               NA                              
+     [955] NA                               NA                              
+     [957] NA                               NA                              
+     [959] NA                               NA                              
+     [961] NA                               "Zanthoxylum sp2"               
+     [963] NA                               NA                              
+     [965] NA                               NA                              
+     [967] NA                               "Aegiphila sp1"                 
+     [969] "Ampelocera sp1"                 "Ampelocera sp1"                
+     [971] NA                               NA                              
+     [973] NA                               NA                              
+     [975] NA                               NA                              
+     [977] NA                               NA                              
+     [979] NA                               NA                              
+     [981] NA                               NA                              
+     [983] NA                               NA                              
+     [985] NA                               "Coccoloba sp1"                 
+     [987] NA                               NA                              
+     [989] "Cordia sp."                     "Cordia sp."                    
+     [991] NA                               NA                              
+     [993] "Dioclea sp1"                    "Diospyros sp2"                 
+     [995] NA                               NA                              
+     [997] "Eugenia sp5"                    "Forsteronia sp1"               
+     [999] NA                               "Gustavia sp."                  
+    [1001] "Gustavia sp."                   NA                              
+    [1003] NA                               "Machaerium sp1"                
+    [1005] NA                               NA                              
+    [1007] NA                               NA                              
+    [1009] "Rubiaceae sp49"                 NA                              
+    [1011] "Neea sp1"                       NA                              
+    [1013] NA                               NA                              
+    [1015] NA                               "Pouteria sp7"                  
+    [1017] "Pouteria sp8"                   NA                              
+    [1019] NA                               "Ruprechtia sp1"                
+    [1021] "Senegalia sp1"                  NA                              
+    [1023] NA                               NA                              
+    [1025] NA                               NA                              
+    [1027] NA                               NA                              
+    [1029] NA                               NA                              
+    [1031] NA                               NA                              
+    [1033] NA                               "Zanthoxylum sp2"               
+    [1035] NA                               NA                              
+    [1037] NA                               NA                              
+    [1039] NA                               NA                              
+    [1041] NA                               NA                              
+    [1043] NA                               NA                              
+    [1045] NA                               NA                              
+    [1047] "Fridericia sp."                 NA                              
+    [1049] NA                               NA                              
+    [1051] NA                               NA                              
+    [1053] NA                               NA                              
+    [1055] NA                               NA                              
+    [1057] NA                               NA                              
+    [1059] NA                               NA                              
+    [1061] NA                               NA                              
+    [1063] NA                               "Calopogonium cf. mucunoides"   
+    [1065] NA                               NA                              
+    [1067] NA                               "Eugenia sp."                   
+    [1069] NA                               "Inga cf. Edulis"               
+    [1071] NA                               "Machaerium cf. inundatum"      
+    [1073] NA                               NA                              
+    [1075] NA                               "Swartzia sp1"                  
+    [1077] NA                               NA                              
+    [1079] NA                               NA                              
+    [1081] "Aegiphila sp."                  "Aiouea sp."                    
+    [1083] "Albizia sp2"                    "Albizia sp2"                   
+    [1085] "Alibertia sp."                  "Allophylus sp."                
+    [1087] NA                               NA                              
+    [1089] NA                               NA                              
+    [1091] "Aristolochia sp."               NA                              
+    [1093] NA                               NA                              
+    [1095] NA                               NA                              
+    [1097] NA                               NA                              
+    [1099] NA                               NA                              
+    [1101] "Brosimum sp."                   NA                              
+    [1103] NA                               NA                              
+    [1105] NA                               NA                              
+    [1107] NA                               NA                              
+    [1109] NA                               NA                              
+    [1111] NA                               NA                              
+    [1113] "Chiococca sp."                  NA                              
+    [1115] "Cissus sp."                     NA                              
+    [1117] "Coccoloba sp1"                  NA                              
+    [1119] NA                               NA                              
+    [1121] NA                               NA                              
+    [1123] NA                               NA                              
+    [1125] NA                               NA                              
+    [1127] NA                               NA                              
+    [1129] "Discophora sp."                 "Discophora sp."                
+    [1131] NA                               NA                              
+    [1133] NA                               NA                              
+    [1135] NA                               "Fridericia sp."                
+    [1137] "Fridericia sp."                 "Galipea sp."                   
+    [1139] "Guapira sp."                    NA                              
+    [1141] NA                               NA                              
+    [1143] "Hippocratea sp."                NA                              
+    [1145] NA                               NA                              
+    [1147] NA                               "Iresine sp."                   
+    [1149] NA                               "Machaerium sp2"                
+    [1151] "Machaerium sp3"                 "Machaerium sp3"                
+    [1153] NA                               NA                              
+    [1155] NA                               "Manilkara sp."                 
+    [1157] NA                               NA                              
+    [1159] NA                               NA                              
+    [1161] NA                               "sp15"                          
+    [1163] "sp16"                           "Rubiaceae sp17"                
+    [1165] "Oxandra sp."                    "Oxandra sp."                   
+    [1167] NA                               NA                              
+    [1169] NA                               NA                              
+    [1171] NA                               "Peltogyne sp."                 
+    [1173] "Peltogyne sp."                  NA                              
+    [1175] "Pisonia sp."                    "Pittoniotis sp."               
+    [1177] NA                               NA                              
+    [1179] "Pouteria sp1"                   "Pouteria sp1"                  
+    [1181] "Pouteria sp2"                   "Pouteria sp3"                  
+    [1183] "Pouteria sp7"                   "Pouteria sp7"                  
+    [1185] "Pouteria sp7"                   NA                              
+    [1187] "Prestonia sp."                  NA                              
+    [1189] NA                               NA                              
+    [1191] NA                               NA                              
+    [1193] "Rudgea sp."                     NA                              
+    [1195] NA                               "Senegalia sp."                 
+    [1197] NA                               "Smilax sp."                    
+    [1199] NA                               NA                              
+    [1201] NA                               NA                              
+    [1203] NA                               NA                              
+    [1205] "Tabernaemontana sp1"            "Tabernaemontana sp1"           
+    [1207] NA                               NA                              
+    [1209] NA                               NA                              
+    [1211] "Triplaris sp."                  NA                              
+    [1213] NA                               "Vitex sp."                     
+    [1215] NA                               NA                              
+    [1217] "Zanthoxylum sp4"                "Zygia sp."                     
+    [1219] NA                               NA                              
+    [1221] NA                               NA                              
+    [1223] NA                               NA                              
+    [1225] NA                               NA                              
+    [1227] NA                               NA                              
+    [1229] NA                               NA                              
+    [1231] NA                               NA                              
+    [1233] NA                               NA                              
+    [1235] NA                               NA                              
+    [1237] "Mandevilla sp."                 NA                              
+    [1239] "sp6"                            NA                              
+    [1241] NA                               NA                              
+    [1243] NA                               NA                              
+    [1245] NA                               NA                              
+    [1247] NA                               NA                              
+    [1249] NA                               NA                              
+    [1251] NA                               NA                              
+    [1253] NA                               "Allophylus sp."                
+    [1255] NA                               NA                              
+    [1257] NA                               NA                              
+    [1259] NA                               NA                              
+    [1261] NA                               NA                              
+    [1263] NA                               NA                              
+    [1265] NA                               NA                              
+    [1267] NA                               NA                              
+    [1269] NA                               NA                              
+    [1271] "Licaria sp."                    NA                              
+    [1273] NA                               "Mansoa sp."                    
+    [1275] NA                               NA                              
+    [1277] NA                               "Mollinedia sp."                
+    [1279] NA                               "Mucuna sp."                    
+    [1281] NA                               "Piper sp."                     
+    [1283] NA                               NA                              
+    [1285] NA                               NA                              
+    [1287] "Senegalia sp."                  NA                              
+    [1289] "Tabernaemontana sp."            NA                              
+    [1291] NA                               NA                              
+    [1293] "Trichilia sp."                  NA                              
+    [1295] NA                               NA                              
+    [1297] NA                               NA                              
+    [1299] NA                               NA                              
+    [1301] NA                               NA                              
+    [1303] NA                               NA                              
+    [1305] NA                               NA                              
+    [1307] NA                               NA                              
+    [1309] NA                               NA                              
+    [1311] "Alibertia sp."                  NA                              
+    [1313] NA                               NA                              
+    [1315] NA                               NA                              
+    [1317] NA                               "Casearia sp."                  
+    [1319] "Casearia sp."                   NA                              
+    [1321] NA                               NA                              
+    [1323] NA                               NA                              
+    [1325] NA                               NA                              
+    [1327] NA                               NA                              
+    [1329] NA                               NA                              
+    [1331] NA                               NA                              
+    [1333] NA                               NA                              
+    [1335] NA                               NA                              
+    [1337] NA                               NA                              
+    [1339] NA                               "Ormosia sp1"                   
+    [1341] NA                               NA                              
+    [1343] "Prestonia sp."                  NA                              
+    [1345] NA                               NA                              
+    [1347] NA                               NA                              
+    [1349] NA                               NA                              
+    [1351] NA                               NA                              
+    [1353] NA                               NA                              
+    [1355] "Alibertia sp."                  NA                              
+    [1357] NA                               NA                              
+    [1359] NA                               NA                              
+    [1361] NA                               NA                              
+    [1363] NA                               NA                              
+    [1365] NA                               NA                              
+    [1367] NA                               "Guatteria sp."                 
+    [1369] "Guatteria sp."                  "Inga sp."                      
+    [1371] NA                               NA                              
+    [1373] NA                               NA                              
+    [1375] NA                               NA                              
+    [1377] NA                               "Ormosia sp1"                   
+    [1379] "Ormosia sp1"                    NA                              
+    [1381] NA                               "Piper cf. marginatum"          
+    [1383] NA                               NA                              
+    [1385] "Prestonia sp."                  "Prestonia sp."                 
+    [1387] NA                               NA                              
+    [1389] NA                               NA                              
+    [1391] NA                               NA                              
+    [1393] NA                               NA                              
+    [1395] NA                               NA                              
+    [1397] NA                               NA                              
+    [1399] NA                               NA                              
+    [1401] NA                               NA                              
+    [1403] NA                               NA                              
+    [1405] NA                               NA                              
+    [1407] NA                               NA                              
+    [1409] NA                               NA                              
+    [1411] NA                               "Ormosia sp1"                   
+    [1413] NA                               NA                              
+    [1415] NA                               NA                              
+    [1417] "Ampelocera sp1"                 "Ampelocera sp1"                
+    [1419] "Ampelocera sp1"                 "Ampelocera sp1"                
+    [1421] "Ampelocera sp1"                 NA                              
+    [1423] NA                               NA                              
+    [1425] "Asclepias sp."                  NA                              
+    [1427] NA                               NA                              
+    [1429] NA                               NA                              
+    [1431] "Bunchosia sp2"                  "Bunchosia sp2"                 
+    [1433] "Bunchosia sp2"                  NA                              
+    [1435] NA                               NA                              
+    [1437] NA                               NA                              
+    [1439] NA                               "Casearia sp1"                  
+    [1441] NA                               NA                              
+    [1443] "Coccoloba sp1"                  "Coccoloba sp2"                 
+    [1445] "Coccoloba sp2"                  "Coccoloba sp2"                 
+    [1447] "Coccoloba sp2"                  "Coccoloba sp2"                 
+    [1449] NA                               NA                              
+    [1451] NA                               NA                              
+    [1453] NA                               "Diospyros sp2"                 
+    [1455] "Diospyros sp2"                  NA                              
+    [1457] "Guapira sp."                    NA                              
+    [1459] "Hiraea sp."                     "Leonia sp1"                    
+    [1461] NA                               NA                              
+    [1463] NA                               NA                              
+    [1465] "Rubiaceae sp11"                 "sp12"                          
+    [1467] "sp18"                           NA                              
+    [1469] NA                               NA                              
+    [1471] "Piptadenia sp."                 NA                              
+    [1473] "Pouteria sp7"                   NA                              
+    [1475] NA                               NA                              
+    [1477] NA                               NA                              
+    [1479] "Ruprechtia sp1"                 NA                              
+    [1481] NA                               NA                              
+    [1483] NA                               NA                              
+    [1485] NA                               NA                              
+    [1487] "Vachellia sp."                  NA                              
+    [1489] NA                               NA                              
+    [1491] "Allophylus sp."                 NA                              
+    [1493] NA                               NA                              
+    [1495] NA                               NA                              
+    [1497] NA                               NA                              
+    [1499] "Chomelia sp."                   NA                              
+    [1501] NA                               NA                              
+    [1503] NA                               "Fabaceae sp1"                  
+    [1505] NA                               NA                              
+    [1507] NA                               "Matayba sp."                   
+    [1509] NA                               NA                              
+    [1511] NA                               NA                              
+    [1513] NA                               NA                              
+    [1515] NA                               NA                              
+    [1517] "Senegalia sp."                  NA                              
+    [1519] "Tabernaemontana sp."            NA                              
+    [1521] NA                               NA                              
+    [1523] NA                               "Zanthoxylum sp."               
+    [1525] NA                               "Albizia sp."                   
+    [1527] NA                               NA                              
+    [1529] NA                               NA                              
+    [1531] NA                               NA                              
+    [1533] NA                               NA                              
+    [1535] NA                               NA                              
+    [1537] NA                               NA                              
+    [1539] NA                               NA                              
+    [1541] NA                               NA                              
+    [1543] NA                               NA                              
+    [1545] "Oxandra sp."                    "Paullinia sp."                 
+    [1547] NA                               NA                              
+    [1549] "Pradosia sp."                   NA                              
+    [1551] NA                               NA                              
+    [1553] NA                               NA                              
+    [1555] NA                               NA                              
+    [1557] NA                               NA                              
+    [1559] "Albizia sp."                    NA                              
+    [1561] NA                               NA                              
+    [1563] NA                               "Fridericia sp."                
+    [1565] NA                               NA                              
+    [1567] NA                               NA                              
+    [1569] NA                               "Mendoncia sp."                 
+    [1571] NA                               NA                              
+    [1573] NA                               NA                              
+    [1575] NA                               "Senegalia sp."                 
+    [1577] NA                               NA                              
+    [1579] NA                               NA                              
+    [1581] NA                               NA                              
+    [1583] NA                               NA                              
+    [1585] NA                               NA                              
+    [1587] "Cnidoscolus sp."                NA                              
+    [1589] NA                               NA                              
+    [1591] NA                               NA                              
+    [1593] NA                               "Fabaceae sp2"                  
+    [1595] "Fabaceae sp3"                   NA                              
+    [1597] NA                               NA                              
+    [1599] NA                               NA                              
+    [1601] NA                               "Randia sp."                    
+    [1603] NA                               NA                              
+    [1605] NA                               NA                              
+    [1607] NA                               NA                              
+    [1609] NA                               NA                              
+    [1611] NA                               NA                              
+    [1613] NA                               NA                              
+    [1615] NA                               NA                              
+    [1617] NA                               NA                              
+    [1619] NA                               NA                              
+    [1621] NA                               NA                              
+    [1623] NA                               NA                              
+    [1625] NA                               NA                              
+    [1627] NA                               NA                              
+    [1629] NA                               NA                              
+    [1631] NA                               NA                              
+    [1633] NA                               NA                              
+    [1635] NA                               NA                              
+    [1637] NA                               NA                              
+    [1639] NA                               NA                              
+    [1641] NA                               NA                              
+    [1643] NA                               NA                              
+    [1645] NA                               NA                              
+    [1647] NA                               NA                              
+    [1649] NA                               NA                              
+    [1651] NA                               NA                              
+    [1653] NA                               NA                              
+    [1655] NA                               NA                              
+    [1657] "Cordia sp."                     NA                              
+    [1659] NA                               NA                              
+    [1661] NA                               NA                              
+    [1663] NA                               NA                              
+    [1665] NA                               NA                              
+    [1667] NA                               "Inga sp1"                      
+    [1669] "Inga sp2"                       "sp12"                          
+    [1671] NA                               NA                              
+    [1673] NA                               "Uncaria sp."                   
+    [1675] NA                               NA                              
+    [1677] NA                               NA                              
+    [1679] NA                               NA                              
+    [1681] NA                               NA                              
+    [1683] NA                               NA                              
+    [1685] NA                               "Bactris sp2"                   
+    [1687] NA                               "Bignoniaceae sp."              
+    [1689] "Bignonia sp2"                   NA                              
+    [1691] NA                               NA                              
+    [1693] NA                               NA                              
+    [1695] NA                               NA                              
+    [1697] NA                               NA                              
+    [1699] NA                               NA                              
+    [1701] "Cordia sp2"                     NA                              
+    [1703] NA                               NA                              
+    [1705] NA                               NA                              
+    [1707] NA                               "Ficus sp2"                     
+    [1709] NA                               NA                              
+    [1711] NA                               NA                              
+    [1713] NA                               NA                              
+    [1715] "Machaerium sp3"                 NA                              
+    [1717] "Malvaviscus sp."                NA                              
+    [1719] NA                               NA                              
+    [1721] "Oxandra sp."                    NA                              
+    [1723] NA                               NA                              
+    [1725] NA                               NA                              
+    [1727] NA                               NA                              
+    [1729] NA                               NA                              
+    [1731] "Quararibea sp1"                 "Quararibea sp2"                
+    [1733] "Quararibea sp2"                 NA                              
+    [1735] "Randia sp5"                     "Rinorea sp."                   
+    [1737] NA                               NA                              
+    [1739] NA                               NA                              
+    [1741] NA                               NA                              
+    [1743] "Tabernaemontana sp."            NA                              
+    [1745] "Ulmaceae sp."                   "Urticaceae sp."                
+    [1747] "Xylosma sp1"                    NA                              
+    [1749] NA                               NA                              
+    [1751] NA                               "Annona sp2"                    
+    [1753] NA                               NA                              
+    [1755] "Capparaceae sp."                NA                              
+    [1757] NA                               NA                              
+    [1759] NA                               NA                              
+    [1761] NA                               "Inga sp3"                      
+    [1763] NA                               NA                              
+    [1765] "Machaerium sp3"                 "Machaerium sp4"                
+    [1767] NA                               NA                              
+    [1769] "Randia sp5"                     "Randia sp6"                    
+    [1771] "Senegalia sp."                  NA                              
+    [1773] NA                               NA                              
+    [1775] NA                               NA                              
+    [1777] NA                               NA                              
+    [1779] "Annona sp2"                     NA                              
+    [1781] "Aspidosperma sp2"               NA                              
+    [1783] NA                               "Bactris sp2"                   
+    [1785] NA                               NA                              
+    [1787] NA                               "Capparaceae sp."               
+    [1789] NA                               NA                              
+    [1791] NA                               NA                              
+    [1793] NA                               NA                              
+    [1795] NA                               "Connarus sp."                  
+    [1797] NA                               NA                              
+    [1799] NA                               NA                              
+    [1801] NA                               NA                              
+    [1803] NA                               "Inga sp1"                      
+    [1805] "Inga sp5"                       NA                              
+    [1807] NA                               NA                              
+    [1809] NA                               NA                              
+    [1811] "Nectandra sp1"                  NA                              
+    [1813] NA                               "Prestonia sp."                 
+    [1815] NA                               "Rubiaceae sp."                 
+    [1817] NA                               NA                              
+    [1819] NA                               NA                              
+    [1821] NA                               "Swartzia sp1"                  
+    [1823] NA                               NA                              
+    [1825] "Urticaceae sp."                 "Xylosma sp1"                   
+    [1827] NA                               NA                              
+    [1829] NA                               NA                              
+    [1831] "Coccoloba sp."                  NA                              
+    [1833] NA                               NA                              
+    [1835] NA                               NA                              
+    [1837] "Pouteria sp."                   NA                              
+    [1839] NA                               NA                              
+    [1841] NA                               NA                              
+    [1843] NA                               NA                              
+    [1845] NA                               NA                              
+    [1847] NA                               NA                              
+    [1849] NA                               NA                              
+    [1851] NA                               NA                              
+    [1853] NA                               NA                              
+    [1855] NA                               NA                              
+    [1857] NA                               "Ficus sp2"                     
+    [1859] NA                               NA                              
+    [1861] NA                               NA                              
+    [1863] NA                               "Inga sp10"                     
+    [1865] NA                               NA                              
+    [1867] NA                               NA                              
+    [1869] NA                               "Piper sp4"                     
+    [1871] NA                               NA                              
+    [1873] NA                               NA                              
+    [1875] NA                               NA                              
+    [1877] NA                               NA                              
+    [1879] NA                               NA                              
+    [1881] NA                               NA                              
+    [1883] NA                               NA                              
+    [1885] NA                               NA                              
+    [1887] NA                               NA                              
+    [1889] NA                               NA                              
+    [1891] NA                               NA                              
+    [1893] "Fabaceae sp3"                   "Ficus sp2"                     
+    [1895] NA                               NA                              
+    [1897] NA                               NA                              
+    [1899] NA                               NA                              
+    [1901] NA                               NA                              
+    [1903] NA                               NA                              
+    [1905] NA                               NA                              
+    [1907] NA                               NA                              
+    [1909] NA                               NA                              
+    [1911] NA                               "Piper sp4"                     
+    [1913] NA                               NA                              
+    [1915] NA                               NA                              
+    [1917] NA                               "Zanthoxylum sp5"               
+    [1919] NA                               NA                              
+    [1921] NA                               "Inga sp10"                     
+    [1923] "Inga sp10"                      "Inga sp11"                     
+    [1925] NA                               NA                              
+    [1927] NA                               "Zanthoxylum sp3"               
+    [1929] "Zanthoxylum sp5"                NA                              
+    [1931] NA                               NA                              
+    [1933] "Aristolochia sp."               NA                              
+    [1935] NA                               NA                              
+    [1937] NA                               NA                              
+    [1939] NA                               NA                              
+    [1941] NA                               NA                              
+    [1943] NA                               NA                              
+    [1945] NA                               NA                              
+    [1947] NA                               NA                              
+    [1949] NA                               NA                              
+    [1951] "Chloroleucon sp."               NA                              
+    [1953] NA                               NA                              
+    [1955] NA                               NA                              
+    [1957] "Critonia sp."                   NA                              
+    [1959] NA                               NA                              
+    [1961] NA                               NA                              
+    [1963] NA                               NA                              
+    [1965] NA                               NA                              
+    [1967] NA                               NA                              
+    [1969] NA                               NA                              
+    [1971] NA                               NA                              
+    [1973] NA                               NA                              
+    [1975] NA                               NA                              
+    [1977] NA                               NA                              
+    [1979] NA                               NA                              
+    [1981] "sp2"                            "Bignoniaceae sp3"              
+    [1983] "Myrcia sp."                     NA                              
+    [1985] "Oxandra sp."                    NA                              
+    [1987] NA                               NA                              
+    [1989] NA                               NA                              
+    [1991] NA                               NA                              
+    [1993] NA                               NA                              
+    [1995] NA                               NA                              
+    [1997] NA                               NA                              
+    [1999] NA                               NA                              
+    [2001] NA                               NA                              
+    [2003] NA                               NA                              
+    [2005] NA                               NA                              
+    [2007] "Stigmaphyllon sp1"              NA                              
+    [2009] NA                               NA                              
+    [2011] NA                               NA                              
+    [2013] NA                               NA                              
+    [2015] NA                               NA                              
+    [2017] NA                               NA                              
+    [2019] NA                               NA                              
+    [2021] NA                               "Bignoniaceae sp3"              
+    [2023] NA                               NA                              
+    [2025] NA                               NA                              
+    [2027] NA                               NA                              
+    [2029] NA                               NA                              
+    [2031] NA                               NA                              
+    [2033] NA                               NA                              
+    [2035] NA                               NA                              
+    [2037] NA                               NA                              
+    [2039] NA                               NA                              
+    [2041] NA                               NA                              
+    [2043] NA                               NA                              
+    [2045] NA                               NA                              
+    [2047] NA                               NA                              
+    [2049] NA                               NA                              
+    [2051] NA                               NA                              
+    [2053] NA                               NA                              
+    [2055] NA                               NA                              
+    [2057] NA                               "Bignoniaceae sp3"              
+    [2059] NA                               "Oxandra sp."                   
+    [2061] NA                               NA                              
+    [2063] NA                               NA                              
+    [2065] NA                               NA                              
+    [2067] NA                               NA                              
+    [2069] NA                               NA                              
+    [2071] NA                               "Rubiaceae sp2"                 
+    [2073] NA                               NA                              
+    [2075] NA                               NA                              
+    [2077] NA                               NA                              
+    [2079] NA                               NA                              
+    [2081] NA                               NA                              
+    [2083] NA                               NA                              
+    [2085] NA                               NA                              
+    [2087] NA                               NA                              
+    [2089] "Aiouea sp."                     NA                              
+    [2091] NA                               NA                              
+    [2093] NA                               "Aristolochia sp."              
+    [2095] NA                               NA                              
+    [2097] NA                               NA                              
+    [2099] NA                               NA                              
+    [2101] NA                               NA                              
+    [2103] NA                               NA                              
+    [2105] NA                               NA                              
+    [2107] NA                               NA                              
+    [2109] NA                               NA                              
+    [2111] NA                               NA                              
+    [2113] NA                               "Chloroleucon sp."              
+    [2115] NA                               NA                              
+    [2117] NA                               NA                              
+    [2119] NA                               NA                              
+    [2121] NA                               NA                              
+    [2123] NA                               NA                              
+    [2125] NA                               NA                              
+    [2127] NA                               NA                              
+    [2129] NA                               NA                              
+    [2131] "sp1"                            "sp4"                           
+    [2133] NA                               "Leguminosae sp1"               
+    [2135] NA                               "Bignoniaceae cf. Lundia"       
+    [2137] NA                               NA                              
+    [2139] NA                               NA                              
+    [2141] NA                               NA                              
+    [2143] NA                               NA                              
+    [2145] "Bignoniaceae cf. Martinella"    NA                              
+    [2147] "Myrcia sp."                     NA                              
+    [2149] NA                               "Oxandra sp."                   
+    [2151] NA                               NA                              
+    [2153] NA                               NA                              
+    [2155] NA                               NA                              
+    [2157] NA                               NA                              
+    [2159] NA                               NA                              
+    [2161] NA                               NA                              
+    [2163] NA                               NA                              
+    [2165] NA                               "Rubiaceae sp1"                 
+    [2167] "Rubiaceae sp2"                  NA                              
+    [2169] NA                               NA                              
+    [2171] NA                               "Senna sp1"                     
+    [2173] NA                               NA                              
+    [2175] NA                               NA                              
+    [2177] NA                               NA                              
+    [2179] NA                               NA                              
+    [2181] "Trema sp."                      NA                              
+    [2183] NA                               NA                              
+    [2185] NA                               NA                              
+    [2187] NA                               NA                              
+    [2189] NA                               NA                              
+    [2191] NA                               NA                              
+    [2193] NA                               "Capparis sp2"                  
+    [2195] "Casearia sp6"                   "Casearia sp6"                  
+    [2197] "Chiococca sp."                  NA                              
+    [2199] NA                               "Coccoloba sp."                 
+    [2201] NA                               NA                              
+    [2203] "Coutarea sp."                   NA                              
+    [2205] NA                               NA                              
+    [2207] NA                               NA                              
+    [2209] NA                               NA                              
+    [2211] NA                               NA                              
+    [2213] NA                               "Ipomoea sp."                   
+    [2215] NA                               NA                              
+    [2217] NA                               NA                              
+    [2219] NA                               NA                              
+    [2221] NA                               NA                              
+    [2223] "Myrospermum sp."                "Neea sp."                      
+    [2225] NA                               NA                              
+    [2227] "Phryganocydia sp1"              NA                              
+    [2229] NA                               NA                              
+    [2231] NA                               NA                              
+    [2233] NA                               NA                              
+    [2235] NA                               NA                              
+    [2237] NA                               NA                              
+    [2239] NA                               NA                              
+    [2241] NA                               NA                              
+    [2243] NA                               NA                              
+    [2245] NA                               NA                              
+    [2247] NA                               NA                              
+    [2249] NA                               "Eugenia sp1"                   
+    [2251] NA                               NA                              
+    [2253] NA                               NA                              
+    [2255] NA                               NA                              
+    [2257] NA                               NA                              
+    [2259] NA                               NA                              
+    [2261] NA                               NA                              
+    [2263] NA                               NA                              
+    [2265] NA                               NA                              
+    [2267] NA                               NA                              
+    [2269] NA                               NA                              
+    [2271] NA                               NA                              
+    [2273] NA                               NA                              
+    [2275] NA                               NA                              
+    [2277] "Allophylus cf. occidentalis"    NA                              
+    [2279] NA                               NA                              
+    [2281] "Chamaedorea cf. pinnatifrons"   NA                              
+    [2283] NA                               "Clusia sp."                    
+    [2285] NA                               NA                              
+    [2287] NA                               "Cupania sp1"                   
+    [2289] "Bignonia sp."                   NA                              
+    [2291] NA                               "Eugenia cf. monticola"         
+    [2293] "Eugenia sp1"                    NA                              
+    [2295] NA                               NA                              
+    [2297] NA                               NA                              
+    [2299] NA                               NA                              
+    [2301] NA                               NA                              
+    [2303] "Inga sp."                       "Lauraceae sp1"                 
+    [2305] NA                               NA                              
+    [2307] "Malpighia sp1"                  "Mucuna sp."                    
+    [2309] NA                               "Myrcia sp1"                    
+    [2311] NA                               "Nectandra sp1"                 
+    [2313] "Nectandra sp2"                  "Ocotea sp."                    
+    [2315] "Oreopanax sp."                  "Palicourea sp."                
+    [2317] NA                               NA                              
+    [2319] "Psicotria sp."                  NA                              
+    [2321] NA                               "Sapindaceae sp1"               
+    [2323] NA                               "Solanum sp."                   
+    [2325] NA                               NA                              
+    [2327] NA                               NA                              
+    [2329] "Trophis cf. caucana"            NA                              
+    [2331] NA                               NA                              
+    [2333] "Ziziphus sp."                   NA                              
+    [2335] NA                               "Albizia sp."                   
+    [2337] NA                               NA                              
+    [2339] NA                               NA                              
+    [2341] NA                               NA                              
+    [2343] NA                               NA                              
+    [2345] NA                               NA                              
+    [2347] NA                               NA                              
+    [2349] NA                               NA                              
+    [2351] NA                               NA                              
+    [2353] NA                               NA                              
+    [2355] NA                               NA                              
+    [2357] NA                               NA                              
+    [2359] NA                               "Adenocalymma sp."              
+    [2361] NA                               NA                              
+    [2363] NA                               NA                              
+    [2365] NA                               NA                              
+    [2367] NA                               NA                              
+    [2369] NA                               NA                              
+    [2371] NA                               NA                              
+    [2373] "Eugenia sp1"                    NA                              
+    [2375] NA                               NA                              
+    [2377] NA                               NA                              
+    [2379] "Inga sp."                       "Licaria sp."                   
+    [2381] "Lundia sp."                     NA                              
+    [2383] NA                               NA                              
+    [2385] NA                               "Rubiaceae sp1"                 
+    [2387] "Meliaceae sp10"                 "Meliaceae sp11"                
+    [2389] "Rhamnaceae sp12"                "Fabaceae sp13"                 
+    [2391] "Violaceae sp14"                 "Celastraceae sp15"             
+    [2393] "Meliaceae sp16"                 "Violaceae sp17"                
+    [2395] "Capparaceae sp18"               "Fabaceae sp19"                 
+    [2397] "Burseraceae sp2"                "Fabaceae sp20"                 
+    [2399] "Bignoniaceae sp3"               "Burseraceae sp4"               
+    [2401] "Celastraceae sp5"               "Nyctaginaceae sp6"             
+    [2403] "Sapotaceae sp7"                 "Moraceae sp8"                  
+    [2405] "Achariaceae sp9"                NA                              
+    [2407] NA                               NA                              
+    [2409] NA                               "Pouteria sp."                  
+    [2411] NA                               NA                              
+    [2413] NA                               NA                              
+    [2415] NA                               "Senegalia sp."                 
+    [2417] NA                               NA                              
+    [2419] NA                               NA                              
+    [2421] "Tabernaemontana sp."            NA                              
+    [2423] "Trema sp."                      NA                              
+    [2425] "Trichilia sp."                  NA                              
+    [2427] NA                               NA                              
+    [2429] NA                               NA                              
+    [2431] NA                               NA                              
+    [2433] NA                               NA                              
+    [2435] NA                               "Cynophalla sp."                
+    [2437] NA                               NA                              
+    [2439] NA                               NA                              
+    [2441] NA                               NA                              
+    [2443] "Cynophalla sp."                 NA                              
+    [2445] NA                               NA                              
+    [2447] NA                               NA                              
+    [2449] NA                               NA                              
+    [2451] NA                               NA                              
+    [2453] "Cynophalla sp."                 NA                              
+    [2455] NA                               NA                              
+    [2457] NA                               NA                              
+    [2459] NA                               NA                              
+    [2461] "Cecropia sp."                   NA                              
+    [2463] NA                               NA                              
+    [2465] NA                               NA                              
+    [2467] NA                               NA                              
+    [2469] NA                               "Lauraceae sp1"                 
+    [2471] "Marsdenia sp."                  NA                              
+    [2473] NA                               NA                              
+    [2475] "Rudgea sp."                     NA                              
+    [2477] "Sorocea sp."                    NA                              
+    [2479] NA                               NA                              
+    [2481] NA                               NA                              
+    [2483] NA                               NA                              
+    [2485] NA                               NA                              
+    [2487] NA                               NA                              
+    [2489] NA                               NA                              
+    [2491] NA                               NA                              
+    [2493] "Eugenia sp1"                    NA                              
+    [2495] NA                               NA                              
+    [2497] NA                               NA                              
+    [2499] NA                               NA                              
+    [2501] NA                               NA                              
+    [2503] NA                               NA                              
+    [2505] NA                               "Pouteria sp1"                  
+    [2507] NA                               NA                              
+    [2509] "Pterocarpus sp2"                NA                              
+    [2511] "Sorocea sp."                    "Sorocea sp."                   
+    [2513] NA                               NA                              
+    [2515] NA                               NA                              
+    [2517] NA                               NA                              
+    [2519] NA                               NA                              
+    [2521] NA                               NA                              
+    [2523] NA                               NA                              
+    [2525] NA                               NA                              
+    [2527] NA                               NA                              
+    [2529] NA                               NA                              
+    [2531] NA                               NA                              
+    [2533] NA                               NA                              
+    [2535] NA                               NA                              
+    [2537] NA                               NA                              
+    [2539] "Sorocea sp."                    NA                              
+    [2541] NA                               NA                              
+    [2543] NA                               NA                              
+    [2545] NA                               NA                              
+    [2547] NA                               NA                              
+    [2549] NA                               NA                              
+    [2551] NA                               NA                              
+    [2553] NA                               NA                              
+    [2555] "Cynophalla sp."                 NA                              
+    [2557] NA                               NA                              
+    [2559] NA                               NA                              
+    [2561] "Oxandra sp."                    NA                              
+    [2563] NA                               NA                              
+    [2565] NA                               NA                              
+    [2567] NA                               NA                              
+    [2569] NA                               NA                              
+    [2571] NA                               NA                              
+    [2573] NA                               NA                              
+    [2575] NA                               NA                              
+    [2577] NA                               NA                              
+    [2579] NA                               NA                              
+    [2581] NA                               NA                              
+    [2583] NA                               NA                              
+    [2585] NA                               NA                              
+    [2587] NA                               NA                              
+    [2589] NA                               NA                              
+    [2591] NA                               NA                              
+    [2593] NA                               NA                              
+    [2595] NA                               NA                              
+    [2597] NA                               NA                              
+    [2599] NA                               NA                              
+    [2601] NA                               NA                              
+    [2603] NA                               NA                              
+    [2605] NA                               NA                              
+    [2607] NA                               NA                              
+    [2609] "Eugenia sp1"                    "Eugenia sp2"                   
+    [2611] NA                               NA                              
+    [2613] NA                               NA                              
+    [2615] NA                               NA                              
+    [2617] NA                               NA                              
+    [2619] NA                               NA                              
+    [2621] "Paullinia sp."                  NA                              
+    [2623] NA                               NA                              
+    [2625] NA                               NA                              
+    [2627] "Randia sp."                     "Ruprechtia sp."                
+    [2629] NA                               NA                              
+    [2631] NA                               NA                              
+    [2633] NA                               NA                              
+    [2635] NA                               NA                              
+    [2637] NA                               "Capparaceae sp2"               
+    [2639] NA                               NA                              
+    [2641] NA                               NA                              
+    [2643] NA                               NA                              
+    [2645] NA                               NA                              
+    [2647] "Matayba sp."                    NA                              
+    [2649] NA                               NA                              
+    [2651] NA                               NA                              
+    [2653] NA                               NA                              
+    [2655] NA                               NA                              
+    [2657] NA                               NA                              
+    [2659] NA                               NA                              
+    [2661] NA                               "Machaerium sp1"                
+    [2663] "Machaerium sp3"                 "Randia sp."                    
+    [2665] "Solanum sp1"                    NA                              
+    [2667] NA                               NA                              
+    [2669] NA                               NA                              
+    [2671] NA                               NA                              
+    [2673] NA                               "Bactris sp2"                   
+    [2675] "Bignonia sp2"                   NA                              
+    [2677] NA                               NA                              
+    [2679] NA                               "Casearia sp1"                  
+    [2681] NA                               NA                              
+    [2683] NA                               NA                              
+    [2685] NA                               NA                              
+    [2687] NA                               "Galipea sp."                   
+    [2689] "Guapira sp2"                    NA                              
+    [2691] NA                               NA                              
+    [2693] NA                               NA                              
+    [2695] NA                               NA                              
+    [2697] NA                               NA                              
+    [2699] "Inga sp4"                       NA                              
+    [2701] "Machaerium sp10"                "Machaerium sp2"                
+    [2703] "Machaerium sp4"                 NA                              
+    [2705] NA                               NA                              
+    [2707] NA                               NA                              
+    [2709] NA                               NA                              
+    [2711] NA                               NA                              
+    [2713] NA                               NA                              
+    [2715] NA                               NA                              
+    [2717] "Schnella sp1"                   "Schnella sp2"                  
+    [2719] "Senegalia sp."                  NA                              
+    [2721] NA                               NA                              
+    [2723] NA                               NA                              
+    [2725] "Swartzia sp2"                   "Tabernaemontana sp."           
+    [2727] NA                               "Trigonia sp."                  
+    [2729] NA                               "Urticaceae sp."                
+    [2731] NA                               NA                              
+    [2733] NA                               "Casearia sp1"                  
+    [2735] "Casearia sp1"                   NA                              
+    [2737] NA                               NA                              
+    [2739] NA                               NA                              
+    [2741] NA                               NA                              
+    [2743] "Cupania sp1"                    "Fabaceae sp2"                  
+    [2745] NA                               NA                              
+    [2747] NA                               NA                              
+    [2749] "Machaerium sp2"                 "Machaerium sp2"                
+    [2751] "Machaerium sp4"                 NA                              
+    [2753] "Paullinia sp."                  NA                              
+    [2755] NA                               NA                              
+    [2757] "Randia sp6"                     "Schnella sp1"                  
+    [2759] "Schnella sp3"                   "Senegalia sp."                 
+    [2761] NA                               "Swartzia sp2"                  
+    [2763] "Swartzia sp2"                   "Tabernaemontana sp."           
+    [2765] "Tabernaemontana sp."            "Verbenaceae sp."               
+    [2767] NA                               NA                              
+    [2769] NA                               NA                              
+    [2771] NA                               NA                              
+    [2773] NA                               NA                              
+    [2775] NA                               NA                              
+    [2777] NA                               "Cordia sp3"                    
+    [2779] NA                               NA                              
+    [2781] NA                               NA                              
+    [2783] NA                               NA                              
+    [2785] "Guapira sp2"                    NA                              
+    [2787] NA                               NA                              
+    [2789] "Machaerium sp4"                 NA                              
+    [2791] NA                               NA                              
+    [2793] "Pterocarpus sp1"                "Rinorea sp."                   
+    [2795] "Schnella sp1"                   NA                              
+    [2797] NA                               "Senegalia sp."                 
+    [2799] NA                               "Senna sp1"                     
+    [2801] "Senna sp3"                      "Tabernaemontana sp."           
+    [2803] NA                               NA                              
+    [2805] NA                               NA                              
+    [2807] NA                               NA                              
+    [2809] NA                               NA                              
+    [2811] NA                               NA                              
+    [2813] "Eugenia sp2"                    "Fabaceae sp1"                  
+    [2815] NA                               NA                              
+    [2817] "Hamelia sp."                    NA                              
+    [2819] NA                               NA                              
+    [2821] NA                               NA                              
+    [2823] NA                               NA                              
+    [2825] NA                               NA                              
+    [2827] NA                               NA                              
+    [2829] NA                               NA                              
+    [2831] "Jacaranda sp."                  NA                              
+    [2833] NA                               NA                              
+    [2835] NA                               NA                              
+    [2837] NA                               "Stigmaphyllon sp."             
+    [2839] "Triplaris sp2"                  NA                              
+    [2841] NA                               "Xylosma sp2"                   
+    [2843] NA                               NA                              
+    [2845] "Bignonia sp2"                   "Bignonia sp2"                  
+    [2847] "Bignonia sp3"                   "Bignonia sp4"                  
+    [2849] NA                               NA                              
+    [2851] NA                               NA                              
+    [2853] "Cordia sp4"                     "Fabaceae sp."                  
+    [2855] "Fabaceae sp."                   NA                              
+    [2857] NA                               NA                              
+    [2859] NA                               NA                              
+    [2861] NA                               "Machaerium sp6"                
+    [2863] "Machaerium sp6"                 "Machaerium sp8"                
+    [2865] "Mandevilla sp."                 NA                              
+    [2867] NA                               NA                              
+    [2869] NA                               "Serjania sp."                  
+    [2871] NA                               NA                              
+    [2873] NA                               NA                              
+    [2875] "Albizia sp."                    "Bignonia sp5"                  
+    [2877] "Bignonia sp5"                   NA                              
+    [2879] NA                               NA                              
+    [2881] NA                               "Cnidoscolus sp."               
+    [2883] NA                               NA                              
+    [2885] "Cordia sp4"                     "Cordia sp4"                    
+    [2887] "Enterolobium sp1"               "Fabaceae sp."                  
+    [2889] NA                               "Hamelia sp."                   
+    [2891] NA                               NA                              
+    [2893] NA                               NA                              
+    [2895] NA                               "Machaerium sp5"                
+    [2897] "Machaerium sp7"                 "Pristimera sp."                
+    [2899] NA                               "Randia sp1"                    
+    [2901] NA                               "Rubiaceae sp."                 
+    [2903] NA                               NA                              
+    [2905] "Senna sp2"                      "Serjania sp."                  
+    [2907] "Solanum sp2"                    "Triplaris sp2"                 
+    [2909] NA                               NA                              
+    [2911] NA                               "Bignonia sp5"                  
+    [2913] NA                               NA                              
+    [2915] NA                               NA                              
+    [2917] NA                               NA                              
+    [2919] NA                               NA                              
+    [2921] NA                               NA                              
+    [2923] NA                               NA                              
+    [2925] "Cordia sp4"                     NA                              
+    [2927] "Eugenia sp2"                    "Fabaceae sp."                  
+    [2929] "Fabaceae sp2"                   NA                              
+    [2931] "Guapira sp1"                    NA                              
+    [2933] NA                               NA                              
+    [2935] NA                               "Machaerium sp7"                
+    [2937] "Machaerium sp7"                 "Pristimera sp."                
+    [2939] NA                               NA                              
+    [2941] NA                               NA                              
+    [2943] NA                               NA                              
+    [2945] NA                               NA                              
+    [2947] NA                               NA                              
+    [2949] NA                               NA                              
+    [2951] NA                               "Capparaceae sp1"               
+    [2953] NA                               NA                              
+    [2955] NA                               NA                              
+    [2957] NA                               "Eugenia sp3"                   
+    [2959] NA                               NA                              
+    [2961] NA                               NA                              
+    [2963] NA                               NA                              
+    [2965] NA                               NA                              
+    [2967] "Psychotria sp."                 NA                              
+    [2969] NA                               NA                              
+    [2971] NA                               NA                              
+    [2973] NA                               NA                              
+    [2975] NA                               NA                              
+    [2977] "Annona sp3"                     NA                              
+    [2979] "Banisteriopsis sp2"             "Banisteriopsis sp2"            
+    [2981] NA                               NA                              
+    [2983] "Cordia sp5"                     "Cordia sp6"                    
+    [2985] NA                               NA                              
+    [2987] NA                               NA                              
+    [2989] NA                               NA                              
+    [2991] "Ficus sp1"                      "Ficus sp2"                     
+    [2993] NA                               NA                              
+    [2995] NA                               NA                              
+    [2997] NA                               NA                              
+    [2999] NA                               NA                              
+    [3001] NA                               NA                              
+    [3003] NA                               NA                              
+    [3005] NA                               NA                              
+    [3007] NA                               NA                              
+    [3009] "Zanthoxylum sp2"                NA                              
+    [3011] NA                               NA                              
+    [3013] NA                               "Brosimum sp2"                  
+    [3015] NA                               NA                              
+    [3017] NA                               NA                              
+    [3019] NA                               NA                              
+    [3021] NA                               NA                              
+    [3023] NA                               NA                              
+    [3025] NA                               NA                              
+    [3027] NA                               NA                              
+    [3029] NA                               "Handroanthus sp."              
+    [3031] NA                               NA                              
+    [3033] NA                               NA                              
+    [3035] NA                               NA                              
+    [3037] NA                               NA                              
+    [3039] NA                               "Machaerium sp12"               
+    [3041] NA                               NA                              
+    [3043] "Nectandra sp3"                  "Neea sp."                      
+    [3045] "Neea sp."                       NA                              
+    [3047] NA                               NA                              
+    [3049] NA                               NA                              
+    [3051] NA                               NA                              
+    [3053] "Ampelocera sp."                 NA                              
+    [3055] NA                               "Capparaceae sp1"               
+    [3057] NA                               "Chomelia sp."                  
+    [3059] NA                               NA                              
+    [3061] NA                               NA                              
+    [3063] NA                               NA                              
+    [3065] NA                               "Eugenia sp4"                   
+    [3067] NA                               NA                              
+    [3069] NA                               NA                              
+    [3071] NA                               "Lonchocarpus sp."              
+    [3073] NA                               NA                              
+    [3075] NA                               "Nectandra sp3"                 
+    [3077] NA                               NA                              
+    [3079] NA                               NA                              
+    [3081] NA                               "Randia sp4"                    
+    [3083] "Salacia sp2"                    NA                              
+    [3085] NA                               NA                              
+    [3087] NA                               NA                              
+    [3089] NA                               NA                              
+    [3091] NA                               NA                              
+    [3093] NA                               NA                              
+    [3095] NA                               NA                              
+    [3097] NA                               NA                              
+    [3099] NA                               NA                              
+    [3101] NA                               NA                              
+    [3103] NA                               NA                              
+    [3105] NA                               NA                              
+    [3107] NA                               NA                              
+    [3109] NA                               NA                              
+    [3111] "Randia sp2"                     NA                              
+    [3113] NA                               NA                              
+    [3115] NA                               NA                              
+    [3117] NA                               NA                              
+    [3119] "Eugenia sp."                    NA                              
+    [3121] NA                               NA                              
+    [3123] "Stylogyne cf. turbacensis"      NA                              
+    [3125] "Xylosma cf. velutina"           NA                              
+    [3127] NA                               NA                              
+    [3129] NA                               NA                              
+    [3131] NA                               NA                              
+    [3133] NA                               NA                              
+    [3135] NA                               NA                              
+    [3137] NA                               NA                              
+    [3139] "Paullinia sp."                  NA                              
+    [3141] NA                               NA                              
+    [3143] NA                               NA                              
+    [3145] NA                               NA                              
+    [3147] NA                               NA                              
+    [3149] NA                               NA                              
+    [3151] "Cordia sp."                     NA                              
+    [3153] NA                               NA                              
+    [3155] NA                               NA                              
+    [3157] NA                               NA                              
+    [3159] "Eugenia cf. egensis"            NA                              
+    [3161] NA                               NA                              
+    [3163] NA                               NA                              
+    [3165] NA                               NA                              
+    [3167] NA                               NA                              
+    [3169] NA                               NA                              
+    [3171] NA                               NA                              
+    [3173] NA                               NA                              
+    [3175] NA                               NA                              
+    [3177] NA                               NA                              
+    [3179] NA                               NA                              
+    [3181] NA                               NA                              
+    [3183] NA                               NA                              
+    [3185] NA                               "Oreopanax cf. cecropifolius"   
+    [3187] NA                               NA                              
+    [3189] NA                               NA                              
+    [3191] "Stylogyne cf. turbacensis"      NA                              
+    [3193] NA                               NA                              
+    [3195] NA                               NA                              
+    [3197] NA                               NA                              
+    [3199] NA                               NA                              
+    [3201] NA                               NA                              
+    [3203] NA                               NA                              
+    [3205] NA                               "Cestrum cf. megalophyllum"     
+    [3207] NA                               NA                              
+    [3209] NA                               NA                              
+    [3211] NA                               NA                              
+    [3213] NA                               NA                              
+    [3215] NA                               NA                              
+    [3217] NA                               NA                              
+    [3219] "Eugenia cf. egensis"            NA                              
+    [3221] NA                               NA                              
+    [3223] NA                               NA                              
+    [3225] NA                               NA                              
+    [3227] NA                               "Cestrum sp."                   
+    [3229] NA                               NA                              
+    [3231] NA                               NA                              
+    [3233] NA                               "Solanum cf. argenteum"         
+    [3235] NA                               NA                              
+    [3237] NA                               NA                              
+    [3239] NA                               "Cordia sp."                    
+    [3241] NA                               "Eugenia cf. egensis"           
+    [3243] NA                               NA                              
+    [3245] NA                               NA                              
+    [3247] NA                               NA                              
+    [3249] NA                               NA                              
+    [3251] NA                               "Annona cf. glabra"             
+    [3253] NA                               NA                              
+    [3255] NA                               NA                              
+    [3257] NA                               NA                              
+    [3259] NA                               NA                              
+    [3261] NA                               "Piper cf. marginatum"          
+    [3263] NA                               NA                              
+    [3265] NA                               NA                              
+    [3267] NA                               "Cordia sp."                    
+    [3269] NA                               NA                              
+    [3271] NA                               NA                              
+    [3273] NA                               NA                              
+    [3275] NA                               NA                              
+    [3277] NA                               "Piper cf. marginatum"          
+    [3279] NA                               NA                              
+    [3281] NA                               NA                              
+    [3283] NA                               NA                              
+    [3285] NA                               NA                              
+    [3287] NA                               NA                              
+    [3289] NA                               NA                              
+    [3291] NA                               NA                              
+    [3293] NA                               NA                              
+    [3295] NA                               NA                              
+    [3297] NA                               NA                              
+    [3299] NA                               "Eugenia cf. egensis"           
+    [3301] NA                               NA                              
+    [3303] NA                               NA                              
+    [3305] NA                               NA                              
+    [3307] NA                               NA                              
+    [3309] NA                               NA                              
+    [3311] NA                               NA                              
+    [3313] "Cestrum sp."                    NA                              
+    [3315] NA                               NA                              
+    [3317] "Eugenia cf. egensis"            NA                              
+    [3319] NA                               NA                              
+    [3321] NA                               NA                              
+    [3323] NA                               NA                              
+    [3325] NA                               NA                              
+    [3327] "Cestrum cf. megalophyllum"      NA                              
+    [3329] NA                               NA                              
+    [3331] NA                               NA                              
+    [3333] NA                               NA                              
+    [3335] NA                               "Stylogyne cf. turbacensis"     
+    [3337] NA                               NA                              
+    [3339] NA                               NA                              
+    [3341] NA                               NA                              
+    [3343] NA                               NA                              
+    [3345] NA                               NA                              
+    [3347] NA                               NA                              
+    [3349] NA                               NA                              
+    [3351] NA                               NA                              
+    [3353] NA                               NA                              
+    [3355] NA                               NA                              
+    [3357] NA                               NA                              
+    [3359] NA                               NA                              
+    [3361] "Eugenia cf. egensis"            NA                              
+    [3363] NA                               NA                              
+    [3365] NA                               NA                              
+    [3367] NA                               NA                              
+    [3369] NA                               NA                              
+    [3371] NA                               NA                              
+    [3373] NA                               "Eugenia cf. egensis"           
+    [3375] NA                               NA                              
+    [3377] NA                               NA                              
+    [3379] NA                               NA                              
+    [3381] NA                               NA                              
+    [3383] NA                               NA                              
+    [3385] NA                               NA                              
+    [3387] NA                               NA                              
+    [3389] NA                               NA                              
+    [3391] NA                               NA                              
+    [3393] NA                               NA                              
+    [3395] NA                               NA                              
+    [3397] NA                               NA                              
+    [3399] NA                               NA                              
+    [3401] NA                               NA                              
+    [3403] NA                               NA                              
+    [3405] NA                               NA                              
+    [3407] NA                               NA                              
+    [3409] NA                               NA                              
+    [3411] NA                               NA                              
+    [3413] NA                               NA                              
+    [3415] NA                               NA                              
+    [3417] NA                               NA                              
+    [3419] NA                               NA                              
+    [3421] NA                               NA                              
+    [3423] NA                               NA                              
+    [3425] NA                               NA                              
+    [3427] NA                               NA                              
+    [3429] NA                               NA                              
+    [3431] NA                               NA                              
+    [3433] NA                               NA                              
+    [3435] NA                               NA                              
+    [3437] NA                               NA                              
+    [3439] NA                               NA                              
+    [3441] NA                               NA                              
+    [3443] NA                               NA                              
+    [3445] NA                               "Eugenia sp."                   
+    [3447] NA                               NA                              
+    [3449] "Stylogyne cf. turbacensis"      NA                              
+    [3451] "Cordia sp."                     NA                              
+    [3453] NA                               NA                              
+    [3455] NA                               NA                              
+    [3457] NA                               NA                              
+    [3459] NA                               NA                              
+    [3461] NA                               NA                              
+    [3463] NA                               NA                              
+    [3465] "Eugenia cf. egensis"            NA                              
+    [3467] NA                               NA                              
+    [3469] NA                               NA                              
+    [3471] NA                               NA                              
+    [3473] NA                               NA                              
+    [3475] NA                               NA                              
+    [3477] NA                               "Eugenia cf. egensis"           
+    [3479] NA                               NA                              
+    [3481] NA                               NA                              
+    [3483] NA                               NA                              
+    [3485] NA                               NA                              
+    [3487] NA                               NA                              
+    [3489] NA                               NA                              
+    [3491] NA                               NA                              
+    [3493] NA                               NA                              
+    [3495] NA                               NA                              
+    [3497] NA                               NA                              
+    [3499] NA                               NA                              
+    [3501] NA                               NA                              
+    [3503] NA                               NA                              
+    [3505] NA                               NA                              
+    [3507] NA                               NA                              
+    [3509] NA                               NA                              
+    [3511] NA                               NA                              
+    [3513] NA                               NA                              
+    [3515] NA                               NA                              
+    [3517] NA                               NA                              
+    [3519] NA                               NA                              
+    [3521] NA                               NA                              
+    [3523] NA                               NA                              
+    [3525] NA                               NA                              
+    [3527] NA                               NA                              
+    [3529] "Eugenia cf. egensis"            NA                              
+    [3531] NA                               NA                              
+    [3533] NA                               NA                              
+    [3535] NA                               NA                              
+    [3537] NA                               NA                              
+    [3539] NA                               NA                              
+    [3541] "Eugenia cf. egensis"            NA                              
+    [3543] NA                               NA                              
+    [3545] NA                               NA                              
+    [3547] NA                               NA                              
+    [3549] NA                               NA                              
+    [3551] NA                               NA                              
+    [3553] NA                               NA                              
+    [3555] NA                               NA                              
+    [3557] "Eugenia sp."                    NA                              
+    [3559] NA                               NA                              
+    [3561] NA                               NA                              
+    [3563] NA                               NA                              
+    [3565] NA                               "Cestrum cf. megalophyllum"     
+    [3567] NA                               NA                              
+    [3569] NA                               "Eugenia sp."                   
+    [3571] NA                               NA                              
+    [3573] NA                               NA                              
+    [3575] NA                               NA                              
+    [3577] NA                               NA                              
+    [3579] NA                               NA                              
+    [3581] "Eugenia sp."                    NA                              
+    [3583] NA                               NA                              
+    [3585] NA                               NA                              
+    [3587] NA                               NA                              
+    [3589] NA                               "Eugenia cf. egensis"           
+    [3591] NA                               NA                              
+    [3593] NA                               NA                              
+    [3595] "Myrcia sp2"                     "Myrcia sp3"                    
+    [3597] NA                               NA                              
+    [3599] NA                               NA                              
+    [3601] "Eugenia cf. egensis"            NA                              
+    [3603] NA                               NA                              
+    [3605] NA                               "Passiflora cf. sphaerocarpa"   
+    [3607] NA                               NA                              
+    [3609] NA                               "Cestrum cf. megalophyllum"     
+    [3611] NA                               NA                              
+    [3613] NA                               "Eugenia cf. egensis"           
+    [3615] NA                               NA                              
+    [3617] NA                               NA                              
+    [3619] "Myrcia sp3"                     NA                              
+    [3621] NA                               NA                              
+    [3623] NA                               NA                              
+    [3625] NA                               NA                              
+    [3627] NA                               NA                              
+    [3629] NA                               NA                              
+    [3631] NA                               NA                              
+    [3633] NA                               "Eugenia sp."                   
+    [3635] NA                               NA                              
+    [3637] NA                               "Jatropha sp."                  
+    [3639] NA                               "Stylogyne cf. turbacensis"     
+    [3641] NA                               NA                              
+    [3643] NA                               NA                              
+    [3645] NA                               NA                              
+    [3647] NA                               NA                              
+    [3649] NA                               NA                              
+    [3651] NA                               "Passiflora cf. sphaerocarpa"   
+    [3653] "Piper sp."                      NA                              
+    [3655] NA                               NA                              
+    [3657] NA                               NA                              
+    [3659] "Stylogyne cf. turbacensis"      NA                              
+    [3661] NA                               NA                              
+    [3663] NA                               NA                              
+    [3665] NA                               NA                              
+    [3667] NA                               "Cestrum cf. megalophyllum"     
+    [3669] NA                               NA                              
+    [3671] NA                               NA                              
+    [3673] NA                               "Eugenia cf. egensis"           
+    [3675] NA                               NA                              
+    [3677] NA                               NA                              
+    [3679] "Myrcia sp2"                     NA                              
+    [3681] "Passiflora cf. sphaerocarpa"    NA                              
+    [3683] "Psychotria sp."                 "Stylogyne cf. turbacensis"     
+    [3685] "Xylosma cf. velutina"           NA                              
+    [3687] NA                               NA                              
+    [3689] NA                               NA                              
+    [3691] NA                               NA                              
+    [3693] "Eugenia cf. egensis"            NA                              
+    [3695] NA                               NA                              
+    [3697] NA                               "Psychotria sp."                
+    [3699] NA                               NA                              
+    [3701] NA                               NA                              
+    [3703] NA                               NA                              
+    [3705] NA                               NA                              
+    [3707] NA                               NA                              
+    [3709] NA                               NA                              
+    [3711] "Eugenia cf. egensis"            NA                              
+    [3713] NA                               "Passiflora cf. sphaerocarpa"   
+    [3715] "Psychotria sp."                 NA                              
+    [3717] NA                               NA                              
+    [3719] NA                               NA                              
+    [3721] NA                               NA                              
+    [3723] NA                               NA                              
+    [3725] NA                               NA                              
+    [3727] NA                               NA                              
+    [3729] NA                               NA                              
+    [3731] NA                               "Myrcia sp3"                    
+    [3733] NA                               NA                              
+    [3735] NA                               NA                              
+    [3737] NA                               NA                              
+    [3739] NA                               NA                              
+    [3741] "Eugenia cf. egensis"            NA                              
+    [3743] NA                               NA                              
+    [3745] NA                               NA                              
+    [3747] NA                               NA                              
+    [3749] NA                               NA                              
+    [3751] NA                               NA                              
+    [3753] "Eugenia cf. egensis"            NA                              
+    [3755] NA                               NA                              
+    [3757] NA                               "Psychotria sp."                
+    [3759] NA                               NA                              
+    [3761] "Stylogyne cf. turbacensis"      NA                              
+    [3763] NA                               NA                              
+    [3765] NA                               NA                              
+    [3767] NA                               NA                              
+    [3769] NA                               NA                              
+    [3771] "Eugenia sp."                    NA                              
+    [3773] NA                               NA                              
+    [3775] NA                               NA                              
+    [3777] NA                               NA                              
+    [3779] NA                               NA                              
+    [3781] NA                               NA                              
+    [3783] NA                               NA                              
+    [3785] NA                               NA                              
+    [3787] "Eugenia cf. egensis"            "Eugenia sp2"                   
+    [3789] NA                               NA                              
+    [3791] NA                               NA                              
+    [3793] NA                               "Protium sp."                   
+    [3795] NA                               NA                              
+    [3797] NA                               NA                              
+    [3799] NA                               NA                              
+    [3801] NA                               NA                              
+    [3803] NA                               NA                              
+    [3805] NA                               "Cordia sp."                    
+    [3807] NA                               "Eugenia cf. egensis"           
+    [3809] NA                               NA                              
+    [3811] NA                               NA                              
+    [3813] "Apocynaceae sp1"                "Bignoniaceae sp3"              
+    [3815] NA                               NA                              
+    [3817] "Serjania sp."                   NA                              
+    [3819] NA                               NA                              
+    [3821] NA                               NA                              
+    [3823] NA                               NA                              
+    [3825] NA                               NA                              
+    [3827] "Eugenia cf. egensis"            NA                              
+    [3829] NA                               NA                              
+    [3831] NA                               "Apocynaceae sp1"               
+    [3833] "Bignoniaceae sp3"               "Piper cf. marginatum"          
+    [3835] NA                               NA                              
+    [3837] NA                               NA                              
+    [3839] NA                               NA                              
+    [3841] NA                               NA                              
+    [3843] NA                               NA                              
+    [3845] NA                               "Eugenia sp."                   
+    [3847] NA                               NA                              
+    [3849] "Myrcia sp."                     NA                              
+    [3851] NA                               NA                              
+    [3853] NA                               NA                              
+    [3855] NA                               NA                              
+    [3857] NA                               NA                              
+    [3859] "Cereus sp."                     NA                              
+    [3861] "Eugenia cf. egensis"            NA                              
+    [3863] NA                               "Celastraceae sp5"              
+    [3865] NA                               NA                              
+    [3867] NA                               NA                              
+    [3869] NA                               NA                              
+    [3871] NA                               NA                              
+    [3873] NA                               "Eugenia cf. egensis"           
+    [3875] NA                               NA                              
+    [3877] "Mandevilla sp."                 NA                              
+    [3879] NA                               NA                              
+    [3881] NA                               "Seguieria sp."                 
+    [3883] NA                               NA                              
+    [3885] NA                               NA                              
+    [3887] NA                               NA                              
+    [3889] NA                               "Eugenia cf. egensis"           
+    [3891] NA                               NA                              
+    [3893] "Mandevilla sp."                 NA                              
+    [3895] NA                               NA                              
+    [3897] NA                               NA                              
+    [3899] NA                               NA                              
+    [3901] NA                               NA                              
+    [3903] NA                               NA                              
+    [3905] NA                               NA                              
+    [3907] NA                               "Eugenia cf. egensis"           
+    [3909] NA                               NA                              
+    [3911] "Gouania sp."                    NA                              
+    [3913] NA                               NA                              
+    [3915] NA                               NA                              
+    [3917] NA                               NA                              
+    [3919] NA                               NA                              
+    [3921] NA                               NA                              
+    [3923] NA                               NA                              
+    [3925] NA                               "Eugenia sp."                   
+    [3927] NA                               "Myrcia sp."                    
+    [3929] NA                               NA                              
+    [3931] "Stylogyne cf. turbacensis"      NA                              
+    [3933] NA                               NA                              
+    [3935] NA                               NA                              
+    [3937] NA                               NA                              
+    [3939] NA                               NA                              
+    [3941] NA                               NA                              
+    [3943] "Eugenia cf. egensis"            NA                              
+    [3945] NA                               NA                              
+    [3947] NA                               "Asteraceae sp2"                
+    [3949] "Bignoniaceae sp3"               "Celastraceae sp5"              
+    [3951] NA                               NA                              
+    [3953] NA                               NA                              
+    [3955] NA                               NA                              
+    [3957] NA                               "Banisteriopsis cf. muricata"   
+    [3959] "Bignoniaceae sp."               NA                              
+    [3961] NA                               NA                              
+    [3963] "Cinchona sp."                   NA                              
+    [3965] NA                               "Doliocarpus sp."               
+    [3967] NA                               NA                              
+    [3969] "Eugenia cf. egensis"            "Eugenia cf. punicifolia"       
+    [3971] NA                               NA                              
+    [3973] NA                               NA                              
+    [3975] NA                               NA                              
+    [3977] NA                               NA                              
+    [3979] NA                               NA                              
+    [3981] NA                               NA                              
+    [3983] NA                               NA                              
+    [3985] NA                               NA                              
+    [3987] NA                               NA                              
+    [3989] "Eugenia cf. egensis"            NA                              
+    [3991] NA                               "Celastraceae sp5"              
+    [3993] NA                               NA                              
+    [3995] NA                               NA                              
+    [3997] NA                               NA                              
+    [3999] "Cestrum cf. megalophyllum"      NA                              
+    [4001] NA                               NA                              
+    [4003] NA                               "Eugenia cf. egensis"           
+    [4005] NA                               NA                              
+    [4007] NA                               NA                              
+    [4009] NA                               NA                              
+    [4011] "Psychotria sp."                 NA                              
+    [4013] NA                               NA                              
+    [4015] NA                               NA                              
+    [4017] NA                               NA                              
+    [4019] NA                               "Eugenia sp."                   
+    [4021] NA                               NA                              
+    [4023] NA                               NA                              
+    [4025] NA                               NA                              
+    [4027] NA                               NA                              
+    [4029] NA                               "Eugenia cf. egensis"           
+    [4031] NA                               NA                              
+    [4033] NA                               NA                              
+    [4035] NA                               NA                              
+    [4037] NA                               NA                              
+    [4039] NA                               NA                              
+    [4041] NA                               NA                              
+    [4043] NA                               NA                              
+    [4045] NA                               NA                              
+    [4047] "Eugenia sp."                    NA                              
+    [4049] NA                               "Piper sp."                     
+    [4051] "Stylogyne cf. turbacensis"      NA                              
+    [4053] NA                               NA                              
+    [4055] NA                               NA                              
+    [4057] "Eugenia cf. egensis"            NA                              
+    [4059] NA                               NA                              
+    [4061] NA                               NA                              
+    [4063] NA                               NA                              
+    [4065] NA                               NA                              
+    [4067] "Acacia cf. glomerosa"           NA                              
+    [4069] NA                               NA                              
+    [4071] NA                               NA                              
+    [4073] NA                               NA                              
+    [4075] NA                               "Croton sp."                    
+    [4077] NA                               NA                              
+    [4079] NA                               NA                              
+    [4081] NA                               NA                              
+    [4083] NA                               NA                              
+    [4085] NA                               NA                              
+    [4087] NA                               NA                              
+    [4089] NA                               NA                              
+    [4091] NA                               "Bignoniaceae sp4"              
+    [4093] NA                               NA                              
+    [4095] NA                               NA                              
+    [4097] NA                               NA                              
+    [4099] "Cestrum cf. megalophyllum"      NA                              
+    [4101] NA                               NA                              
+    [4103] NA                               NA                              
+    [4105] NA                               NA                              
+    [4107] NA                               NA                              
+    [4109] NA                               NA                              
+    [4111] "Cestrum cf. megalophyllum"      NA                              
+    [4113] NA                               NA                              
+    [4115] "Eugenia sp."                    NA                              
+    [4117] NA                               NA                              
+    [4119] "Myrcia sp."                     NA                              
+    [4121] NA                               "Stylogyne cf. turbacensis"     
+    [4123] NA                               NA                              
+    [4125] NA                               NA                              
+    [4127] NA                               NA                              
+    [4129] NA                               NA                              
+    [4131] "Eugenia cf. egensis"            NA                              
+    [4133] NA                               NA                              
+    [4135] NA                               NA                              
+    [4137] NA                               NA                              
+    [4139] NA                               NA                              
+    [4141] NA                               NA                              
+    [4143] NA                               NA                              
+    [4145] NA                               NA                              
+    [4147] "Eugenia sp."                    NA                              
+    [4149] NA                               "Myrcia sp2"                    
+    [4151] NA                               NA                              
+    [4153] NA                               "Stylogyne cf. turbacensis"     
+    [4155] NA                               NA                              
+    [4157] NA                               NA                              
+    [4159] NA                               NA                              
+    [4161] NA                               "Eugenia sp."                   
+    [4163] NA                               NA                              
+    [4165] NA                               NA                              
+    [4167] NA                               NA                              
+    [4169] NA                               NA                              
+    [4171] NA                               NA                              
+    [4173] NA                               NA                              
+    [4175] NA                               NA                              
+    [4177] "Cecropia sp."                   NA                              
+    [4179] NA                               "Enterolobium sp2"              
+    [4181] NA                               NA                              
+    [4183] NA                               NA                              
+    [4185] NA                               NA                              
+    [4187] "Handroanthus sp."               "Inga sp1"                      
+    [4189] NA                               NA                              
+    [4191] NA                               NA                              
+    [4193] "Piper sp3"                      NA                              
+    [4195] NA                               "Senna sp1"                     
+    [4197] "Solanum sp1"                    NA                              
+    [4199] NA                               NA                              
+    [4201] NA                               NA                              
+    [4203] "Bactris sp1"                    "Bignonia sp1"                  
+    [4205] "Cecropia sp."                   "Celastraceae sp."              
+    [4207] NA                               NA                              
+    [4209] NA                               NA                              
+    [4211] NA                               NA                              
+    [4213] "Enterolobium sp2"               NA                              
+    [4215] NA                               NA                              
+    [4217] NA                               "Inga sp2"                      
+    [4219] NA                               NA                              
+    [4221] "Machaerium sp9"                 "Myriocarpa sp."                
+    [4223] NA                               NA                              
+    [4225] NA                               NA                              
+    [4227] "Pouteria sp2"                   NA                              
+    [4229] NA                               NA                              
+    [4231] "Senna sp1"                      "Serjania sp."                  
+    [4233] "Sorocea sp."                    "Sorocea sp."                   
+    [4235] NA                               NA                              
+    [4237] NA                               NA                              
+    [4239] NA                               NA                              
+    [4241] NA                               NA                              
+    [4243] NA                               NA                              
+    [4245] "Annona sp."                     NA                              
+    [4247] NA                               "Bactris sp1"                   
+    [4249] NA                               NA                              
+    [4251] NA                               NA                              
+    [4253] "Cecropia sp."                   NA                              
+    [4255] NA                               NA                              
+    [4257] "Cordia sp1"                     NA                              
+    [4259] NA                               "Enterolobium sp2"              
+    [4261] NA                               NA                              
+    [4263] NA                               NA                              
+    [4265] NA                               NA                              
+    [4267] NA                               NA                              
+    [4269] NA                               NA                              
+    [4271] NA                               NA                              
+    [4273] NA                               NA                              
+    [4275] NA                               "Inga sp3"                      
+    [4277] "Machaerium sp2"                 "Machaerium sp6"                
+    [4279] NA                               NA                              
+    [4281] NA                               NA                              
+    [4283] NA                               NA                              
+    [4285] NA                               NA                              
+    [4287] "Senna sp1"                      NA                              
+    [4289] NA                               NA                              
+    [4291] NA                               NA                              
+    [4293] NA                               NA                              
+    [4295] NA                               NA                              
+    [4297] NA                               NA                              
+    [4299] NA                               NA                              
+    [4301] NA                               NA                              
+    [4303] "Cynophalla sp."                 NA                              
+    [4305] NA                               NA                              
+    [4307] NA                               NA                              
+    [4309] NA                               NA                              
+    [4311] NA                               NA                              
+    [4313] NA                               NA                              
+    [4315] NA                               NA                              
+    [4317] NA                               NA                              
+    [4319] NA                               NA                              
+    [4321] "Cordia sp."                     NA                              
+    [4323] NA                               NA                              
+    [4325] NA                               NA                              
+    [4327] "Eugenia sp."                    NA                              
+    [4329] NA                               NA                              
+    [4331] NA                               NA                              
+    [4333] NA                               NA                              
+    [4335] NA                               NA                              
+    [4337] NA                               NA                              
+    [4339] NA                               NA                              
+    [4341] NA                               NA                              
+    [4343] NA                               NA                              
+    [4345] NA                               NA                              
+    [4347] NA                               NA                              
+    [4349] "Machaerium sp."                 NA                              
+    [4351] NA                               NA                              
+    [4353] NA                               NA                              
+    [4355] NA                               NA                              
+    [4357] NA                               "Capparaceae sp."               
+    [4359] NA                               NA                              
+    [4361] NA                               NA                              
+    [4363] NA                               NA                              
+    [4365] "Fabaceae sp2"                   NA                              
+    [4367] NA                               NA                              
+    [4369] NA                               NA                              
+    [4371] NA                               NA                              
+    [4373] NA                               NA                              
+    [4375] NA                               NA                              
+    [4377] NA                               NA                              
+    [4379] NA                               NA                              
+    [4381] NA                               "Eugenia sp."                   
+    [4383] NA                               NA                              
+    [4385] NA                               NA                              
+    [4387] "Aristolochia sp."               NA                              
+    [4389] NA                               NA                              
+    [4391] NA                               NA                              
+    [4393] NA                               NA                              
+    [4395] NA                               NA                              
+    [4397] NA                               NA                              
+    [4399] NA                               NA                              
+    [4401] NA                               NA                              
+    [4403] NA                               NA                              
+    [4405] NA                               NA                              
+    [4407] NA                               NA                              
+    [4409] NA                               "Solanum sp."                   
+    [4411] NA                               NA                              
+    [4413] NA                               NA                              
+    [4415] NA                               NA                              
+    [4417] NA                               NA                              
+    [4419] NA                               NA                              
+    [4421] NA                               NA                              
+    [4423] NA                               NA                              
+    [4425] NA                               NA                              
+    [4427] NA                               NA                              
+    [4429] NA                               NA                              
+    [4431] NA                               NA                              
+    [4433] NA                               NA                              
+    [4435] NA                               NA                              
+    [4437] NA                               NA                              
+    [4439] NA                               NA                              
+    [4441] NA                               NA                              
+    [4443] NA                               NA                              
+    [4445] NA                               NA                              
+    [4447] NA                               NA                              
+    [4449] NA                               NA                              
+    [4451] NA                               NA                              
+    [4453] NA                               NA                              
+    [4455] NA                               NA                              
+    [4457] NA                               NA                              
+    [4459] NA                               NA                              
+    [4461] NA                               NA                              
+    [4463] NA                               NA                              
+    [4465] NA                               NA                              
+    [4467] NA                               NA                              
+    [4469] NA                               NA                              
+    [4471] NA                               NA                              
+    [4473] NA                               NA                              
+    [4475] NA                               NA                              
+    [4477] NA                               NA                              
+    [4479] NA                               NA                              
+    [4481] NA                               NA                              
+    [4483] NA                               NA                              
+    [4485] NA                               NA                              
+    [4487] "Lauraceae sp7"                  NA                              
+    [4489] "Machaerium sp11"                NA                              
+    [4491] NA                               NA                              
+    [4493] NA                               NA                              
+    [4495] NA                               NA                              
+    [4497] NA                               NA                              
+    [4499] NA                               NA                              
+    [4501] NA                               "Xylosma sp3"                   
+    [4503] NA                               NA                              
+    [4505] NA                               NA                              
+    [4507] NA                               NA                              
+    [4509] NA                               NA                              
+    [4511] NA                               NA                              
+    [4513] "Clusia sp1"                     NA                              
+    [4515] NA                               NA                              
+    [4517] NA                               NA                              
+    [4519] NA                               NA                              
+    [4521] NA                               NA                              
+    [4523] NA                               NA                              
+    [4525] NA                               "Lauraceae sp7"                 
+    [4527] NA                               NA                              
+    [4529] NA                               NA                              
+    [4531] NA                               NA                              
+    [4533] NA                               "Serjania sp."                  
+    [4535] NA                               "Swartzia sp4"                  
+    [4537] NA                               NA                              
+    [4539] NA                               NA                              
+    [4541] NA                               NA                              
+    [4543] NA                               NA                              
+    [4545] NA                               NA                              
+    [4547] NA                               NA                              
+    [4549] NA                               NA                              
+    [4551] NA                               NA                              
+    [4553] NA                               NA                              
+    [4555] NA                               NA                              
+    [4557] NA                               NA                              
+    [4559] "Casearia sp."                   NA                              
+    [4561] NA                               NA                              
+    [4563] NA                               NA                              
+    [4565] NA                               NA                              
+    [4567] NA                               NA                              
+    [4569] NA                               "Eugenia sp2"                   
+    [4571] "Guarea sp."                     "Guatteria sp."                 
+    [4573] NA                               "Lepidaploa sp."                
+    [4575] NA                               NA                              
+    [4577] NA                               NA                              
+    [4579] NA                               NA                              
+    [4581] NA                               NA                              
+    [4583] NA                               NA                              
+    [4585] NA                               NA                              
+    [4587] NA                               NA                              
+    [4589] NA                               NA                              
+    [4591] NA                               NA                              
+    [4593] NA                               NA                              
+    [4595] NA                               NA                              
+    [4597] NA                               "Annona sp."                    
+    [4599] NA                               NA                              
+    [4601] "Cinmomun sp."                   NA                              
+    [4603] NA                               NA                              
+    [4605] NA                               NA                              
+    [4607] "Eugenia sp3"                    NA                              
+    [4609] "Ficus sp."                      NA                              
+    [4611] NA                               NA                              
+    [4613] "Guarea sp."                     NA                              
+    [4615] NA                               "Inga sp."                      
+    [4617] NA                               "Lonchocarpus sp."              
+    [4619] NA                               NA                              
+    [4621] "Nectandra sp."                  "Nectandra sp."                 
+    [4623] NA                               "Ormosia sp3"                   
+    [4625] NA                               NA                              
+    [4627] NA                               "Piper cf. marginatum"          
+    [4629] NA                               NA                              
+    [4631] "Prestonia sp."                  NA                              
+    [4633] NA                               NA                              
+    [4635] NA                               NA                              
+    [4637] NA                               NA                              
+    [4639] NA                               NA                              
+    [4641] NA                               NA                              
+    [4643] NA                               NA                              
+    [4645] NA                               NA                              
+    [4647] NA                               NA                              
+    [4649] NA                               "Casearia sp."                  
+    [4651] NA                               NA                              
+    [4653] NA                               NA                              
+    [4655] NA                               NA                              
+    [4657] NA                               NA                              
+    [4659] NA                               NA                              
+    [4661] NA                               NA                              
+    [4663] NA                               "Eugenia sp3"                   
+    [4665] "Guatteria sp."                  "Hasseltia sp."                 
+    [4667] NA                               NA                              
+    [4669] NA                               NA                              
+    [4671] NA                               NA                              
+    [4673] NA                               NA                              
+    [4675] NA                               NA                              
+    [4677] NA                               NA                              
+    [4679] NA                               "Neea sp."                      
+    [4681] NA                               NA                              
+    [4683] NA                               "Piper cf. marginatum"          
+    [4685] NA                               NA                              
+    [4687] "Prestonia sp."                  NA                              
+    [4689] "Psychotria sp."                 NA                              
+    [4691] NA                               NA                              
+    [4693] NA                               NA                              
+    [4695] NA                               NA                              
+    [4697] NA                               NA                              
+    [4699] NA                               NA                              
+    [4701] NA                               NA                              
+    [4703] NA                               NA                              
+    [4705] NA                               NA                              
+    [4707] NA                               NA                              
+    [4709] NA                               NA                              
+    [4711] "Aphelandra sp."                 NA                              
+    [4713] NA                               NA                              
+    [4715] NA                               "Prestonia sp."                 
+    [4717] NA                               NA                              
+    [4719] NA                               NA                              
+    [4721] NA                               NA                              
+    [4723] NA                               NA                              
+    [4725] NA                               NA                              
+    [4727] NA                               NA                              
+    [4729] "Aphelandra sp."                 "Eugenia sp2"                   
+    [4731] NA                               NA                              
+    [4733] "Hasseltia sp."                  NA                              
+    [4735] NA                               "Ormosia sp2"                   
+    [4737] NA                               "Psychotria sp."                
+    [4739] NA                               NA                              
+    [4741] "Psychotria sp."                 NA                              
+    [4743] NA                               NA                              
+    [4745] NA                               NA                              
+    [4747] NA                               NA                              
+    [4749] NA                               NA                              
+    [4751] NA                               NA                              
+    [4753] NA                               NA                              
+    [4755] NA                               NA                              
+    [4757] "Cupania sp2"                    NA                              
+    [4759] NA                               NA                              
+    [4761] NA                               NA                              
+    [4763] NA                               NA                              
+    [4765] NA                               NA                              
+    [4767] NA                               NA                              
+    [4769] "Inga sp8"                       NA                              
+    [4771] "Lauraceae sp5"                  NA                              
+    [4773] NA                               NA                              
+    [4775] NA                               NA                              
+    [4777] "Sapindaceae sp2"                NA                              
+    [4779] NA                               NA                              
+    [4781] NA                               NA                              
+    [4783] NA                               NA                              
+    [4785] NA                               NA                              
+    [4787] NA                               NA                              
+    [4789] NA                               NA                              
+    [4791] NA                               NA                              
+    [4793] "Clusia sp2"                     "Clusia sp2"                    
+    [4795] NA                               NA                              
+    [4797] NA                               NA                              
+    [4799] NA                               NA                              
+    [4801] NA                               NA                              
+    [4803] NA                               NA                              
+    [4805] NA                               NA                              
+    [4807] NA                               NA                              
+    [4809] NA                               NA                              
+    [4811] NA                               NA                              
+    [4813] "Ficus sp6"                      NA                              
+    [4815] NA                               NA                              
+    [4817] NA                               NA                              
+    [4819] NA                               "Lauraceae sp6"                 
+    [4821] "Lauraceae sp6"                  "Lauraceae sp7"                 
+    [4823] NA                               NA                              
+    [4825] "Malvaviscus sp1"                NA                              
+    [4827] NA                               NA                              
+    [4829] "Myrsine sp."                    NA                              
+    [4831] NA                               NA                              
+    [4833] NA                               NA                              
+    [4835] NA                               "Psychotria sp."                
+    [4837] NA                               "Serjania sp."                  
+    [4839] NA                               NA                              
+    [4841] NA                               NA                              
+    [4843] NA                               "Zanthoxylum sp4"               
+    [4845] "Apocynaceae sp4"                NA                              
+    [4847] NA                               NA                              
+    [4849] NA                               NA                              
+    [4851] NA                               NA                              
+    [4853] NA                               NA                              
+    [4855] NA                               NA                              
+    [4857] NA                               NA                              
+    [4859] NA                               NA                              
+    [4861] NA                               "Ficus sp6"                     
+    [4863] NA                               NA                              
+    [4865] NA                               "Lauraceae sp6"                 
+    [4867] NA                               NA                              
+    [4869] NA                               NA                              
+    [4871] NA                               NA                              
+    [4873] NA                               NA                              
+    [4875] NA                               NA                              
+    [4877] "Vachellia sp."                  NA                              
+    [4879] NA                               NA                              
+    [4881] NA                               NA                              
+    [4883] NA                               NA                              
+    [4885] NA                               "Neea sp."                      
+    [4887] NA                               NA                              
+    [4889] NA                               NA                              
+    [4891] NA                               NA                              
+    [4893] NA                               NA                              
+    [4895] NA                               NA                              
+    [4897] NA                               NA                              
+    [4899] NA                               NA                              
+    [4901] NA                               "Lonchocarpus sp."              
+    [4903] NA                               NA                              
+    [4905] NA                               NA                              
+    [4907] NA                               NA                              
+    [4909] NA                               NA                              
+    [4911] NA                               NA                              
+    [4913] NA                               NA                              
+    [4915] NA                               NA                              
+    [4917] NA                               NA                              
+    [4919] NA                               NA                              
+    [4921] NA                               NA                              
+    [4923] NA                               NA                              
+    [4925] NA                               NA                              
+    [4927] NA                               NA                              
+    [4929] NA                               NA                              
+    [4931] NA                               NA                              
+    [4933] NA                               NA                              
+    [4935] NA                               NA                              
+    [4937] NA                               NA                              
+    [4939] NA                               "Inga sp."                      
+    [4941] NA                               NA                              
+    [4943] NA                               NA                              
+    [4945] NA                               NA                              
+    [4947] NA                               NA                              
+    [4949] NA                               NA                              
+    [4951] NA                               NA                              
+    [4953] NA                               NA                              
+    [4955] "Heteropterys sp."               NA                              
+    [4957] NA                               NA                              
+    [4959] NA                               NA                              
+    [4961] NA                               NA                              
+    [4963] NA                               NA                              
+    [4965] NA                               NA                              
+    [4967] NA                               NA                              
+    [4969] NA                               NA                              
+    [4971] NA                               NA                              
+    [4973] NA                               NA                              
+    [4975] NA                               NA                              
+    [4977] NA                               NA                              
+    [4979] NA                               NA                              
+    [4981] NA                               NA                              
+    [4983] "Cynophalla sp."                 NA                              
+    [4985] NA                               NA                              
+    [4987] NA                               "Pouteria sp."                  
+    [4989] NA                               NA                              
+    [4991] NA                               NA                              
+    [4993] NA                               NA                              
+    [4995] NA                               NA                              
+    [4997] NA                               "Guettarda sp."                 
+    [4999] NA                               NA                              
+    [5001] NA                               NA                              
+    [5003] NA                               NA                              
+    [5005] NA                               NA                              
+    [5007] NA                               NA                              
+    [5009] NA                               NA                              
+    [5011] NA                               "Guettarda sp."                 
+    [5013] NA                               NA                              
+    [5015] NA                               NA                              
+    [5017] NA                               NA                              
+    [5019] NA                               NA                              
+    [5021] NA                               "Guettarda sp."                 
+    [5023] NA                               NA                              
+    [5025] NA                               NA                              
+    [5027] NA                               NA                              
+    [5029] NA                               NA                              
+    [5031] NA                               "Bunchosia aff. hartwegiana"    
+    [5033] NA                               NA                              
+    [5035] NA                               NA                              
+    [5037] NA                               "Fabaceae sp1"                  
+    [5039] NA                               NA                              
+    [5041] NA                               NA                              
+    [5043] NA                               NA                              
+    [5045] NA                               "Forsteronia sp."               
+    [5047] NA                               NA                              
+    [5049] "Guettarda sp."                  NA                              
+    [5051] NA                               NA                              
+    [5053] NA                               NA                              
+    [5055] NA                               NA                              
+    [5057] NA                               NA                              
+    [5059] NA                               NA                              
+    [5061] NA                               NA                              
+    [5063] NA                               NA                              
+    [5065] NA                               NA                              
+    [5067] NA                               NA                              
+    [5069] "Guettarda sp."                  NA                              
+    [5071] NA                               NA                              
+    [5073] NA                               NA                              
+    [5075] NA                               NA                              
+    [5077] NA                               "Guettarda sp."                 
+    [5079] NA                               NA                              
+    [5081] NA                               NA                              
+    [5083] NA                               NA                              
+    [5085] "Guettarda sp."                  NA                              
+    [5087] NA                               NA                              
+    [5089] NA                               NA                              
+    [5091] NA                               NA                              
+    [5093] NA                               NA                              
+    [5095] "Guettarda sp."                  NA                              
+    [5097] NA                               NA                              
+    [5099] NA                               NA                              
+    [5101] NA                               NA                              
+    [5103] NA                               NA                              
+    [5105] NA                               NA                              
+    [5107] NA                               NA                              
+    [5109] NA                               NA                              
+    [5111] NA                               NA                              
+    [5113] NA                               NA                              
+    [5115] NA                               NA                              
+    [5117] NA                               NA                              
+    [5119] NA                               NA                              
+    [5121] NA                               NA                              
+    [5123] NA                               NA                              
+    [5125] NA                               NA                              
+    [5127] NA                               NA                              
+    [5129] "Hiraea sp."                     NA                              
+    [5131] NA                               NA                              
+    [5133] NA                               NA                              
+    [5135] NA                               NA                              
+    [5137] NA                               NA                              
+    [5139] NA                               NA                              
+    [5141] NA                               NA                              
+    [5143] NA                               NA                              
+    [5145] NA                               NA                              
+    [5147] NA                               NA                              
+    [5149] NA                               NA                              
+    [5151] NA                               NA                              
+    [5153] NA                               NA                              
+    [5155] "Albizia sp2"                    NA                              
+    [5157] NA                               NA                              
+    [5159] NA                               "Ampelocera sp1"                
+    [5161] NA                               NA                              
+    [5163] NA                               "Aspidosperma sp1"              
+    [5165] NA                               NA                              
+    [5167] NA                               NA                              
+    [5169] NA                               NA                              
+    [5171] NA                               NA                              
+    [5173] NA                               NA                              
+    [5175] NA                               NA                              
+    [5177] NA                               NA                              
+    [5179] "Cassia sp."                     NA                              
+    [5181] NA                               NA                              
+    [5183] "Cestrum sp1"                    "Cestrum sp1"                   
+    [5185] "Cestrum sp1"                    NA                              
+    [5187] NA                               NA                              
+    [5189] NA                               NA                              
+    [5191] NA                               NA                              
+    [5193] NA                               "Diospyros sp1"                 
+    [5195] "Enterolobium sp1"               "Eugenia sp3"                   
+    [5197] "Eugenia sp3"                    "Eugenia sp3"                   
+    [5199] "Eugenia sp4"                    "Eugenia sp4"                   
+    [5201] "Eugenia sp4"                    "Eugenia sp4"                   
+    [5203] "Eugenia sp4"                    "Ficus sp."                     
+    [5205] "Guarea sp1"                     NA                              
+    [5207] NA                               NA                              
+    [5209] NA                               NA                              
+    [5211] NA                               NA                              
+    [5213] NA                               NA                              
+    [5215] NA                               "Hippocratea sp."               
+    [5217] "Inga sp1"                       "Inga sp1"                      
+    [5219] "Inga sp4"                       "Inga sp6"                      
+    [5221] "Inga sp6"                       "Inga sp6"                      
+    [5223] "Ixora sp."                      NA                              
+    [5225] "Ladenbergia sp."                "Licania sp1"                   
+    [5227] NA                               NA                              
+    [5229] NA                               NA                              
+    [5231] NA                               NA                              
+    [5233] NA                               "Malmea sp."                    
+    [5235] "Malmea sp."                     "Malmea sp."                    
+    [5237] "Matayba sp1"                    "Matayba sp1"                   
+    [5239] NA                               NA                              
+    [5241] NA                               "Rubiaceae sp47"                
+    [5243] NA                               NA                              
+    [5245] NA                               NA                              
+    [5247] NA                               NA                              
+    [5249] "Nectandra sp."                  "Nectandra sp."                 
+    [5251] "Nectandra sp."                  "Nectandra sp."                 
+    [5253] NA                               NA                              
+    [5255] NA                               NA                              
+    [5257] NA                               NA                              
+    [5259] NA                               NA                              
+    [5261] NA                               NA                              
+    [5263] "Paullinia sp1"                  "Paullinia sp1"                 
+    [5265] "Piper sp6"                      "Piper sp6"                     
+    [5267] "Pouteria sp5"                   NA                              
+    [5269] NA                               NA                              
+    [5271] NA                               "Pseudomalmea sp."              
+    [5273] "Pseudomalmea sp."               "Pseudomalmea sp."              
+    [5275] "Pseudomalmea sp."               NA                              
+    [5277] NA                               NA                              
+    [5279] NA                               NA                              
+    [5281] NA                               NA                              
+    [5283] "Randia sp."                     "Rinorea sp1"                   
+    [5285] "Rinorea sp1"                    NA                              
+    [5287] NA                               NA                              
+    [5289] NA                               NA                              
+    [5291] "Ruprechtia sp1"                 "Senegalia sp1"                 
+    [5293] NA                               NA                              
+    [5295] "Sorocea sp."                    "Sorocea sp."                   
+    [5297] "Spathelia sp."                  NA                              
+    [5299] NA                               NA                              
+    [5301] NA                               NA                              
+    [5303] NA                               "Swartzia sp1"                  
+    [5305] "Swartzia sp1"                   NA                              
+    [5307] NA                               NA                              
+    [5309] NA                               NA                              
+    [5311] NA                               NA                              
+    [5313] NA                               NA                              
+    [5315] NA                               NA                              
+    [5317] NA                               NA                              
+    [5319] NA                               NA                              
+    [5321] NA                               "Acalypha sp."                  
+    [5323] NA                               NA                              
+    [5325] "Albizia sp."                    NA                              
+    [5327] "Aristolochia sp."               NA                              
+    [5329] NA                               NA                              
+    [5331] "Bignoniaceae sp."               NA                              
+    [5333] NA                               NA                              
+    [5335] NA                               NA                              
+    [5337] NA                               NA                              
+    [5339] NA                               NA                              
+    [5341] NA                               NA                              
+    [5343] NA                               NA                              
+    [5345] NA                               NA                              
+    [5347] "Eugenia sp."                    "Ficus cf. obtusifolia"         
+    [5349] NA                               NA                              
+    [5351] NA                               NA                              
+    [5353] NA                               NA                              
+    [5355] "Hiraea sp."                     NA                              
+    [5357] NA                               NA                              
+    [5359] "Licaria aff. applanata"         NA                              
+    [5361] NA                               "Luetzelburgia aff. andina"     
+    [5363] "Lycianthes sp."                 NA                              
+    [5365] NA                               NA                              
+    [5367] "Machaerium sp."                 NA                              
+    [5369] NA                               "Primulaceae sp10"              
+    [5371] "Bignoniaceae sp13"              "Fabaceae sp7"                  
+    [5373] "Menispermaceae sp8"             "Malpighiaceae sp9"             
+    [5375] NA                               "Neea sp."                      
+    [5377] "Palicourea sp."                 NA                              
+    [5379] NA                               "Paullinia sp."                 
+    [5381] NA                               NA                              
+    [5383] NA                               NA                              
+    [5385] NA                               "Pterocarpus sp."               
+    [5387] NA                               NA                              
+    [5389] NA                               NA                              
+    [5391] NA                               "Solanum sp."                   
+    [5393] NA                               NA                              
+    [5395] NA                               NA                              
+    [5397] NA                               NA                              
+    [5399] NA                               NA                              
+    [5401] NA                               "Vasconcellea sp."              
+    [5403] NA                               NA                              
+    [5405] NA                               NA                              
+    [5407] NA                               NA                              
+    [5409] NA                               NA                              
+    [5411] NA                               NA                              
+    [5413] NA                               "Opuntia sp."                   
+    [5415] NA                               NA                              
+    [5417] NA                               NA                              
+    [5419] NA                               NA                              
+    [5421] "Cynophalla sp."                 NA                              
+    [5423] NA                               NA                              
+    [5425] NA                               NA                              
+    [5427] NA                               NA                              
+    [5429] NA                               NA                              
+    [5431] NA                               NA                              
+    [5433] NA                               NA                              
+    [5435] NA                               NA                              
+    [5437] NA                               NA                              
+    [5439] NA                               NA                              
+    [5441] NA                               NA                              
+    [5443] NA                               NA                              
+    [5445] NA                               NA                              
+    [5447] NA                               NA                              
+    [5449] NA                               NA                              
+    [5451] NA                               NA                              
+    [5453] NA                               NA                              
+    [5455] NA                               NA                              
+    [5457] NA                               NA                              
+    [5459] NA                               NA                              
+    [5461] NA                               "Cordia sp."                    
+    [5463] NA                               NA                              
+    [5465] NA                               NA                              
+    [5467] NA                               NA                              
+    [5469] NA                               "Eschweilera sp."               
+    [5471] "Eugenia sp1"                    "Guapira sp."                   
+    [5473] NA                               NA                              
+    [5475] NA                               NA                              
+    [5477] NA                               NA                              
+    [5479] NA                               NA                              
+    [5481] "Machaerium sp1"                 NA                              
+    [5483] NA                               NA                              
+    [5485] "Marsdenia sp."                  NA                              
+    [5487] NA                               NA                              
+    [5489] "sp14"                           NA                              
+    [5491] NA                               NA                              
+    [5493] "Paullinia sp2"                  NA                              
+    [5495] NA                               NA                              
+    [5497] NA                               NA                              
+    [5499] "Prestonia sp."                  NA                              
+    [5501] NA                               "Psychotria sp."                
+    [5503] NA                               NA                              
+    [5505] NA                               NA                              
+    [5507] NA                               NA                              
+    [5509] NA                               NA                              
+    [5511] NA                               NA                              
+    [5513] NA                               NA                              
+    [5515] "Senna sp."                      "Senna sp1"                     
+    [5517] NA                               NA                              
+    [5519] NA                               NA                              
+    [5521] "Albizia sp."                    NA                              
+    [5523] "Annona sp4"                     "Aphelandra sp."                
+    [5525] "Aphelandra sp."                 NA                              
+    [5527] "Bactris sp3"                    NA                              
+    [5529] "Brownea sp."                    NA                              
+    [5531] NA                               NA                              
+    [5533] NA                               NA                              
+    [5535] NA                               NA                              
+    [5537] NA                               NA                              
+    [5539] "Ficus sp1"                      NA                              
+    [5541] NA                               NA                              
+    [5543] NA                               "Inga sp7"                      
+    [5545] "Inga sp7"                       NA                              
+    [5547] "Lonchocarpus sp."               NA                              
+    [5549] NA                               "Nectandra sp2"                 
+    [5551] NA                               NA                              
+    [5553] NA                               NA                              
+    [5555] NA                               "Parathesis sp."                
+    [5557] "Peltogyne sp."                  NA                              
+    [5559] NA                               "Piper sp2"                     
+    [5561] NA                               NA                              
+    [5563] NA                               NA                              
+    [5565] NA                               "Swartzia sp3"                  
+    [5567] NA                               NA                              
+    [5569] NA                               NA                              
+    [5571] NA                               NA                              
+    [5573] NA                               "Ampelocera sp."                
+    [5575] NA                               NA                              
+    [5577] NA                               "Banisteriopsis sp1"            
+    [5579] NA                               "Bignonia sp2"                  
+    [5581] NA                               NA                              
+    [5583] NA                               NA                              
+    [5585] NA                               NA                              
+    [5587] NA                               NA                              
+    [5589] NA                               NA                              
+    [5591] NA                               NA                              
+    [5593] NA                               "Cordia sp4"                    
+    [5595] NA                               NA                              
+    [5597] "Croton sp1"                     NA                              
+    [5599] "Erythrina sp1"                  "Erythrina sp2"                 
+    [5601] "Fabaceae sp."                   "Fabaceae sp2"                  
+    [5603] NA                               NA                              
+    [5605] NA                               NA                              
+    [5607] "Inga sp6"                       NA                              
+    [5609] NA                               "Machaerium sp5"                
+    [5611] NA                               NA                              
+    [5613] NA                               NA                              
+    [5615] NA                               "Nectandra sp1"                 
+    [5617] NA                               "Peltogyne sp."                 
+    [5619] NA                               "Piptadenia sp."                
+    [5621] NA                               NA                              
+    [5623] "Salacia sp1"                    "Senna sp4"                     
+    [5625] "Solanum sp2"                    NA                              
+    [5627] NA                               NA                              
+    [5629] NA                               "Tetrapterys sp1"               
+    [5631] NA                               NA                              
+    [5633] NA                               "Zygia sp."                     
+    [5635] NA                               NA                              
+    [5637] NA                               NA                              
+    [5639] NA                               NA                              
+    [5641] NA                               NA                              
+    [5643] NA                               NA                              
+    [5645] NA                               NA                              
+    [5647] NA                               "Chromolaena sp."               
+    [5649] "Chromolaena sp."                NA                              
+    [5651] NA                               "Cordia sp4"                    
+    [5653] NA                               NA                              
+    [5655] "Erythrina sp1"                  "Erythrina sp2"                 
+    [5657] NA                               "Fabaceae sp."                  
+    [5659] NA                               NA                              
+    [5661] NA                               NA                              
+    [5663] NA                               NA                              
+    [5665] NA                               NA                              
+    [5667] NA                               NA                              
+    [5669] NA                               "Inga sp6"                      
+    [5671] "Inga sp6"                       "Inga sp6"                      
+    [5673] NA                               "Moraceae sp."                  
+    [5675] NA                               NA                              
+    [5677] "Nectandra sp1"                  NA                              
+    [5679] NA                               NA                              
+    [5681] NA                               NA                              
+    [5683] NA                               "Piper sp1"                     
+    [5685] NA                               "Salacia sp1"                   
+    [5687] NA                               NA                              
+    [5689] NA                               NA                              
+    [5691] "Swartzia sp3"                   NA                              
+    [5693] NA                               NA                              
+    [5695] NA                               NA                              
+    [5697] NA                               NA                              
+    [5699] NA                               NA                              
+    [5701] "Anemopaegma sp."                "Annona sp."                    
+    [5703] NA                               "Fridericia sp."                
+    [5705] NA                               NA                              
+    [5707] NA                               "Coursetia sp."                 
+    [5709] NA                               NA                              
+    [5711] NA                               NA                              
+    [5713] NA                               "Cheiloclinium sp."             
+    [5715] NA                               NA                              
+    [5717] NA                               NA                              
+    [5719] NA                               NA                              
+    [5721] NA                               NA                              
+    [5723] NA                               "Elaeoluma sp."                 
+    [5725] "Endlicheria sp."                NA                              
+    [5727] NA                               NA                              
+    [5729] NA                               NA                              
+    [5731] NA                               NA                              
+    [5733] "Ficus sp."                      "Ficus sp1"                     
+    [5735] NA                               NA                              
+    [5737] NA                               NA                              
+    [5739] NA                               NA                              
+    [5741] NA                               NA                              
+    [5743] NA                               NA                              
+    [5745] NA                               NA                              
+    [5747] "Inga sp."                       NA                              
+    [5749] NA                               NA                              
+    [5751] NA                               NA                              
+    [5753] NA                               NA                              
+    [5755] "Licaria sp."                    "Licaria sp."                   
+    [5757] "Licania sp2"                    NA                              
+    [5759] NA                               NA                              
+    [5761] NA                               "Matayba sp."                   
+    [5763] "Matayba sp."                    NA                              
+    [5765] NA                               "Myrtaceae sp2"                 
+    [5767] "Myrtaceae sp2"                  "Myrtaceae sp2"                 
+    [5769] "Myrtaceae sp3"                  "sp4"                           
+    [5771] "Myrcia sp1"                     "Myrcia sp1"                    
+    [5773] "Myrcia sp2"                     NA                              
+    [5775] NA                               NA                              
+    [5777] NA                               "Ouratea sp."                   
+    [5779] NA                               NA                              
+    [5781] "Petrea sp."                     NA                              
+    [5783] NA                               NA                              
+    [5785] "Pouteria sp4"                   "Pouteria sp4"                  
+    [5787] NA                               NA                              
+    [5789] "Pseudolmedia sp1"               "Pterocarpus sp4"               
+    [5791] NA                               NA                              
+    [5793] NA                               NA                              
+    [5795] NA                               NA                              
+    [5797] NA                               NA                              
+    [5799] NA                               NA                              
+    [5801] NA                               NA                              
+    [5803] NA                               NA                              
+    [5805] NA                               "Acalypha sp1"                  
+    [5807] "Asteraceae sp1"                 "Asteraceae sp2"                
+    [5809] NA                               NA                              
+    [5811] NA                               NA                              
+    [5813] NA                               "Chamaedorea sp1"               
+    [5815] NA                               NA                              
+    [5817] "Erythrina sp1"                  "Eugenia sp2"                   
+    [5819] NA                               "Ficus sp1"                     
+    [5821] "Geissanthus aff. occidentalis"  "Geissanthus sp1"               
+    [5823] NA                               NA                              
+    [5825] NA                               NA                              
+    [5827] NA                               NA                              
+    [5829] "Lozania sp1"                    NA                              
+    [5831] NA                               "Oreopanax sp1"                 
+    [5833] "Paullinia cf. globosa"          "Piper aff. hispidum"           
+    [5835] NA                               "Piper sp1"                     
+    [5837] "Piper sp2"                      "Quararibea aff. alchornaefolia"
+    [5839] NA                               NA                              
+    [5841] NA                               "Zanthoxylum sp1"               
+    [5843] "Zanthoxylum aff. sprucey"       NA                              
+    [5845] NA                               NA                              
+    [5847] NA                               NA                              
+    [5849] "Doliocarpus cf. multiflorus"    NA                              
+    [5851] NA                               "Machaerium sp."                
+    [5853] NA                               NA                              
+    [5855] "Rustia cf. occidentalis"        "Sterculia sp."                 
+    [5857] NA                               NA                              
+    [5859] NA                               NA                              
+    [5861] NA                               "Ficus sp."                     
+    [5863] "Licaria sp."                    NA                              
+    [5865] "Fabaceae sp9"                   NA                              
+    [5867] NA                               NA                              
+    [5869] "Rustia cf. occidentalis"        NA                              
+    [5871] NA                               NA                              
+    [5873] NA                               "Doliocarpus cf. multiflorus"   
+    [5875] NA                               NA                              
+    [5877] NA                               "Sterculia sp."                 
+    [5879] NA                               NA                              
+    [5881] NA                               NA                              
+    [5883] NA                               NA                              
+    [5885] NA                               NA                              
+    [5887] NA                               "Luetzelburgia sp."             
+    [5889] NA                               NA                              
+    [5891] NA                               "Rustia cf. occidentalis"       
+    [5893] NA                               NA                              
+    [5895] NA                               NA                              
+    [5897] NA                               NA                              
+    [5899] NA                               NA                              
+    [5901] NA                               NA                              
+    [5903] NA                               NA                              
+    [5905] NA                               NA                              
+    [5907] NA                               NA                              
+    [5909] NA                               NA                              
+    [5911] NA                               "Bignoniaceae sp3"              
+    [5913] NA                               NA                              
+    [5915] NA                               NA                              
+    [5917] NA                               "Doliocarpus cf. multiflorus"   
+    [5919] NA                               NA                              
+    [5921] NA                               NA                              
+    [5923] NA                               NA                              
+    [5925] NA                               NA                              
+    [5927] NA                               NA                              
+    [5929] "Apocynaceae sp4"                "Celastraceae sp5"              
+    [5931] NA                               NA                              
+    [5933] NA                               NA                              
+    [5935] NA                               NA                              
+    [5937] NA                               NA                              
+    [5939] NA                               NA                              
+    [5941] "Bignoniaceae sp6"               "Proteaceae sp7"                
+    [5943] NA                               NA                              
+    [5945] NA                               NA                              
+    [5947] "Ficus sp."                      "Licaria sp."                   
+    [5949] NA                               "Apocynaceae sp8"               
+    [5951] NA                               NA                              
+    [5953] NA                               NA                              
+    [5955] NA                               NA                              
+    [5957] NA                               NA                              
+    [5959] NA                               NA                              
+    [5961] NA                               NA                              
+    [5963] NA                               NA                              
+    [5965] NA                               NA                              
+    [5967] NA                               NA                              
+    [5969] NA                               NA                              
+    [5971] NA                               "Cupania sp1"                   
+    [5973] NA                               "Daphnopsis sp."                
+    [5975] "Enterolobium sp1"               NA                              
+    [5977] NA                               NA                              
+    [5979] NA                               NA                              
+    [5981] NA                               NA                              
+    [5983] NA                               NA                              
+    [5985] NA                               NA                              
+    [5987] "Guapira sp1"                    "Guapira sp1"                   
+    [5989] NA                               NA                              
+    [5991] NA                               NA                              
+    [5993] NA                               "Amaranthaceae sp5"             
+    [5995] "Myrsine sp1"                    NA                              
+    [5997] NA                               NA                              
+    [5999] NA                               NA                              
+    [6001] NA                               NA                              
+    [6003] NA                               NA                              
+    [6005] NA                               NA                              
+    [6007] NA                               "Serjania sp1"                  
+    [6009] NA                               NA                              
+    [6011] NA                               NA                              
+    [6013] NA                               NA                              
+    [6015] NA                               NA                              
+    [6017] NA                               NA                              
+    [6019] NA                               NA                              
+    [6021] NA                               "Verbesina sp."                 
+    [6023] NA                               NA                              
+    [6025] NA                               NA                              
+    [6027] NA                               NA                              
+    [6029] NA                               NA                              
+    [6031] NA                               NA                              
+    [6033] NA                               NA                              
+    [6035] NA                               NA                              
+    [6037] "Ampelocera sp."                 NA                              
+    [6039] NA                               NA                              
+    [6041] NA                               NA                              
+    [6043] "Chomelia sp."                   "Chomelia sp."                  
+    [6045] NA                               NA                              
+    [6047] NA                               NA                              
+    [6049] NA                               NA                              
+    [6051] NA                               NA                              
+    [6053] NA                               NA                              
+    [6055] NA                               NA                              
+    [6057] NA                               NA                              
+    [6059] NA                               NA                              
+    [6061] "Randia sp3"                     "Randia sp4"                    
+    [6063] NA                               NA                              
+    [6065] NA                               "Apocynaceae sp3"               
+    [6067] NA                               NA                              
+    [6069] NA                               NA                              
+    [6071] NA                               NA                              
+    [6073] NA                               NA                              
 
 KEW: WCVP
 
