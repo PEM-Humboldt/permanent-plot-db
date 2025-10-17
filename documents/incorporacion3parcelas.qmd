@@ -505,6 +505,12 @@ pb_ind<-as.numeric(names(un_taxInd)[!un_taxInd])
 write.csv(x = corrected_parcelas[ind_idx %in% pb_ind,c("plot","subplot","ind","cd_tax","cd_morfo","genus","specificEpithet","verbatimTaxonRank")], file = "../../problemIndividualTaxo.csv")
 ```
 
+
+```{r}
+solution<-read.csv("../../problemIndividualTaxo_soluciónNatalia.csv")
+```
+
+
 There is a problem for various individuals which have more than one taxon depending on the ramet.
 ```{r}
 majority<-function(mat)
