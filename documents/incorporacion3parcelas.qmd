@@ -507,7 +507,15 @@ write.csv(x = corrected_parcelas[ind_idx %in% pb_ind,c("plot","subplot","ind","c
 
 
 ```{r}
-solution<-read.csv("../../problemIndividualTaxo_soluciónNatalia.csv")
+solution<-read.csv("../../problemIndividualTaxo_soluciónNatalia.csv",sep=";", encoding = "latin1")
+solution$tagToChange<- gsub("[A-z ]*([0-9]+\\.?[0-9]?[A-Z]?)$","\\1",solution$correccion)
+matCorrec<-as.matrix(solution[c("plot","subplot","ind","cd_tax","cd_morfo")])
+matCorrec[grep("^ +",matCorrec)]<-gsub("^ +","",matCorrec[grep("^ +",matCorrec)])
+matParcelas<-as.matrix(corrected_parcelas[c("plot","subplot","ind","cd_tax","cd_morfo")])
+matParcelas[grep("^ +",matParcelas)]<-gsub("^ +","",matParcelas[grep("^ +",matParcelas)])
+m<-match(split(matParcelas,row(matParcelas)),split(matCorrec,row(matCorrec)))
+solution$tagToChange[m[!is.na(m)]]
+
 ```
 
 
