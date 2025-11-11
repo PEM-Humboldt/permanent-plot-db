@@ -565,7 +565,7 @@ for(i in 1:length(pbToResolve))
   }
   if(sum(changeInd) == 0 || (sum(changeInd)>0 & !resolved))
   {
-    stopifnot(tapply(s$selecci.n,m_mt,function(x)length(unique(x))))
+    stopifnot(tapply(s$selecci.n,m_mt,function(x)length(unique(x)))==1)
     corr_family<-p$family[s$selecci.n==1][1]
     corr_genus<-p$genus[s$selecci.n==1][1]
     corr_specificEpithet<-p$specificEpithet[s$selecci.n==1][1]
@@ -579,7 +579,7 @@ for(i in 1:length(pbToResolve))
     corrected_parcelas$specificEpithet[ind_idx==c_idx][s$selecci.n==0]<-corr_specificEpithet
     corrected_parcelas$authorName[ind_idx==c_idx][s$selecci.n==0]<-corr_authorName
     corrected_parcelas$cd_tax[ind_idx==c_idx][s$selecci.n==0]<-corr_cd_tax
-    corrected_parcelas$cd_morpho[ind_idx==c_idx][s$selecci.n==0]<-corr_cd_morpho
+    corrected_parcelas$cd_morpho[ind_idx==c_idx][s$selecci.n==0]<-corr_cd_morfo
     corrected_parcelas$tax_localId[ind_idx==c_idx][s$selecci.n==0]<-corr_tax_localId
     corrected_parcelas$verbatimTaxonRank[ind_idx==c_idx][s$selecci.n==0]<-corr_verbatimTaxonRank
   }
@@ -601,6 +601,8 @@ all(sapply(tax_ind,function(x)majority(as.matrix(x)))==1)
 
 
 ```{r}
+matInd<-as.matrix(corrected_parcelas[c("plot","subplot","ind")])
+ind_idx<-match(split(matInd,row(matInd)),split(matInd,row(matInd)))
 ind_tab<-corrected_parcelas[unique(ind_idx),]
 ind_tab$cd_project<-cd_projects[unique(ind_idx)]
 ind_tab$cd_identif<-NA
@@ -742,8 +744,11 @@ RETURNING cd_var"
 ```{r}
 corrected_parcelas$cd_project<-cd_projects
 ### TODO: manage that!
+corrected_parcelas[7954,"ramet"]<-6
 mat_ramet<-as.matrix(corrected_parcelas[c("plot","subplot","ind","ramet")])
-corrected_parcelas<-corrected_parcelas[-which(!match(split(mat_ramet,row(mat_ramet)),split(mat_ramet,row(mat_ramet)))==1:nrow(mat_ramet)),]
+pbRamets<-which(!match(split(mat_ramet,row(mat_ramet)),split(mat_ramet,row(mat_ramet)))==1:nrow(mat_ramet))
+if(length(pbRamets)>0)
+ {corrected_parcelas<-corrected_parcelas[-pbRamets,]}
 ####
 
 mat_ramet<-as.matrix(corrected_parcelas[c("plot","subplot","ind","ramet")])

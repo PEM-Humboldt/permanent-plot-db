@@ -390,9 +390,9 @@ FROM a
 
 | cd_project | cd_loc | cd_gp_biol | cd_method | date_begin | date_end   | compaign_nb |
 |-----------:|-------:|:-----------|----------:|:-----------|:-----------|------------:|
-|        334 |    634 | arbo       |         2 | 2015-11-08 | 2015-11-08 |           1 |
-|        335 |    635 | arbo       |         2 | 2015-10-21 | 2015-10-21 |           1 |
-|        336 |    636 | arbo       |         2 | 2015-11-07 | 2015-11-07 |           1 |
+|        388 |   6088 | arbo       |         2 | 2015-11-08 | 2015-11-08 |           1 |
+|        389 |   6089 | arbo       |         2 | 2015-10-21 | 2015-10-21 |           1 |
+|        390 |   6090 | arbo       |         2 | 2015-11-07 | 2015-11-07 |           1 |
 
 ``` r
 stopifnot(table(tab_gp_event$cd_project)==1)
@@ -660,6 +660,7 @@ Determinations make sense at the individual case. Here are the
 correspondance between rows and individuals:
 
 ``` r
+stopifnot(is.character(corrected_parcelas$ind))
 matInd<-as.matrix(corrected_parcelas[c("plot","subplot","ind")])
 ind_idx<-match(split(matInd,row(matInd)),split(matInd,row(matInd)))
 tax_ind<-by(corrected_parcelas,ind_idx,function(tab)unique(tab[c("cd_tax","cd_morfo")]))
@@ -672,6 +673,86 @@ sum(!un_taxInd)
 ``` r
 pb_ind<-as.numeric(names(un_taxInd)[!un_taxInd])
 write.csv(x = corrected_parcelas[ind_idx %in% pb_ind,c("plot","subplot","ind","cd_tax","cd_morfo","genus","specificEpithet","verbatimTaxonRank")], file = "../../problemIndividualTaxo.csv")
+```
+
+``` r
+solution<-read.csv("../../problemIndividualTaxo_soluciónNatalia.csv",sep=";", encoding = "latin1")
+```
+
+I’ve got a problem here: each time I apply the code from this document,
+the cd_morfo variable is deleted and created another time, which means
+that with the serial type, it increment the minimal values as the last
+max value +1. So it does not correspond.
+
+The only solution is to test whether the tables have the same order and
+to replace
+
+``` r
+stopifnot(solution$cd_tax==corrected_parcelas$cd_tax[ind_idx %in% pb_ind])
+stopifnot(solution$ind==corrected_parcelas$ind[ind_idx %in% pb_ind])
+```
+
+``` r
+solution$cd_morfo<-corrected_parcelas$cd_morfo[ind_idx %in% pb_ind]
+```
+
+``` r
+#solution$tagToChange<- gsub("[A-z ]*([0-9]+\\.?[0-9]?[A-Z]?)$","\\1",solution$correccion)
+matCorrec<-as.matrix(solution[c("plot","subplot","ind","cd_tax","cd_morfo")])
+matCorrec[grep("^ +",matCorrec)]<-gsub("^ +","",matCorrec[grep("^ +",matCorrec)])
+matParcelas<-as.matrix(corrected_parcelas[c("plot","subplot","ind","cd_tax","cd_morfo")])
+matParcelas[grep("^ +",matParcelas)]<-gsub("^ +","",matParcelas[grep("^ +",matParcelas)])
+m<-match(split(matCorrec,row(matCorrec)),split(matParcelas,row(matParcelas)))
+#m<-match(split(matParcelas,row(matParcelas)),split(matCorrec,row(matCorrec)))
+pbToResolve<-unique(ind_idx[m])
+ind_idx_v2<-ind_idx
+min_new_idx<-nrow(corrected_parcelas) + 1
+for(i in 1:length(pbToResolve))
+{
+  c_idx <-pbToResolve[i]
+  s <- solution[ind_idx[m]==c_idx,]
+  p <- corrected_parcelas[ind_idx==c_idx,]
+  stopifnot(nrow(s)==nrow(p))
+  mt <- as.matrix(p[c("cd_tax", "cd_morfo")])
+  m_mt <- match(split(mt,row(mt)),split(mt,row(mt)))
+  changeInd <- s$correccion != ""
+  if(sum(changeInd) > 0)
+  {
+    stopifnot(sum(changeInd)==1) # If there is cases where more than one file should change individualID, the code should be more complex, understand if there are more than one row corresponding to the same individual etc.
+    c_plot <- s$plot[1]
+    c_subplot <- s$subplot[1]
+    c_ind <- s$ind[1]
+    potentialInd <- paste(c_ind,1:50,sep=".")
+    alreadyInd<-corrected_parcelas$ind[corrected_parcelas$plot == c_plot & corrected_parcelas$subplot == c_subplot]
+    newInd<-potentialInd[!potentialInd%in%alreadyInd][1]
+    corrected_parcelas$ind[ind_idx==c_idx][changeInd]<-newInd
+    corrected_parcelas$individualID[ind_idx==c_idx][changeInd]<-newInd
+    corrected_parcelas$ramet[ind_idx==c_idx][changeInd]<-1
+    ind_idx_v2[ind_idx==c_idx][changeInd]<-max(min_new_idx,max(ind_idx_v2)+1)
+    newIdxs<-ind_idx_v2[ind_idx==c_idx]
+    resolved<-all(tapply(newIdxs,m_mt,function(x)length(unique(x)))==1)
+  }
+  if(sum(changeInd) == 0 || (sum(changeInd)>0 & !resolved))
+  {
+    stopifnot(tapply(s$selecci.n,m_mt,function(x)length(unique(x)))==1)
+    corr_family<-p$family[s$selecci.n==1][1]
+    corr_genus<-p$genus[s$selecci.n==1][1]
+    corr_specificEpithet<-p$specificEpithet[s$selecci.n==1][1]
+    corr_authorName<-p$authorName[s$selecci.n==1][1]
+    corr_cd_tax<-p$cd_tax[s$selecci.n==1][1]
+    corr_cd_morfo<-p$cd_tax[s$selecci.n==1][1]
+    corr_tax_localId<-p$tax_localId[s$selecci.n==1][1]
+    corr_verbatimTaxonRank<-p$verbatimTaxonRank[s$selecci.n==1][1]
+    corrected_parcelas$family[ind_idx==c_idx][s$selecci.n==0]<-corr_family
+    corrected_parcelas$genus[ind_idx==c_idx][s$selecci.n==0]<-corr_genus
+    corrected_parcelas$specificEpithet[ind_idx==c_idx][s$selecci.n==0]<-corr_specificEpithet
+    corrected_parcelas$authorName[ind_idx==c_idx][s$selecci.n==0]<-corr_authorName
+    corrected_parcelas$cd_tax[ind_idx==c_idx][s$selecci.n==0]<-corr_cd_tax
+    corrected_parcelas$cd_morpho[ind_idx==c_idx][s$selecci.n==0]<-corr_cd_morfo
+    corrected_parcelas$tax_localId[ind_idx==c_idx][s$selecci.n==0]<-corr_tax_localId
+    corrected_parcelas$verbatimTaxonRank[ind_idx==c_idx][s$selecci.n==0]<-corr_verbatimTaxonRank
+  }
+}
 ```
 
 There is a problem for various individuals which have more than one
@@ -691,6 +772,8 @@ all(sapply(tax_ind,function(x)majority(as.matrix(x)))==1)
 ## Inserting determination, register, individual and coordinates
 
 ``` r
+matInd<-as.matrix(corrected_parcelas[c("plot","subplot","ind")])
+ind_idx<-match(split(matInd,row(matInd)),split(matInd,row(matInd)))
 ind_tab<-corrected_parcelas[unique(ind_idx),]
 ind_tab$cd_project<-cd_projects[unique(ind_idx)]
 ind_tab$cd_identif<-NA
@@ -827,8 +910,11 @@ RETURNING cd_var"
 ``` r
 corrected_parcelas$cd_project<-cd_projects
 ### TODO: manage that!
+corrected_parcelas[7954,"ramet"]<-6
 mat_ramet<-as.matrix(corrected_parcelas[c("plot","subplot","ind","ramet")])
-corrected_parcelas<-corrected_parcelas[-which(!match(split(mat_ramet,row(mat_ramet)),split(mat_ramet,row(mat_ramet)))==1:nrow(mat_ramet)),]
+pbRamets<-which(!match(split(mat_ramet,row(mat_ramet)),split(mat_ramet,row(mat_ramet)))==1:nrow(mat_ramet))
+if(length(pbRamets)>0)
+ {corrected_parcelas<-corrected_parcelas[-pbRamets,]}
 ####
 
 mat_ramet<-as.matrix(corrected_parcelas[c("plot","subplot","ind","ramet")])
