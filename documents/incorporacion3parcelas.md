@@ -100,8 +100,6 @@ if(RPostgres::dbExistsTable(pp_bst,DBI::Id(schema="tmp",table="spatproject")))
 {RPostgres::dbExecute(pp_bst,"DROP TABLE tmp.spatproject")}
 ```
 
-    [1] 0
-
 ``` r
 RPostgres::dbExecute(pp_bst,"
 CREATE TABLE tmp.spatproject AS(
@@ -350,13 +348,11 @@ ORDER BY l.cd_loc,subplot
 
     [1] 300
 
-## Inserting projects
-
 ``` r
 RPostgres::dbExecute(pp_bst,"DELETE FROM main.project WHERE project IN (SELECT plot FROM tmp.spatproject)")
 ```
 
-    [1] 3
+    [1] 0
 
 ``` r
 RPostgres::dbExecute(pp_bst,
@@ -390,9 +386,9 @@ FROM a
 
 | cd_project | cd_loc | cd_gp_biol | cd_method | date_begin | date_end   | compaign_nb |
 |-----------:|-------:|:-----------|----------:|:-----------|:-----------|------------:|
-|        388 |   6088 | arbo       |         2 | 2015-11-08 | 2015-11-08 |           1 |
-|        389 |   6089 | arbo       |         2 | 2015-10-21 | 2015-10-21 |           1 |
-|        390 |   6090 | arbo       |         2 | 2015-11-07 | 2015-11-07 |           1 |
+|        331 |    331 | arbo       |         2 | 2015-11-08 | 2015-11-08 |           1 |
+|        332 |    332 | arbo       |         2 | 2015-10-21 | 2015-10-21 |           1 |
+|        333 |    333 | arbo       |         2 | 2015-11-07 | 2015-11-07 |           1 |
 
 ``` r
 stopifnot(table(tab_gp_event$cd_project)==1)
@@ -437,6 +433,34 @@ events<-RPostgres::dbReadTable(pp_bst,DBI::Id(schema="main",table="event"))
 m<-match(paste0(parcelas_tot$plot,"_census0_subplot",trimws(parcelas_tot$subplot)),events$event_id)
 parcelas_tot$cd_event<-events$cd_event[m]
 ```
+
+### Correction to the falsely attribruted subplots
+
+``` r
+sf_event <- st_read(pp_bst,query="
+SELECT e.*,pol_geom
+FROM main.project
+LEFT JOIN main.gp_event ge USING (cd_project)
+LEFT JOIN main.event e USING (cd_gp_event)
+LEFT JOIN main.location l ON e.cd_loc=l.cd_loc
+WHERE project IN ('LaPaz','Matitas','Plato')
+")
+sjpe <- st_join(sf_parcelas,sf_event)
+
+# Plato subparcelas 14 -> 13
+idToChange<-sjpe$id[sjpe$plot=="Plato" & sjpe$subplot==14 & sjpe$num_replicate==13]
+newEvent <- RPostgres::dbGetQuery(pp_bst,"SELECT cd_event FROM main.event LEFT JOIN main.gp_event USING (cd_gp_event) LEFT JOIN main.project USING (cd_project) WHERE project='Plato' AND num_replicate=13")$cd_event
+parcelas_tot[parcelas_tot$id %in% idToChange,"subplot"]<-13
+parcelas_tot[parcelas_tot$id %in% idToChange,"cd_event"]<-newEvent
+
+# Plato subparcelas 45 -> 44
+idToChange<-sjpe$id[sjpe$plot=="Plato" & sjpe$subplot==45 & sjpe$num_replicate==44]
+newEvent <- RPostgres::dbGetQuery(pp_bst,"SELECT cd_event FROM main.event LEFT JOIN main.gp_event USING (cd_gp_event) LEFT JOIN main.project USING (cd_project) WHERE project='Plato' AND num_replicate=44")$cd_event
+parcelas_tot[parcelas_tot$id %in% idToChange,"subplot"]<-44
+parcelas_tot[parcelas_tot$id %in% idToChange,"cd_event"]<-newEvent
+```
+
+## Inserting projects
 
 ## Taxonomy
 
@@ -567,7 +591,7 @@ pp_bst<-dbConnect(Postgres(),dbname="pp_bst_col")
 dbExecute(pp_bst,"UPDATE main.taxo SET cd_accepted=cd_tax WHERE cd_accepted IS NULL")
 ```
 
-    [1] 0
+    [1] 130
 
 ``` r
 intoDB<-addClassifToDb(completeClassifparcelas, pp_bst)
@@ -959,6 +983,82 @@ for(i in 1:nrow(corrected_parcelas))
 }
 dbCommit(pp_bst)
 ```
+
+## Creating the occurrenceID
+
+``` sql
+SELECT cd_reg, project, 'IAvH:OBSERVATIONHUMANA:'||UPPER(project)||'_CENSUS0:'||LPAD( (ROW_NUMBER() OVER (PARTITION BY cd_project ORDER BY cd_project,cd_reg))::text,4,'0') occurence_id
+FROM main.register r
+LEFT JOIN main.event e USING (cd_event)
+LEFT JOIN main.gp_event ge USING (cd_gp_event)
+LEFT JOIN main.project p USING (cd_project)
+```
+
+| cd_reg | project | occurence_id                              |
+|:-------|:--------|:------------------------------------------|
+| 5141   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0001 |
+| 5142   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0002 |
+| 5143   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0003 |
+| 5144   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0004 |
+| 5145   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0005 |
+| 5146   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0006 |
+| 5147   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0007 |
+| 5148   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0008 |
+| 5149   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0009 |
+| 5150   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0010 |
+
+Displaying records 1 - 10
+
+``` r
+reg_occurrenceId<-dbGetQuery(pp_bst,"
+WITH a AS(
+SELECT cd_reg, project, 'IAvH:OBSERVATIONHUMANA:'||UPPER(project)||'_CENSUS0:'||LPAD( (ROW_NUMBER() OVER (PARTITION BY cd_project ORDER BY cd_project,cd_reg))::text,4,'0') occurrence_id
+FROM main.register r
+LEFT JOIN main.event e USING (cd_event)
+LEFT JOIN main.gp_event ge USING (cd_gp_event)
+LEFT JOIN main.project p USING (cd_project)
+)UPDATE main.register AS r
+SET occurrence_id=a.occurrence_id
+FROM a
+WHERE a.cd_reg=r.cd_reg AND r.occurrence_id IS NULL
+RETURNING r.cd_reg, r.occurrence_id")
+stopifnot(all(is.na(corrected_parcelas$occurrenceID)))
+corrected_parcelas$occurrenceID<-reg_occurrenceId$occurrence_id[match(corrected_parcelas$cd_reg,reg_occurrenceId$cd_reg)]
+```
+
+## Checking final quality
+
+Most likely, the problems we will find here will be corrected in a
+previous part of the code, so the results here won’t show them anymore,
+but it is helpful to keep the checks here!
+
+``` sql
+WITH a AS(
+SELECT project,event_id,location, substring(event_id FROM '[0-9]+$') subplot_event, substring(location FROM '[0-9]+$') subplot_location
+FROM main.register_location rl
+LEFT JOIN main.register USING (cd_reg)
+LEFT JOIN main.event USING (cd_event)
+LEFT JOIN main.gp_event USING (cd_gp_event)
+LEFT JOIN main.project USING (cd_project)
+LEFT JOIN main.location l ON l.cd_org_lev=6 AND ST_intersects(rl.pt_geom,l.pol_geom) 
+),b AS(
+SELECT project,subplot_event,subplot_location,count(*)
+FROM a
+GROUP BY project,subplot_event,subplot_location
+),c AS(
+SELECT DISTINCT ON (project,subplot_event) project, subplot_event, subplot_location
+FROM b
+ORDER BY project,subplot_event,count DESC
+)
+SELECT *
+FROM c
+WHERE subplot_event<>subplot_location
+```
+
+| project | subplot_event | subplot_location |
+|:--------|:--------------|:-----------------|
+
+0 records
 
 ``` r
 save(corrected_parcelas,file="../../inserted_3parcelas_backup.RData")

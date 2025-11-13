@@ -210,7 +210,8 @@ VALUES
 CREATE TABLE main.organization
 (
     cd_org smallserial PRIMARY KEY,
-    org_name text,
+    org_name text UNIQUE,
+    org_abbrev text UNIQUE,
     cd_org_type smallint REFERENCES main.organization_type
 );
 
@@ -241,6 +242,9 @@ CREATE TABLE main.people
     first_name2 text,
     family_name1 text,
     family_name2 text,
+    preferred_complete text,
+    preferred_first text,
+    preferred_family text,
     gender char(1),
     birth date,
     declared_identity text[]
@@ -508,28 +512,10 @@ CREATE TABLE main.taxo_verbatim
 	UNIQUE(scientific_name, kingdom, phylum, "class", "order", family, genus, specific_epithet, infraspecific_epithet, subspecies_epithet, variety_epithet, species, taxon_rank, authorship, identification_qualifier, verbatim_taxon_rank)
 );
 
-CREATE TABLE main.identification -- note that in the case of identification reporting to individuals that are present in various registers, we have the problem of needing to go through the registers to apply these identification to the individuals. It will be complicated, but it actually represents better the reality of the data. It is particularly messy in the cases where there are various identifications through time: we will need to resolve the multiple registers + multiple identification mess before knowing the identity of the individual, let's add that sometimes there is a parent identification, and you got a very difficult problem to manage.
-(
-	cd_identif serial PRIMARY KEY,
-	cd_tax int REFERENCES main.taxo(cd_tax) ON DELETE SET NULL ON UPDATE CASCADE,
-	cd_morfo int REFERENCES main.morfo_taxo (cd_morfo) ON DELETE SET NULL ON UPDATE CASCADE,
-	cd_verb_taxo int REFERENCES main.taxo_verbatim(cd_verb_taxo) ON DELETE SET NULL ON UPDATE CASCADE,
-	parent_identif int REFERENCES main.identification(cd_identif) ON DELETE SET NULL ON UPDATE CASCADE, --I am not completely convinced here but having a parent identification allows to manage the fact that sometimes the identification based on a register applies to all the registers that have been noted as the same species
-	taxon_code text,
-	date_identif date NOT NULL,
-	time_identif time,
-	identified_by int[],
-	remarks_identif text,
-	catalog text,
-	voucher text
-);
-
-
 CREATE TABLE main.register
 (
     cd_reg serial PRIMARY KEY,
     cd_event int REFERENCES main.event(cd_event) ON DELETE CASCADE NOT NULL,
-    cd_identif int REFERENCES main.identification(cd_identif) ON DELETE SET NULL,
     cds_recorded_by int[],
     date_reg date,
     time_reg time,
@@ -543,6 +529,25 @@ CREATE TABLE main.register
 -- CREATE INDEX registros_cd_event_fkey ON main.registros(cd_event);
 -- CREATE INDEX registros_cd_tax_fkey ON main.registros(cd_tax);
 -- CREATE INDEX registros_cd_morfo_fkey ON main.registros(cd_morfo);
+
+CREATE TABLE main.identification -- note that in the case of identification reporting to individuals that are present in various registers, we have the problem of needing to go through the registers to apply these identification to the individuals. It will be complicated, but it actually represents better the reality of the data. It is particularly messy in the cases where there are various identifications through time: we will need to resolve the multiple registers + multiple identification mess before knowing the identity of the individual, let's add that sometimes there is a parent identification, and you got a very difficult problem to manage.
+(
+	cd_identif serial PRIMARY KEY,
+	cd_reg int REFERENCES main.register(cd_reg) ON DELETE SET NULL ON UPDATE CASCADE,
+	cd_tax int REFERENCES main.taxo(cd_tax) ON DELETE SET NULL ON UPDATE CASCADE,
+	cd_morfo int REFERENCES main.morfo_taxo (cd_morfo) ON DELETE SET NULL ON UPDATE CASCADE,
+	cd_verb_taxo int REFERENCES main.taxo_verbatim(cd_verb_taxo) ON DELETE SET NULL ON UPDATE CASCADE,
+	parent_identif int REFERENCES main.identification(cd_identif) ON DELETE SET NULL ON UPDATE CASCADE, --I am not completely convinced here but having a parent identification allows to manage the fact that sometimes the identification based on a register applies to all the registers that have been noted as the same species
+	taxon_code text,
+	date_identif date NOT NULL,
+	time_identif time,
+	identified_by int[],
+	remarks_identif text,
+	catalog_name text,
+	catalog_id text,
+	voucher text
+);
+
 
 CREATE TABLE main.register_location
 (
