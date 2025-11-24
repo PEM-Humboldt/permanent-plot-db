@@ -12,7 +12,12 @@ pp_bst <- RPostgres::dbConnect(RPostgres::Postgres(), dbname = "pp_bst_col")
 ### Event
 
 ``` sql
-WITH a AS(
+WITH srs AS(
+SELECT * 
+FROM spatial_ref_sys  
+WHERE srid=4326
+)
+,a AS(
 SELECT DISTINCT ON (cd_event)cd_event, mpio, dpto, ST_Area(ST_intersection(l.pol_geom,m.the_geom))
 FROM main.event e 
 LEFT JOIN main.location l USING (cd_loc)
@@ -71,17 +76,17 @@ SELECT project||'_census'|| (campaign_nb -1)::text AS "eventID",
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(ST_Centroid(l.pol_geom)) AS "decimalLatitude",
-  ST_Y(ST_Centroid(l.pol_geom)) AS "decimalLongitude",
+  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
+  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
-  ST_AsText(l.pol_geom, 2 ) AS "footprintWKT",
+  ST_AsText(ST_transform(l.pol_geom,srs.srid), 8 ) AS "footprintWKT",
   srs.auth_name||':'||srs.auth_srid AS "footprintSRS"
 FROM main.gp_event ge
 LEFT JOIN main.project p USING (cd_project,cd_loc)
 LEFT JOIN main.location l USING (cd_loc)
 LEFT JOIN c USING (cd_project)
 LEFT JOIN d USING (cd_project)
-LEFT JOIN spatial_ref_sys srs ON ST_SRID(pol_geom)=srs.srid
+CROSS JOIN srs
 WHERE project='LaPaz'
 
 
@@ -113,10 +118,10 @@ UNION ALL
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(ST_Centroid(l.pol_geom)) AS "decimalLatitude",
-  ST_Y(ST_Centroid(l.pol_geom)) AS "decimalLongitude",
+  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
+  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
-  ST_AsText(l.pol_geom, 2 ) AS "footprintWKT",
+  ST_AsText(ST_Transform(l.pol_geom,srs.srid), 8 ) AS "footprintWKT",
   srs.auth_name||':'||srs.auth_srid AS "footprintSRS"
 FROM main.event e
 LEFT JOIN main.location l USING (cd_loc)
@@ -124,7 +129,7 @@ LEFT JOIN main.gp_event USING (cd_gp_event)
 LEFT JOIN main.project USING (cd_project)
 LEFT JOIN a USING(cd_event)
 LEFT JOIN b USING(cd_event)
-LEFT JOIN spatial_ref_sys srs ON ST_SRID(pol_geom)=srs.srid
+CROSS JOIN srs
 WHERE project='LaPaz'
 ORDER BY num_replicate)
 ```
@@ -132,7 +137,11 @@ ORDER BY num_replicate)
 ### Register
 
 ``` sql
-WITH last_identif AS(
+WITH srs AS(
+SELECT * 
+FROM spatial_ref_sys  
+WHERE srid=4326
+),last_identif AS(
 SELECT DISTINCT ON (cd_reg) i.*
 FROM main.register
 LEFT JOIN main.identification i USING (cd_reg)
@@ -165,21 +174,19 @@ LEFT JOIN (SELECT cd_person,
 GROUP BY cd_identif
 )
 SELECT occurrence_id AS "occurrenceID",
-  CASE
-    WHEN COALESCE(voucher,catalog_id) IS NULL THEN 'HumanObservation'
-    ELSE 'PreservedSpecimen'
-  END AS "basisOfRecord",
+  'HumanObservation' AS "basisOfRecord",
   'Event' AS "type",
   CASE
     WHEN COALESCE(voucher,catalog_id) IS NULL THEN 'Observación sistemática'
     ELSE 'Colecta botánica'
   END AS "samplingProtocol",
   'Instituto de Investigación de Recursos Biológicos Alexander von Humboldt (IAvH)' AS "institutionCode",
-  catalog_id AS "catalogNumber",
+  catalog_id AS "recordNumber",
   recorded_by.recorded_by AS "recordedBy",
   COALESCE(organism_id, ind.tag) AS "organismID",
   qt_int AS "individualCount",
   r.remarks AS "occurrenceRemarks",
+  project||'_census'|| (campaign_nb -1)::text  AS "parentEventID",
   event_id AS "eventID",
   CASE
     WHEN m.mpio IS NOT NULL THEN 'América del Sur'
@@ -195,8 +202,8 @@ SELECT occurrence_id AS "occurrenceID",
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(pt_geom) AS "decimalLatitude",
-  ST_Y(pt_geom) AS "decimalLongitude",
+  ST_X(ST_transform(pt_geom,srs.srid)) AS "decimalLatitude",
+  ST_Y(ST_transform(pt_geom,srs.srid)) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
   identified_by.identified_by AS "identifiedBy",
   TO_CHAR(date_identif,'YYYY-MM-DD') AS "dateIdentified",
@@ -238,7 +245,7 @@ LEFT JOIN main.taxo tsp ON find_higher_id(t.cd_tax,'SP')=tsp.cd_tax
 LEFT JOIN main.event e USING (cd_event)
 LEFT JOIN main.gp_event USING (cd_gp_event)
 LEFT JOIN main.project USING (cd_project)
-LEFT JOIN spatial_ref_sys srs ON ST_SRID(pt_geom)=srs.srid
+CROSS JOIN srs
 WHERE project='LaPaz'
 ORDER BY num_replicate, ind.tag
 ```
@@ -283,12 +290,17 @@ saveInExcel("../../otherData/DwC_LaPaz.xlsx",lVar=c("event","register","Measurem
     Writing sheets: event register MeasurementsOrFacts
     into file:/home/marius/Travail/traitementDonnees/2024_parcelas_permanentes/otherData/DwC_LaPaz.xlsx
 
-## La Paz
+## Matitas
 
 ### Event
 
 ``` sql
-WITH a AS(
+WITH srs AS(
+SELECT * 
+FROM spatial_ref_sys  
+WHERE srid=4326
+)
+,a AS(
 SELECT DISTINCT ON (cd_event)cd_event, mpio, dpto, ST_Area(ST_intersection(l.pol_geom,m.the_geom))
 FROM main.event e 
 LEFT JOIN main.location l USING (cd_loc)
@@ -347,17 +359,17 @@ SELECT project||'_census'|| (campaign_nb -1)::text AS "eventID",
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(ST_Centroid(l.pol_geom)) AS "decimalLatitude",
-  ST_Y(ST_Centroid(l.pol_geom)) AS "decimalLongitude",
+  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
+  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
-  ST_AsText(l.pol_geom, 2 ) AS "footprintWKT",
+  ST_AsText(ST_transform(l.pol_geom,srs.srid), 8 ) AS "footprintWKT",
   srs.auth_name||':'||srs.auth_srid AS "footprintSRS"
 FROM main.gp_event ge
 LEFT JOIN main.project p USING (cd_project,cd_loc)
 LEFT JOIN main.location l USING (cd_loc)
 LEFT JOIN c USING (cd_project)
 LEFT JOIN d USING (cd_project)
-LEFT JOIN spatial_ref_sys srs ON ST_SRID(pol_geom)=srs.srid
+CROSS JOIN srs
 WHERE project='Matitas'
 
 
@@ -389,10 +401,10 @@ UNION ALL
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(ST_Centroid(l.pol_geom)) AS "decimalLatitude",
-  ST_Y(ST_Centroid(l.pol_geom)) AS "decimalLongitude",
+  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
+  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
-  ST_AsText(l.pol_geom, 2 ) AS "footprintWKT",
+  ST_AsText(ST_Transform(l.pol_geom,srs.srid), 8 ) AS "footprintWKT",
   srs.auth_name||':'||srs.auth_srid AS "footprintSRS"
 FROM main.event e
 LEFT JOIN main.location l USING (cd_loc)
@@ -400,7 +412,7 @@ LEFT JOIN main.gp_event USING (cd_gp_event)
 LEFT JOIN main.project USING (cd_project)
 LEFT JOIN a USING(cd_event)
 LEFT JOIN b USING(cd_event)
-LEFT JOIN spatial_ref_sys srs ON ST_SRID(pol_geom)=srs.srid
+CROSS JOIN srs
 WHERE project='Matitas'
 ORDER BY num_replicate)
 ```
@@ -408,7 +420,11 @@ ORDER BY num_replicate)
 ### Register
 
 ``` sql
-WITH last_identif AS(
+WITH srs AS(
+SELECT * 
+FROM spatial_ref_sys  
+WHERE srid=4326
+),last_identif AS(
 SELECT DISTINCT ON (cd_reg) i.*
 FROM main.register
 LEFT JOIN main.identification i USING (cd_reg)
@@ -441,21 +457,19 @@ LEFT JOIN (SELECT cd_person,
 GROUP BY cd_identif
 )
 SELECT occurrence_id AS "occurrenceID",
-  CASE
-    WHEN COALESCE(voucher,catalog_id) IS NULL THEN 'HumanObservation'
-    ELSE 'PreservedSpecimen'
-  END AS "basisOfRecord",
+  'HumanObservation' AS "basisOfRecord",
   'Event' AS "type",
   CASE
     WHEN COALESCE(voucher,catalog_id) IS NULL THEN 'Observación sistemática'
     ELSE 'Colecta botánica'
   END AS "samplingProtocol",
   'Instituto de Investigación de Recursos Biológicos Alexander von Humboldt (IAvH)' AS "institutionCode",
-  catalog_id AS "catalogNumber",
+  catalog_id AS "recordNumber",
   recorded_by.recorded_by AS "recordedBy",
   COALESCE(organism_id, ind.tag) AS "organismID",
   qt_int AS "individualCount",
   r.remarks AS "occurrenceRemarks",
+  project||'_census'|| (campaign_nb -1)::text  AS "parentEventID",
   event_id AS "eventID",
   CASE
     WHEN m.mpio IS NOT NULL THEN 'América del Sur'
@@ -471,8 +485,8 @@ SELECT occurrence_id AS "occurrenceID",
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(pt_geom) AS "decimalLatitude",
-  ST_Y(pt_geom) AS "decimalLongitude",
+  ST_X(ST_transform(pt_geom,srs.srid)) AS "decimalLatitude",
+  ST_Y(ST_transform(pt_geom,srs.srid)) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
   identified_by.identified_by AS "identifiedBy",
   TO_CHAR(date_identif,'YYYY-MM-DD') AS "dateIdentified",
@@ -514,7 +528,7 @@ LEFT JOIN main.taxo tsp ON find_higher_id(t.cd_tax,'SP')=tsp.cd_tax
 LEFT JOIN main.event e USING (cd_event)
 LEFT JOIN main.gp_event USING (cd_gp_event)
 LEFT JOIN main.project USING (cd_project)
-LEFT JOIN spatial_ref_sys srs ON ST_SRID(pt_geom)=srs.srid
+CROSS JOIN srs
 WHERE project='Matitas'
 ORDER BY num_replicate, ind.tag
 ```
@@ -559,12 +573,17 @@ saveInExcel("../../otherData/DwC_Matitas.xlsx",lVar=c("event","register","Measur
     Writing sheets: event register MeasurementsOrFacts
     into file:/home/marius/Travail/traitementDonnees/2024_parcelas_permanentes/otherData/DwC_Matitas.xlsx
 
-## La Paz
+## Plato
 
 ### Event
 
 ``` sql
-WITH a AS(
+WITH srs AS(
+SELECT * 
+FROM spatial_ref_sys  
+WHERE srid=4326
+)
+,a AS(
 SELECT DISTINCT ON (cd_event)cd_event, mpio, dpto, ST_Area(ST_intersection(l.pol_geom,m.the_geom))
 FROM main.event e 
 LEFT JOIN main.location l USING (cd_loc)
@@ -623,17 +642,17 @@ SELECT project||'_census'|| (campaign_nb -1)::text AS "eventID",
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(ST_Centroid(l.pol_geom)) AS "decimalLatitude",
-  ST_Y(ST_Centroid(l.pol_geom)) AS "decimalLongitude",
+  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
+  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
-  ST_AsText(l.pol_geom, 2 ) AS "footprintWKT",
+  ST_AsText(ST_transform(l.pol_geom,srs.srid), 8 ) AS "footprintWKT",
   srs.auth_name||':'||srs.auth_srid AS "footprintSRS"
 FROM main.gp_event ge
 LEFT JOIN main.project p USING (cd_project,cd_loc)
 LEFT JOIN main.location l USING (cd_loc)
 LEFT JOIN c USING (cd_project)
 LEFT JOIN d USING (cd_project)
-LEFT JOIN spatial_ref_sys srs ON ST_SRID(pol_geom)=srs.srid
+CROSS JOIN srs
 WHERE project='Plato'
 
 
@@ -665,10 +684,10 @@ UNION ALL
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(ST_Centroid(l.pol_geom)) AS "decimalLatitude",
-  ST_Y(ST_Centroid(l.pol_geom)) AS "decimalLongitude",
+  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
+  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
-  ST_AsText(l.pol_geom, 2 ) AS "footprintWKT",
+  ST_AsText(ST_Transform(l.pol_geom,srs.srid), 8 ) AS "footprintWKT",
   srs.auth_name||':'||srs.auth_srid AS "footprintSRS"
 FROM main.event e
 LEFT JOIN main.location l USING (cd_loc)
@@ -676,7 +695,7 @@ LEFT JOIN main.gp_event USING (cd_gp_event)
 LEFT JOIN main.project USING (cd_project)
 LEFT JOIN a USING(cd_event)
 LEFT JOIN b USING(cd_event)
-LEFT JOIN spatial_ref_sys srs ON ST_SRID(pol_geom)=srs.srid
+CROSS JOIN srs
 WHERE project='Plato'
 ORDER BY num_replicate)
 ```
@@ -684,7 +703,11 @@ ORDER BY num_replicate)
 ### Register
 
 ``` sql
-WITH last_identif AS(
+WITH srs AS(
+SELECT * 
+FROM spatial_ref_sys  
+WHERE srid=4326
+),last_identif AS(
 SELECT DISTINCT ON (cd_reg) i.*
 FROM main.register
 LEFT JOIN main.identification i USING (cd_reg)
@@ -717,21 +740,19 @@ LEFT JOIN (SELECT cd_person,
 GROUP BY cd_identif
 )
 SELECT occurrence_id AS "occurrenceID",
-  CASE
-    WHEN COALESCE(voucher,catalog_id) IS NULL THEN 'HumanObservation'
-    ELSE 'PreservedSpecimen'
-  END AS "basisOfRecord",
+  'HumanObservation' AS "basisOfRecord",
   'Event' AS "type",
   CASE
     WHEN COALESCE(voucher,catalog_id) IS NULL THEN 'Observación sistemática'
     ELSE 'Colecta botánica'
   END AS "samplingProtocol",
   'Instituto de Investigación de Recursos Biológicos Alexander von Humboldt (IAvH)' AS "institutionCode",
-  catalog_id AS "catalogNumber",
+  catalog_id AS "recordNumber",
   recorded_by.recorded_by AS "recordedBy",
   COALESCE(organism_id, ind.tag) AS "organismID",
   qt_int AS "individualCount",
   r.remarks AS "occurrenceRemarks",
+  project||'_census'|| (campaign_nb -1)::text  AS "parentEventID",
   event_id AS "eventID",
   CASE
     WHEN m.mpio IS NOT NULL THEN 'América del Sur'
@@ -747,8 +768,8 @@ SELECT occurrence_id AS "occurrenceID",
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(pt_geom) AS "decimalLatitude",
-  ST_Y(pt_geom) AS "decimalLongitude",
+  ST_X(ST_transform(pt_geom,srs.srid)) AS "decimalLatitude",
+  ST_Y(ST_transform(pt_geom,srs.srid)) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
   identified_by.identified_by AS "identifiedBy",
   TO_CHAR(date_identif,'YYYY-MM-DD') AS "dateIdentified",
@@ -790,7 +811,7 @@ LEFT JOIN main.taxo tsp ON find_higher_id(t.cd_tax,'SP')=tsp.cd_tax
 LEFT JOIN main.event e USING (cd_event)
 LEFT JOIN main.gp_event USING (cd_gp_event)
 LEFT JOIN main.project USING (cd_project)
-LEFT JOIN spatial_ref_sys srs ON ST_SRID(pt_geom)=srs.srid
+CROSS JOIN srs
 WHERE project='Plato'
 ORDER BY num_replicate, ind.tag
 ```

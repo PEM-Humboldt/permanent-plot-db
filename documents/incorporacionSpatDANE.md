@@ -158,6 +158,8 @@ if(!"spat" %in% schemas)
 {RPostgres::dbExecute(pp_bst,"CREATE schema spat")}
 ```
 
+    [1] 0
+
 ## Creating the tables
 
 ``` r
@@ -169,18 +171,8 @@ all(toupper(mpio$suggestedC)==mpio$mpio_cnmbr)
 ``` r
 if(RPostgres::dbExistsTable(pp_bst,DBI::Id(schema="spat",table="mpio_dane_2023")))
 {RPostgres::dbExecute(pp_bst,"DROP TABLE spat.mpio_dane_2023")}
-```
-
-    [1] 0
-
-``` r
 if(RPostgres::dbExistsTable(pp_bst,DBI::Id(schema="spat",table="dpto_dane_2023")))
 {RPostgres::dbExecute(pp_bst,"DROP TABLE spat.dpto_dane_2023")}
-```
-
-    [1] 0
-
-``` r
 RPostgres::dbExecute(pp_bst,
 "CREATE TABLE spat.dpto_dane_2023
 (

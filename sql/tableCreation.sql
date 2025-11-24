@@ -253,8 +253,8 @@ CREATE TABLE main.people
 CREATE TABLE main.people_role
 (
 	cd_people_role serial PRIMARY KEY,
-	cd_person smallint REFERENCES main.people(cd_person),
-	cd_org smallint REFERENCES main.organization(cd_org) NOT NULL,
+	cd_person smallint REFERENCES main.people(cd_person) ON DELETE CASCADE,
+	cd_org smallint REFERENCES main.organization(cd_org) ON DELETE CASCADE,
 	role text NOT NULL,
 	date_apply date,
 	date_begin date,
@@ -299,7 +299,7 @@ CREATE TABLE main.project
 	cd_loc int REFERENCES main.location(cd_loc) ON DELETE SET NULL
 );
 ALTER TABLE main.organization_relationship ADD COLUMN cd_project int REFERENCES main.project(cd_project);
-ALTER TABLE main.people_role ADD COLUMN cd_project int REFERENCES main.project(cd_project);
+ALTER TABLE main.people_role ADD COLUMN cd_project int REFERENCES main.project(cd_project) ON DELETE CASCADE;
 
 CREATE TABLE main.proj_rel_type  -- On the long term we will be able to document project types and the different relationships between projects such as funding relationships, differenciating data projects which only exists in terms of data management from metaprojects having an institutional structures etc. That is why we do not only use a simple foreign key to a parent project.
 (
