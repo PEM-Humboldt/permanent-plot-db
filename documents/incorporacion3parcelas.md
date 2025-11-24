@@ -7,9 +7,12 @@ DIR_DATA <- "../../otherData/"
 dir(DIR_DATA)
 ```
 
-    [1] "Dryflor_Marius.txt"           "LaPaz.csv"                   
-    [3] "Matitas.csv"                  "Plato.csv"                   
-    [5] "TDF_taxonomicReference.RData"
+     [1] "codigos_colecta_jabiru.csv"   "Dryflor_Marius.txt"          
+     [3] "DwC_Jabiru.xlsx"              "DwC_LaPaz.xlsx"              
+     [5] "DwC_Matitas.xlsx"             "DwC_Plato.xlsx"              
+     [7] "Jabiru_str.xlsx"              "LaPaz.csv"                   
+     [9] "Matitas.csv"                  "Plato.csv"                   
+    [11] "TDF_taxonomicReference.RData"
 
 ``` r
 encod<-stringi::stri_enc_detect(paste0(DIR_DATA,"/LaPaz.csv"))[[1]]$Encoding[1]
@@ -796,6 +799,7 @@ all(sapply(tax_ind,function(x)majority(as.matrix(x)))==1)
 ## Inserting determination, register, individual and coordinates
 
 ``` r
+corrected_parcelas$recordNumber[corrected_parcelas$recordNumber==""]<-NA
 matInd<-as.matrix(corrected_parcelas[c("plot","subplot","ind")])
 ind_idx<-match(split(matInd,row(matInd)),split(matInd,row(matInd)))
 ind_tab<-corrected_parcelas[unique(ind_idx),]
@@ -804,23 +808,26 @@ ind_tab$cd_identif<-NA
 ind_tab$cd_reg<-NA
 ind_tab$cd_ind<-NA
 dateIdentif<-as.Date("1/10/2025",format="%d/%m/%Y")
+stopifnot(sum(!is.na(ind_tab$recordNumber)) == sum(!is.na(corrected_parcelas$recordNumber)))
 dbBegin(pp_bst)
 for(i in 1:nrow(ind_tab))
 {
-  cd_identif <- RPostgres::dbGetQuery(pp_bst,paste0("INSERT INTO main.identification (cd_tax, cd_morfo, date_identif) VALUES(",
-         dbQuoteLiteral(pp_bst,ind_tab$cd_tax[i]),",",
-         dbQuoteLiteral(pp_bst,ind_tab$cd_morfo[i]),",",
-         dbQuoteLiteral(pp_bst,dateIdentif),")
-         RETURNING cd_identif")
-  )$cd_identif
-  cd_reg<-RPostgres::dbGetQuery(pp_bst,paste0("INSERT INTO main.register(cd_event, cd_identif, date_reg, qt_int)
+  cd_reg<-RPostgres::dbGetQuery(pp_bst,paste0("INSERT INTO main.register(cd_event, date_reg, qt_int)
          VALUES(",
          dbQuoteLiteral(pp_bst,ind_tab$cd_event[i]),",",
-         dbQuoteLiteral(pp_bst,cd_identif),",",
          dbQuoteLiteral(pp_bst,ind_tab$measuring_date[i]),",",
          1,")
          RETURNING cd_reg")
          )$cd_reg
+  cd_identif <- RPostgres::dbGetQuery(pp_bst,paste0("INSERT INTO main.identification (cd_reg,cd_tax, cd_morfo, date_identif, catalog_id) VALUES(",
+         dbQuoteLiteral(pp_bst,cd_reg),",",
+         dbQuoteLiteral(pp_bst,ind_tab$cd_tax[i]),",",
+         dbQuoteLiteral(pp_bst,ind_tab$cd_morfo[i]),",",
+         dbQuoteLiteral(pp_bst,dateIdentif),",",
+         dbQuoteLiteral(pp_bst,ind_tab$recordNumber[i]),
+         ")
+         RETURNING cd_identif")
+  )$cd_identif
   if(!is.na(ind_tab$latitude_decimal[i])&!is.na(ind_tab$longitude_decimal[i]))
   {
     RPostgres::dbExecute(pp_bst,
@@ -987,40 +994,60 @@ dbCommit(pp_bst)
 ## Creating the occurrenceID
 
 ``` sql
-SELECT cd_reg, project, 'IAvH:OBSERVATIONHUMANA:'||UPPER(project)||'_CENSUS0:'||LPAD( (ROW_NUMBER() OVER (PARTITION BY cd_project ORDER BY cd_project,cd_reg))::text,4,'0') occurence_id
+WITH a AS(
+SELECT r.cd_reg,
+  CASE
+    WHEN COALESCE(voucher, catalog_id) IS NULL THEN 'ObservacionHumana'
+    ELSE 'PreservedSpecimen'
+    END basis_of_record
+FROM main.register r
+LEFT JOIN main.identification i USING (cd_reg)
+)
+SELECT cd_reg, project, 'IAvH:'||UPPER(basis_of_record)||':'||UPPER(project)||'_CENSUS0:'||LPAD( (ROW_NUMBER() OVER (PARTITION BY cd_project ORDER BY cd_project,cd_reg))::text,4,'0') occurrence_id
 FROM main.register r
 LEFT JOIN main.event e USING (cd_event)
 LEFT JOIN main.gp_event ge USING (cd_gp_event)
 LEFT JOIN main.project p USING (cd_project)
+LEFT JOIN a USING(cd_reg)
+WHERE project IN ('LaPaz','Matitas','Plato')
 ```
 
-| cd_reg | project | occurence_id                              |
+| cd_reg | project | occurrence_id                             |
 |:-------|:--------|:------------------------------------------|
-| 5141   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0001 |
-| 5142   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0002 |
-| 5143   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0003 |
-| 5144   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0004 |
-| 5145   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0005 |
-| 5146   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0006 |
-| 5147   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0007 |
-| 5148   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0008 |
-| 5149   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0009 |
-| 5150   | Plato   | IAvH:OBSERVATIONHUMANA:PLATO_CENSUS0:0010 |
+| 5141   | Plato   | IAvH:PRESERVEDSPECIMEN:PLATO_CENSUS0:0001 |
+| 5142   | Plato   | IAvH:PRESERVEDSPECIMEN:PLATO_CENSUS0:0002 |
+| 5143   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0003 |
+| 5144   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0004 |
+| 5145   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0005 |
+| 5146   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0006 |
+| 5147   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0007 |
+| 5148   | Plato   | IAvH:PRESERVEDSPECIMEN:PLATO_CENSUS0:0008 |
+| 5149   | Plato   | IAvH:PRESERVEDSPECIMEN:PLATO_CENSUS0:0009 |
+| 5150   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0010 |
 
 Displaying records 1 - 10
 
 ``` r
 reg_occurrenceId<-dbGetQuery(pp_bst,"
-WITH a AS(
-SELECT cd_reg, project, 'IAvH:OBSERVATIONHUMANA:'||UPPER(project)||'_CENSUS0:'||LPAD( (ROW_NUMBER() OVER (PARTITION BY cd_project ORDER BY cd_project,cd_reg))::text,4,'0') occurrence_id
+WITH a AS(SELECT r.cd_reg,
+  CASE
+    WHEN COALESCE(voucher, catalog_id) IS NULL THEN 'ObservacionHumana'
+    ELSE 'EspecimenPreservado'
+    END basis_of_record
+FROM main.register r
+LEFT JOIN main.identification i USING (cd_reg)
+), b AS(
+SELECT cd_reg, project, 'IAvH:'||UPPER(basis_of_record)||':'||UPPER(project)||'_CENSUS0:'||LPAD( (ROW_NUMBER() OVER (PARTITION BY cd_project ORDER BY cd_project,cd_reg))::text,4,'0') occurrence_id
 FROM main.register r
 LEFT JOIN main.event e USING (cd_event)
 LEFT JOIN main.gp_event ge USING (cd_gp_event)
 LEFT JOIN main.project p USING (cd_project)
+LEFT JOIN a USING(cd_reg)
+WHERE project IN ('LaPaz','Matitas','Plato')
 )UPDATE main.register AS r
-SET occurrence_id=a.occurrence_id
-FROM a
-WHERE a.cd_reg=r.cd_reg AND r.occurrence_id IS NULL
+SET occurrence_id=b.occurrence_id
+FROM b
+WHERE b.cd_reg=r.cd_reg AND r.occurrence_id IS NULL
 RETURNING r.cd_reg, r.occurrence_id")
 stopifnot(all(is.na(corrected_parcelas$occurrenceID)))
 corrected_parcelas$occurrenceID<-reg_occurrenceId$occurrence_id[match(corrected_parcelas$cd_reg,reg_occurrenceId$cd_reg)]
@@ -1063,6 +1090,174 @@ WHERE subplot_event<>subplot_location
 ``` r
 save(corrected_parcelas,file="../../inserted_3parcelas_backup.RData")
 ```
+
+## Adding people
+
+``` r
+people <- RPostgres::dbReadTable(pp_bst, DBI::Id(schema = "main", table = "people"))
+if(!"Roy González-M" %in% people$preferred_complete)
+{
+  dbExecute(pp_bst,
+"INSERT INTO main.people(
+  verbatim_person,
+  first_name1,
+  first_name2,
+  family_name1,
+  family_name2,
+  preferred_complete,
+  preferred_first,
+  preferred_family,
+  gender,
+  birth)
+VALUES
+  ('Roy González-M','Roy','Oswaldo', 'González', 'Martinez', 'Roy González-M', 'Roy', 'González-M', 'M', NULL),
+  ('Álvaro Idárraga-Piedrahita', 'Álvaro', NULL, 'Idárraga',  'Piedrahita',  'Álvaro Idárraga-Piedrahita',  'Álvaro',  'Idárraga-Piedrahita',  'M', NULL),
+  ('Marius Bottin',  'Marius',  'Jean',  'Bottin',  NULL,  'Marius Bottin'  ,'Marius',  'Bottin'  ,'M', DATE '1984-12-18'),
+('Natalia Norden','Natalia',NULL,'Norden','Medina','Natalia Norden','Natalia','Norden','F',NULL)
+")
+}
+```
+
+    [1] 4
+
+``` r
+orga<-RPostgres::dbReadTable(pp_bst,DBI::Id(schema="main",table="organization"))
+if(!'IAvH' %in% orga$org_abbrev)
+{
+  RPostgres::dbExecute(pp_bst,"INSERT INTO main.organization(org_name, org_abbrev, cd_org_type)
+VALUES('Instituto de Investigación de Recursos Biológicos Alexander von Humboldt','IAvH',(SELECT cd_org_type FROM main.organization_type WHERE org_type='public institution'))")
+}
+```
+
+    [1] 1
+
+``` r
+if(!'UT' %in% orga$org_abbrev)
+{
+  RPostgres::dbExecute(pp_bst,"INSERT INTO main.organization(org_name, org_abbrev, cd_org_type)
+VALUES('Universidad del Tolima','UT',(SELECT cd_org_type FROM main.organization_type WHERE org_type='public institution'))")
+}
+```
+
+    [1] 1
+
+``` r
+if(!'JAUM' %in% orga$org_abbrev)
+{
+  RPostgres::dbExecute(pp_bst,"INSERT INTO main.organization(org_name, org_abbrev, cd_org_type)
+VALUES('Jardín Botánico de Medellín Joaquín Antonio Uribe','JAUM',(SELECT cd_org_type FROM main.organization_type WHERE org_type='private institution'))")
+}
+```
+
+    [1] 1
+
+``` r
+RPostgres::dbGetQuery(pp_bst,
+"WITH a AS(
+SELECT 
+  (SELECT cd_person FROM main.people WHERE preferred_complete='Roy González-M') cd_person,
+  (SELECT cd_org FROM main.organization WHERE org_abbrev='UT') cd_org,
+  'Professor' AS role,
+  DATE(NOW()) AS date_apply
+UNION ALL
+SELECT 
+  (SELECT cd_person FROM main.people WHERE preferred_complete='Álvaro Idárraga-Piedrahita') cd_person,
+  (SELECT cd_org FROM main.organization WHERE org_abbrev='JAUM') cd_org,
+  'Director del herbario' AS role,
+  DATE(NOW()) AS date_apply
+)
+INSERT INTO main.people_role(cd_person, cd_org, role, date_apply)
+SELECT a.*
+FROM a
+LEFT JOIN main.people_role pr USING (cd_person,cd_org,role)
+WHERE pr.cd_people_role IS NULL")
+```
+
+    Warning: Don't need to call dbFetch() for statements, only for queries
+
+``` sql
+WITH a AS(
+SELECT ARRAY[cd_people_role] identified_by
+FROM main.people_role
+LEFT JOIN main.people USING(cd_person)
+LEFT JOIN main.organization USING (cd_org)
+WHERE preferred_complete='Álvaro Idárraga-Piedrahita' AND org_abbrev='JAUM'
+), b AS(
+SELECT cd_reg,identified_by
+FROM main.register r
+CROSS JOIN a
+LEFT JOIN main.event e USING (cd_event)
+LEFT JOIN main.gp_event USING (cd_gp_event)
+LEFT JOIN main.project USING (cd_project)
+WHERE project IN ('LaPaz','Matitas','Plato')
+),c AS(
+UPDATE main.identification i
+SET identified_by=b.identified_by
+FROM b
+WHERE i.cd_reg=b.cd_reg
+RETURNING i.cd_reg, i.identified_by
+)
+SELECT *
+FROM c
+LIMIT 10
+```
+
+| cd_reg | identified_by |
+|:-------|:--------------|
+| 1      | {1}           |
+| 2      | {1}           |
+| 3      | {1}           |
+| 4      | {1}           |
+| 5      | {1}           |
+| 6      | {1}           |
+| 7      | {1}           |
+| 8      | {1}           |
+| 9      | {1}           |
+| 10     | {1}           |
+
+Displaying records 1 - 10
+
+``` sql
+WITH a AS(
+SELECT ARRAY[cd_people_role] cds_recorded_by
+FROM main.people_role
+LEFT JOIN main.people USING(cd_person)
+LEFT JOIN main.organization USING (cd_org)
+WHERE preferred_complete='Roy González-M' AND org_abbrev='UT'
+), b AS(
+SELECT cd_reg,a.cds_recorded_by
+FROM main.register r
+CROSS JOIN a
+LEFT JOIN main.event e USING (cd_event)
+LEFT JOIN main.gp_event USING (cd_gp_event)
+LEFT JOIN main.project USING (cd_project)
+WHERE project IN ('LaPaz','Matitas','Plato')
+),c AS(
+UPDATE main.register r
+SET cds_recorded_by=b.cds_recorded_by
+FROM b
+WHERE r.cd_reg=b.cd_reg
+RETURNING r.cd_reg, r.cds_recorded_by
+)
+SELECT *
+FROM c
+LIMIT 10
+```
+
+| cd_reg | cds_recorded_by |
+|:-------|:----------------|
+| 1      | {2}             |
+| 2      | {2}             |
+| 3      | {2}             |
+| 4      | {2}             |
+| 5      | {2}             |
+| 6      | {2}             |
+| 7      | {2}             |
+| 8      | {2}             |
+| 9      | {2}             |
+| 10     | {2}             |
+
+Displaying records 1 - 10
 
 ## Shutting down light…
 
