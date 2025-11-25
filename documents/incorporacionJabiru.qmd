@@ -563,7 +563,7 @@ det_by<-RPostgres::dbGetQuery(pp_bst,"SELECT 'ARRAY['||STRING_AGG(DISTINCT cd_pe
 rec_by<-RPostgres::dbGetQuery(pp_bst,"SELECT 'ARRAY['||STRING_AGG(DISTINCT cd_people_role::text,',')||']' rec_by FROM tmp.people WHERE rec_by")$rec_by
 
 all_str$recordNumber[all_str$recordNumber==""]<-NA
-matInd<-as.matrix(all_str[c("plot","subplot","ind")])
+matInd<-as.matrix(all_str[c("plot","subplot","Tag")])
 ind_idx<-match(split(matInd,row(matInd)),split(matInd,row(matInd)))
 ind_tab<-all_str[unique(ind_idx),]
 ind_tab$measuring_date<-data_all$Eventos$register_date

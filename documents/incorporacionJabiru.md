@@ -404,7 +404,7 @@ FROM a
 
 | cd_project | cd_loc | cd_gp_biol | cd_method | date_begin | date_end   | compaign_nb |
 |-----------:|-------:|:-----------|----------:|:-----------|:-----------|------------:|
-|        334 |    634 | arbo       |         2 | 2015-07-17 | 2015-07-17 |           1 |
+|        335 |    735 | arbo       |         2 | 2015-07-17 | 2015-07-17 |           1 |
 
 ``` r
 stopifnot(table(tab_gp_event$cd_project)==1)
@@ -463,7 +463,7 @@ LEFT JOIN main.people mp ON tp.name_publi=mp.preferred_complete
 WHERE mp.cd_person IS NULL")
 ```
 
-    [1] 12
+    [1] 0
 
 ``` r
 RPostgres::dbExecute(pp_bst,
@@ -474,7 +474,7 @@ LEFT JOIN main.organization mo ON tp.abbv_inst=mo.org_abbrev
 WHERE mo.cd_org IS NULL")
 ```
 
-    [1] 3
+    [1] 0
 
 ``` r
 RPostgres::dbExecute(pp_bst,"
@@ -786,7 +786,7 @@ det_by<-RPostgres::dbGetQuery(pp_bst,"SELECT 'ARRAY['||STRING_AGG(DISTINCT cd_pe
 rec_by<-RPostgres::dbGetQuery(pp_bst,"SELECT 'ARRAY['||STRING_AGG(DISTINCT cd_people_role::text,',')||']' rec_by FROM tmp.people WHERE rec_by")$rec_by
 
 all_str$recordNumber[all_str$recordNumber==""]<-NA
-matInd<-as.matrix(all_str[c("plot","subplot","ind")])
+matInd<-as.matrix(all_str[c("plot","subplot","Tag")])
 ind_idx<-match(split(matInd,row(matInd)),split(matInd,row(matInd)))
 ind_tab<-all_str[unique(ind_idx),]
 ind_tab$measuring_date<-data_all$Eventos$register_date
@@ -999,16 +999,16 @@ WHERE project IN ('Jabiru')
 
 | cd_reg | project | occurrence_id                              |
 |:-------|:--------|:-------------------------------------------|
-| 6366   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0001 |
-| 6367   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0002 |
-| 6368   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0003 |
-| 6369   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0004 |
-| 6370   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0005 |
-| 6371   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0006 |
-| 6372   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0007 |
-| 6373   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0008 |
-| 6374   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0009 |
-| 6375   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0010 |
+| 9328   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0001 |
+| 9329   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0002 |
+| 9330   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0003 |
+| 9331   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0004 |
+| 9332   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0005 |
+| 9333   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0006 |
+| 9334   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0007 |
+| 9335   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0008 |
+| 9336   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0009 |
+| 9337   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0010 |
 
 Displaying records 1 - 10
 
