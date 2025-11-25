@@ -66,12 +66,12 @@ SELECT project||'_census'|| (campaign_nb -1)::text AS "eventID",
   NULL AS "parentEventID",
   'Parcela permanente' "eventType",
   'Parcela permanente'||ROUND(c.height/10)*10||'m. x '||ROUND(c.width/10)*10||'m.' AS "samplingProtocol",--modified for precision
-  (ROUND(ST_Area(l.pol_geom)/1000)*1000)::int AS sampleSizeValue, 'm2' AS "sampleSizeUnit",--modified for precision
+  (ROUND(ST_Area(l.pol_geom)/1000)*1000)::int AS "sampleSizeValue", 'm2' AS "sampleSizeUnit",--modified for precision
   'census'|| (campaign_nb -1)::text  AS "fieldNumber",
   CASE 
     WHEN ge.date_begin=ge.date_end OR ge.date_end IS NULL THEN TO_CHAR(ge.date_begin,'YYYY-MM-DD')
     WHEN ge.date_end IS NOT NULL AND ge.date_end<>ge.date_begin THEN TO_CHAR(ge.date_begin,'YYYY-MM-DD')||'/'||TO_CHAR(ge.date_end,'YYYY-MM-DD')
-  END "dateEvent",
+  END "eventDate",
   'Bosque seco tropical' AS "habitat",
   'Event' AS "type",
   'Instituto de Investigación de Recursos Biológicos Alexander von Humboldt (IAvH)' AS "institutionCode",
