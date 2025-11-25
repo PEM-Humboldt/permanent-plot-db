@@ -19,6 +19,7 @@ require(sf)
 require(rpostgis)
 require(terra)
 dem<-rast(paste(DIR_DATA,"dem_colombia_magna_30m.img",sep="/"))
+#crs(dem)<-crs("epsg:4170")
 ```
 
 ## Connect to the database
@@ -30,9 +31,8 @@ pp_bst <- RPostgres::dbConnect(RPostgres::Postgres(), dbname = "pp_bst_col")
 ## Managing the reference systems
 
 ```{r}
-(sridDB<-RPostgres::dbGetQuery(pp_bst,"SELECT srid FROM geometry_columns WHERE f_table_schema='main' GROUP BY srid ORDER BY count(*) DESC LIMIT 1")$srid)
-dpto<-st_transform(dpto,sridDB)
-mpio<-st_transform(mpio,sridDB)
+(sridDB<-RPostgres::dbGetQuery(pp_bst,"SELECT auth_name||':'||auth_srid srs FROM geometry_columns LEFT JOIN spatial_ref_sys USING(srid) WHERE f_table_schema='main' GROUP BY auth_name,auth_srid ORDER BY count(*) DESC LIMIT 1")$srs)
+dem<-project(dem,crs(sridDB))
 ```
 
 ## Creating the shemas
@@ -45,50 +45,11 @@ if(!"spat" %in% schemas)
 {RPostgres::dbExecute(pp_bst,"CREATE schema spat")}
 ```
 
-## Creating the tables
+## Importing the DEM
 
 ```{r}
-all(toupper(mpio$suggestedC)==mpio$mpio_cnmbr)
-if(RPostgres::dbExistsTable(pp_bst,DBI::Id(schema="spat",table="mpio_dane_2023")))
-{RPostgres::dbExecute(pp_bst,"DROP TABLE spat.mpio_dane_2023")}
-if(RPostgres::dbExistsTable(pp_bst,DBI::Id(schema="spat",table="dpto_dane_2023")))
-{RPostgres::dbExecute(pp_bst,"DROP TABLE spat.dpto_dane_2023")}
-RPostgres::dbExecute(pp_bst,
-"CREATE TABLE spat.dpto_dane_2023
-(
-  dpto_ccdgo char(2) PRIMARY KEY,
-  dpto text UNIQUE
-)")
-RPostgres::dbExecute(pp_bst,paste0(
-  "SELECT AddGeometryColumn('spat','dpto_dane_2023','the_geom',",RPostgres::dbQuoteLiteral(pp_bst,sridDB),",'MULTIPOLYGON',2,true)"))
-RPostgres::dbExecute(pp_bst,
-"CREATE TABLE spat.mpio_dane_2023
-(
-  mpio_cdpmp char(5) PRIMARY KEY,
-  dpto_ccdgo char(2) REFERENCES spat.dpto_dane_2023(dpto_ccdgo),
-  mpio text,
-  UNIQUE(dpto_ccdgo,mpio)
-)")
-RPostgres::dbExecute(pp_bst,paste0(
-  "SELECT AddGeometryColumn('spat','mpio_dane_2023','the_geom',",RPostgres::dbQuoteLiteral(pp_bst,sridDB),",'MULTIPOLYGON',2,true)"))
+pgWriteRast(pp_bst,c("spat","dem"),raster=dem,overwrite=T)
 ```
-
-## Inserting the values in the table
-
-```{r}
-dpto<-dpto[,c("dpto_ccdgo","suggestedS","geometry")]
-colnames(dpto)<-c("dpto_ccdgo","dpto","geometry")
-st_geometry(dpto)<-"the_geom"
-st_write(dpto,pp_bst,DBI::Id(schema="spat", table="dpto_dane_2023"),append=T)
-```
-
-```{r}
-mpio<-mpio[,c("mpio_cdpmp","dpto_ccdgo","suggestedC","geometry")]
-colnames(mpio)<-c("mpio_cdpmp","dpto_ccdgo","mpio","geometry")
-st_geometry(mpio)<-"the_geom"
-st_write(mpio,pp_bst,DBI::Id(schema="spat", table="mpio_dane_2023"),append=T)
-```
-
 
 ## Shutting down light...
 
