@@ -7,12 +7,13 @@ DIR_DATA <- "../../otherData/"
 dir(DIR_DATA)
 ```
 
-     [1] "codigos_colecta_jabiru.csv"   "Dryflor_Marius.txt"          
-     [3] "DwC_Jabiru.xlsx"              "DwC_LaPaz.xlsx"              
-     [5] "DwC_Matitas.xlsx"             "DwC_Plato.xlsx"              
-     [7] "Jabiru_str.xlsx"              "LaPaz.csv"                   
-     [9] "Matitas.csv"                  "Plato.csv"                   
-    [11] "TDF_taxonomicReference.RData"
+     [1] "codigos_colecta_jabiru.csv"       "Dryflor_Marius.txt"              
+     [3] "DwC_Event_LaPaz.csv"              "DwC_Jabiru.xlsx"                 
+     [5] "DwC_LaPaz.xlsx"                   "DwC_Matitas.xlsx"                
+     [7] "DwC_MeasurementOrFacts_LaPaz.csv" "DwC_Plato.xlsx"                  
+     [9] "DwC_Register_LaPaz.csv"           "Jabiru_str.xlsx"                 
+    [11] "LaPaz.csv"                        "Matitas.csv"                     
+    [13] "Plato.csv"                        "TDF_taxonomicReference.RData"    
 
 ``` r
 encod<-stringi::stri_enc_detect(paste0(DIR_DATA,"/LaPaz.csv"))[[1]]$Encoding[1]
@@ -22,6 +23,46 @@ names(parcelas) <- plots
 # corrección puntual: hay un "1" en las latitudes de LaPaz que no tiene sentido
 parcelas$LaPaz$latitude_decimal[parcelas$LaPaz$latitude_decimal==1]<-NA
 parcelas_tot <- data.frame(id=1:sum(sapply(parcelas,nrow)),plot=rep(names(parcelas),sapply(parcelas,nrow)),Reduce(rbind, parcelas))
+```
+
+## Correction of tags that blocks the individual unicities
+
+``` r
+parcelas_tot$ind[parcelas_tot$plot=="LaPaz"&parcelas_tot$individualID=="394A"]<-"494"
+parcelas_tot$individualID[parcelas_tot$plot=="LaPaz"&parcelas_tot$individualID=="394A"]<-"494A"
+
+parcelas_tot$ind[parcelas_tot$plot=="Plato"&parcelas_tot$individualID=="514B"]<-"541"
+parcelas_tot$individualID[parcelas_tot$plot=="Plato"&parcelas_tot$individualID=="514B"]<-"541B"
+
+parcelas_tot$ind[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="1275A"]<-"1235"
+parcelas_tot$individualID[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="1275A"]<-"1235A"
+
+parcelas_tot$ind[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="1410B"]<-"2410"
+parcelas_tot$individualID[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="1410B"]<-"2410B"
+
+parcelas_tot$ind[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="1425A"&parcelas_tot$subplot==64]<-"2425"
+parcelas_tot$individualID[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="1425A"&parcelas_tot$subplot==64]<-"2425A"
+parcelas_tot$ind[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="1430A"&parcelas_tot$subplot==64]<-"2430"
+parcelas_tot$individualID[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="1430A"&parcelas_tot$subplot==64]<-"2430A"
+parcelas_tot$ind[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="1435A"&parcelas_tot$subplot==64]<-"2435"
+parcelas_tot$individualID[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="1435A"&parcelas_tot$subplot==64]<-"2435A"
+
+parcelas_tot$ind[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="1737D"]<-"1437"
+parcelas_tot$individualID[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="1737D"]<-"1437D"
+
+
+parcelas_tot$ind[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="2552A"]<-"2452"
+parcelas_tot$individualID[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="2552A"]<-"2452A"
+
+
+parcelas_tot$ind[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="2575A"]<-"2675"
+parcelas_tot$individualID[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="2575A"]<-"2675A"
+
+parcelas_tot$ind[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="3279A"]<-"2379"
+parcelas_tot$individualID[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="3279A"]<-"2379A"
+
+parcelas_tot$ind[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="3342"&parcelas_tot$subplot==88]<-"3442"
+parcelas_tot$individualID[parcelas_tot$plot=="Matitas"&parcelas_tot$individualID=="3342"&parcelas_tot$subplot==88]<-"3442"
 ```
 
 ## Connect to the database
@@ -1014,35 +1055,27 @@ WHERE project IN ('LaPaz','Matitas','Plato')
 
 | cd_reg | project | occurrence_id                             |
 |:-------|:--------|:------------------------------------------|
-| 5141   | Plato   | IAvH:PRESERVEDSPECIMEN:PLATO_CENSUS0:0001 |
-| 5142   | Plato   | IAvH:PRESERVEDSPECIMEN:PLATO_CENSUS0:0002 |
-| 5143   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0003 |
-| 5144   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0004 |
-| 5145   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0005 |
-| 5146   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0006 |
-| 5147   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0007 |
-| 5148   | Plato   | IAvH:PRESERVEDSPECIMEN:PLATO_CENSUS0:0008 |
-| 5149   | Plato   | IAvH:PRESERVEDSPECIMEN:PLATO_CENSUS0:0009 |
-| 5150   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0010 |
+| 5131   | Plato   | IAvH:PRESERVEDSPECIMEN:PLATO_CENSUS0:0001 |
+| 5132   | Plato   | IAvH:PRESERVEDSPECIMEN:PLATO_CENSUS0:0002 |
+| 5133   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0003 |
+| 5134   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0004 |
+| 5135   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0005 |
+| 5136   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0006 |
+| 5137   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0007 |
+| 5138   | Plato   | IAvH:PRESERVEDSPECIMEN:PLATO_CENSUS0:0008 |
+| 5139   | Plato   | IAvH:PRESERVEDSPECIMEN:PLATO_CENSUS0:0009 |
+| 5140   | Plato   | IAvH:OBSERVACIONHUMANA:PLATO_CENSUS0:0010 |
 
 Displaying records 1 - 10
 
 ``` r
 reg_occurrenceId<-dbGetQuery(pp_bst,"
-WITH a AS(SELECT r.cd_reg,
-  CASE
-    WHEN COALESCE(voucher, catalog_id) IS NULL THEN 'ObservacionHumana'
-    ELSE 'EspecimenPreservado'
-    END basis_of_record
-FROM main.register r
-LEFT JOIN main.identification i USING (cd_reg)
-), b AS(
-SELECT cd_reg, project, 'IAvH:'||UPPER(basis_of_record)||':'||UPPER(project)||'_CENSUS0:'||LPAD( (ROW_NUMBER() OVER (PARTITION BY cd_project ORDER BY cd_project,cd_reg))::text,4,'0') occurrence_id
+WITH b AS(
+SELECT cd_reg, project, 'IAVH:'||'OBSERVACIONHUMANA'||':'||UPPER(project)||'_CENSUS0:'||LPAD( (ROW_NUMBER() OVER (PARTITION BY cd_project ORDER BY cd_project,cd_reg))::text,4,'0') occurrence_id
 FROM main.register r
 LEFT JOIN main.event e USING (cd_event)
 LEFT JOIN main.gp_event ge USING (cd_gp_event)
 LEFT JOIN main.project p USING (cd_project)
-LEFT JOIN a USING(cd_reg)
 WHERE project IN ('LaPaz','Matitas','Plato')
 )UPDATE main.register AS r
 SET occurrence_id=b.occurrence_id

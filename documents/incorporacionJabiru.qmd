@@ -30,6 +30,14 @@ data_all$Jabiru_str$ramet[data_all$Jabiru_str$ind=="2610A"]<-1
 data_all$Jabiru_str$Tag[data_all$Jabiru_str$ind=="2610A"]<-"2610.1"
 data_all$Jabiru_str$ind[data_all$Jabiru_str$ind=="2610A"]<-"2610.1"
 
+data_all$Jabiru_str[data_all$Jabiru_str$Tag==529,]
+data_all$Jabiru_str$subplot[data_all$Jabiru_str$Tag==529]<-18
+
+data_all$Jabiru_str[data_all$Jabiru_str$Tag %in% c(2238,2239),]
+data_all$Jabiru_str$subplot[data_all$Jabiru_str$ind=="2238A"]<-83
+data_all$Jabiru_str$Tag[data_all$Jabiru_str$ind=="2238A"]<-2239
+data_all$Jabiru_str$Ind[data_all$Jabiru_str$ind=="2238A"]<-"2239A"
+
 ```
 
 ```{r}
@@ -39,10 +47,11 @@ data_all$codigos$tag[!is.na(data_all$codigos$tag)] %in% data_all$Jabiru_str$Tag
 
 
 
+
+
 ```{r}
 data_all$Eventos$register_date<-as.Date(data_all$Eventos$register_date,origin = "1899-12-30")
 ```
-
 
 
 ## Connect to the database
@@ -783,10 +792,11 @@ LEFT JOIN a USING(cd_reg)
 WHERE project IN ('Jabiru')
 
 ```
+
 ```{r}
 reg_occurrenceId<-dbGetQuery(pp_bst,"
 WITH a AS(
-SELECT cd_reg, project, 'IAvH:'||'OBSERVACIONHUMANA'||':'||UPPER(project)||'_CENSUS0:'||LPAD( (ROW_NUMBER() OVER (PARTITION BY cd_project ORDER BY cd_project,cd_reg))::text,4,'0') occurrence_id
+SELECT cd_reg, project, 'IAVH:'||'OBSERVACIONHUMANA'||':'||UPPER(project)||'_CENSUS0:'||LPAD( (ROW_NUMBER() OVER (PARTITION BY cd_project ORDER BY cd_project,cd_reg))::text,4,'0') occurrence_id
 FROM main.register r
 LEFT JOIN main.event e USING (cd_event)
 LEFT JOIN main.gp_event ge USING (cd_gp_event)

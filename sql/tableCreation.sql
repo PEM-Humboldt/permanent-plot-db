@@ -58,9 +58,11 @@ CREATE TABLE main.location
 SELECT AddGeometryColumn('main', 'location', 'pt_geom', 3116, 'POINT', 2);
 SELECT AddGeometryColumn('main', 'location', 'pol_geom', 3116, 'MULTIPOLYGON', 2);
 SELECT AddGeometryColumn('main', 'location', 'li_geom', 3116, 'MULTILINESTRING', 2);
--- CREATE INDEX main_location_pt_geom_spat_idx ON main.location USING GIST(pt_geom);
--- CREATE INDEX main_location_pol_geom_spat_idx ON main.location USING GIST(pol_geom);
--- CREATE INDEX main_location_li_geom_spat_idx ON main.location USING GIST(li_geom);
+CREATE INDEX main_location_pt_geom_spat_idx ON main.location USING GIST(pt_geom);
+CREATE INDEX main_location_pol_geom_spat_idx ON main.location USING GIST(pol_geom);
+CREATE INDEX main_location_li_geom_spat_idx ON main.location USING GIST(li_geom);
+CREATE INDEX main_location_centroid_pol_geom_spat_idx ON main.location USING GIST(ST_Centroid(pol_geom));
+CREATE INDEX main_location_centroid_li_geom_spat_idx ON main.location USING GIST(ST_Centroid(li_geom));
 
 --CREATE INDEX punto_referencia_cd_plat_key ON main.punto_referencia(cd_plat);
 

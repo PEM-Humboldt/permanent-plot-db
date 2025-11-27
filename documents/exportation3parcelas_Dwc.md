@@ -53,12 +53,12 @@ SELECT project||'_census'|| (campaign_nb -1)::text AS "eventID",
   NULL AS "parentEventID",
   'Parcela permanente' "eventType",
   'Parcela permanente'||ROUND(c.height/10)*10||'m. x '||ROUND(c.width/10)*10||'m.' AS "samplingProtocol",--modified for precision
-  (ROUND(ST_Area(l.pol_geom)/1000)*1000)::int AS sampleSizeValue, 'm2' AS "sampleSizeUnit",--modified for precision
+  (ROUND(ST_Area(l.pol_geom)/1000)*1000)::int AS "sampleSizeValue", 'm2' AS "sampleSizeUnit",--modified for precision
   'census'|| (campaign_nb -1)::text  AS "fieldNumber",
   CASE 
     WHEN ge.date_begin=ge.date_end OR ge.date_end IS NULL THEN TO_CHAR(ge.date_begin,'YYYY-MM-DD')
     WHEN ge.date_end IS NOT NULL AND ge.date_end<>ge.date_begin THEN TO_CHAR(ge.date_begin,'YYYY-MM-DD')||'/'||TO_CHAR(ge.date_end,'YYYY-MM-DD')
-  END "dateEvent",
+  END "eventDate",
   'Bosque seco tropical' AS "habitat",
   'Event' AS "type",
   'Instituto de Investigación de Recursos Biológicos Alexander von Humboldt (IAvH)' AS "institutionCode",
@@ -76,8 +76,10 @@ SELECT project||'_census'|| (campaign_nb -1)::text AS "eventID",
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
-  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
+  ST_Value(dem.rast,ST_Centroid(l.pol_geom)) AS "minimumElevationInMeters",
+  ST_Value(dem.rast,ST_Centroid(l.pol_geom)) AS "maximumElevationInMeters",
+  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
+  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
   ST_AsText(ST_transform(l.pol_geom,srs.srid), 8 ) AS "footprintWKT",
   srs.auth_name||':'||srs.auth_srid AS "footprintSRS"
@@ -86,6 +88,7 @@ LEFT JOIN main.project p USING (cd_project,cd_loc)
 LEFT JOIN main.location l USING (cd_loc)
 LEFT JOIN c USING (cd_project)
 LEFT JOIN d USING (cd_project)
+LEFT JOIN spat.dem ON ST_Intersects(dem.rast,ST_Centroid(l.pol_geom))
 CROSS JOIN srs
 WHERE project='LaPaz'
 
@@ -118,8 +121,10 @@ UNION ALL
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
-  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
+  ST_Value(dem.rast,ST_Centroid(l.pol_geom)) AS "minimumElevationInMeters",
+  ST_Value(dem.rast,ST_Centroid(l.pol_geom)) AS "maximumElevationInMeters",
+  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
+  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
   ST_AsText(ST_Transform(l.pol_geom,srs.srid), 8 ) AS "footprintWKT",
   srs.auth_name||':'||srs.auth_srid AS "footprintSRS"
@@ -129,6 +134,7 @@ LEFT JOIN main.gp_event USING (cd_gp_event)
 LEFT JOIN main.project USING (cd_project)
 LEFT JOIN a USING(cd_event)
 LEFT JOIN b USING(cd_event)
+LEFT JOIN spat.dem ON ST_Intersects(dem.rast,ST_Centroid(l.pol_geom))
 CROSS JOIN srs
 WHERE project='LaPaz'
 ORDER BY num_replicate)
@@ -137,7 +143,11 @@ ORDER BY num_replicate)
 ### Register
 
 ``` sql
-WITH srs AS(
+WITH default_tax AS(
+  SELECT cd_tax
+  FROM main.taxo
+  WHERE name_tax='Magnoliopsida'
+), srs AS(
 SELECT * 
 FROM spatial_ref_sys  
 WHERE srid=4326
@@ -172,6 +182,16 @@ LEFT JOIN (SELECT cd_person,
               END name
             FROM main.people) p USING (cd_person)
 GROUP BY cd_identif
+), loc_ev AS(
+SELECT DISTINCT ON (cd_event)cd_event, mpio, dpto, ST_Area(ST_intersection(l.pol_geom,m.the_geom))
+FROM main.event e 
+LEFT JOIN main.location l USING (cd_loc)
+LEFT JOIN main.gp_event ge USING (cd_gp_event)
+LEFT JOIN main.project p USING (cd_project)
+LEFT JOIN spat.mpio_dane_2023 m  ON ST_Intersects(l.pol_geom,m.the_geom)
+LEFT JOIN spat.dpto_dane_2023 d USING(dpto_ccdgo)
+WHERE project='LaPaz'
+ORDER BY cd_event,ST_Area(ST_intersection(l.pol_geom,m.the_geom)) DESC
 )
 SELECT occurrence_id AS "occurrenceID",
   'HumanObservation' AS "basisOfRecord",
@@ -181,6 +201,7 @@ SELECT occurrence_id AS "occurrenceID",
     ELSE 'Colecta botánica'
   END AS "samplingProtocol",
   'Instituto de Investigación de Recursos Biológicos Alexander von Humboldt (IAvH)' AS "institutionCode",
+  '820.000.142-2' AS "institutionID",
   catalog_id AS "recordNumber",
   recorded_by.recorded_by AS "recordedBy",
   COALESCE(organism_id, ind.tag) AS "organismID",
@@ -189,28 +210,28 @@ SELECT occurrence_id AS "occurrenceID",
   project||'_census'|| (campaign_nb -1)::text  AS "parentEventID",
   event_id AS "eventID",
   CASE
-    WHEN m.mpio IS NOT NULL THEN 'América del Sur'
+    WHEN COALESCE(m.mpio,le.mpio) IS NOT NULL THEN 'América del Sur'
     ELSE NULL
   END AS continent,
   CASE
-    WHEN m.mpio IS NOT NULL THEN 'Colombia'
+    WHEN COALESCE(m.mpio,le.mpio) IS NOT NULL THEN 'Colombia'
     ELSE NULL
   END AS country,
-    CASE
-    WHEN m.mpio IS NOT NULL THEN 'CO'
+  CASE
+    WHEN COALESCE(m.mpio,le.mpio) IS NOT NULL THEN 'CO'
     ELSE NULL
   END AS "countryCode",
-  dpto AS "stateProvince",
-  mpio AS county,
-  ST_X(ST_transform(pt_geom,srs.srid)) AS "decimalLatitude",
-  ST_Y(ST_transform(pt_geom,srs.srid)) AS "decimalLongitude",
+  COALESCE(d.dpto,le.dpto) AS "stateProvince",
+  COALESCE(m.mpio,le.mpio) AS county,
+  ST_Y(ST_transform(pt_geom,srs.srid)) AS "decimalLatitude",
+  ST_X(ST_transform(pt_geom,srs.srid)) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
   identified_by.identified_by AS "identifiedBy",
   TO_CHAR(date_identif,'YYYY-MM-DD') AS "dateIdentified",
   identification_qualifier AS "identificationQualifier",
   t.name_tax AS "ScientificName",
   t.authorship AS "ScientificNameAuthorship",
-  tax_rank_spa AS "taxonRank",
+  INITCAP(tax_rank_spa) AS "taxonRank",
   verbatim_taxon_rank AS "verbatimTaxonRank",
   CASE
     WHEN t.gbifid IS NOT NULL THEN 'gbif.org/species/'||t.gbifid
@@ -227,14 +248,13 @@ FROM main.register r
 LEFT JOIN main.register_location l USING (cd_reg)
 LEFT JOIN main.reg_individual USING (cd_reg)
 LEFT JOIN main.individual ind USING (cd_ind)
-LEFT JOIN last_identif USING (cd_reg)
+LEFT JOIN last_identif li USING (cd_reg)
 LEFT JOIN recorded_by USING (cd_reg)
 LEFT JOIN identified_by USING (cd_identif)
 LEFT JOIN spat.mpio_dane_2023 m  ON ST_Intersects(l.pt_geom,m.the_geom)
 LEFT JOIN spat.dpto_dane_2023 d USING(dpto_ccdgo)
-LEFT JOIN main.taxo t USING (cd_tax)
+LEFT JOIN main.taxo t ON COALESCE(li.cd_tax,(SELECT cd_tax FROM default_tax))=t.cd_tax
 LEFT JOIN main.def_tax_rank USING (cd_rank)
-LEFT JOIN main.morfo_taxo mt USING (cd_tax,cd_morfo)
 LEFT JOIN main.taxo tk ON find_higher_id(t.cd_tax,'KG')=tk.cd_tax
 LEFT JOIN main.taxo tp ON find_higher_id(t.cd_tax,'PHY')=tp.cd_tax
 LEFT JOIN main.taxo tc ON find_higher_id(t.cd_tax,'CL')=tc.cd_tax
@@ -242,12 +262,19 @@ LEFT JOIN main.taxo tor ON find_higher_id(t.cd_tax,'OR')=tor.cd_tax
 LEFT JOIN main.taxo tfam ON find_higher_id(t.cd_tax,'FAM')=tfam.cd_tax
 LEFT JOIN main.taxo tgn ON find_higher_id(t.cd_tax,'GN')=tgn.cd_tax
 LEFT JOIN main.taxo tsp ON find_higher_id(t.cd_tax,'SP')=tsp.cd_tax
+LEFT JOIN main.morfo_taxo mt ON li.cd_morfo=mt.cd_morfo
 LEFT JOIN main.event e USING (cd_event)
+LEFT JOIN loc_ev le USING (cd_event)
 LEFT JOIN main.gp_event USING (cd_gp_event)
 LEFT JOIN main.project USING (cd_project)
 CROSS JOIN srs
 WHERE project='LaPaz'
 ORDER BY num_replicate, ind.tag
+```
+
+``` r
+stopifnot(!duplicated(register$occurrenceID))
+stopifnot(!duplicated(register$organismID))
 ```
 
 ### Measurements or facts
@@ -280,6 +307,49 @@ WHERE v1.name_var='dbh_cm' AND v2.name_var='height_m' AND project='LaPaz'
 ORDER BY num_replicate, cd_ind, part_number
 ```
 
+``` sql
+WITH tot AS(
+SELECT 
+  occurrence_id "occurrenceID",
+  CASE 
+    WHEN name_var='dbh_cm' THEN 'DBH ramet'
+    WHEN name_var='height_m' THEN 'Altura ramet'
+  END || part_number AS "measurementType",
+  COALESCE(subind_char_double::text,subind_char_int::text, subind_char_text, subind_char_bool::text) AS "measurementValue",
+  abbv_unit "measurementUnit",
+  num_replicate, cd_ind, part_number,cd_var
+FROM main.subindividual_characteristics s
+LEFT JOIN main.def_var v USING (cd_var)
+LEFT JOIN main.def_unit u USING (cd_unit)
+LEFT JOIN main.subindividual si USING (cd_subind)
+LEFT JOIN main.def_subindividual_part USING (cd_part)
+LEFT JOIN main.individual USING (cd_ind)
+LEFT JOIN main.register USING(cd_reg)
+LEFT JOIN main.event USING (cd_event)
+LEFT JOIN main.gp_event USING (cd_gp_event)
+LEFT JOIN main.project USING (cd_project)
+WHERE project='LaPaz' AND name_var IN ('dbh_cm', 'height_m')
+UNION ALL
+SELECT occurrence_id "occurrenceID",
+  'tag ramet '|| part_number "measurementType",
+  si.tag "measurementValue",
+  NULL AS "measurementUnit",
+  num_replicate, cd_ind, part_number, NULL
+FROM main.subindividual si
+LEFT JOIN main.def_subindividual_part USING (cd_part)
+LEFT JOIN main.individual USING (cd_ind)
+LEFT JOIN main.reg_individual USING (cd_ind)
+LEFT JOIN main.register USING(cd_reg)
+LEFT JOIN main.event USING (cd_event)
+LEFT JOIN main.gp_event USING (cd_gp_event)
+LEFT JOIN main.project USING (cd_project)
+WHERE project='LaPaz'
+)
+SELECT "occurrenceID", "measurementType", "measurementValue","measurementUnit"
+FROM tot
+ORDER BY num_replicate, cd_ind, part_number, cd_var
+```
+
 ### Export
 
 ``` r
@@ -289,6 +359,38 @@ saveInExcel("../../otherData/DwC_LaPaz.xlsx",lVar=c("event","register","Measurem
 
     Writing sheets: event register MeasurementsOrFacts
     into file:/home/marius/Travail/traitementDonnees/2024_parcelas_permanentes/otherData/DwC_LaPaz.xlsx
+
+``` r
+write.csv(event,"../../otherData/DwC_Event_LaPaz.csv",sep=";",dec=".")
+```
+
+    Warning in write.csv(event, "../../otherData/DwC_Event_LaPaz.csv", sep = ";", :
+    attempt to set 'sep' ignored
+
+    Warning in write.csv(event, "../../otherData/DwC_Event_LaPaz.csv", sep = ";", :
+    attempt to set 'dec' ignored
+
+``` r
+write.csv(register,"../../otherData/DwC_Register_LaPaz.csv",sep=";",dec=".")
+```
+
+    Warning in write.csv(register, "../../otherData/DwC_Register_LaPaz.csv", :
+    attempt to set 'sep' ignored
+
+    Warning in write.csv(register, "../../otherData/DwC_Register_LaPaz.csv", :
+    attempt to set 'dec' ignored
+
+``` r
+write.csv(MeasurementsOrFacts2,"../../otherData/DwC_MeasurementOrFacts_LaPaz.csv",sep=";",dec=".")
+```
+
+    Warning in write.csv(MeasurementsOrFacts2,
+    "../../otherData/DwC_MeasurementOrFacts_LaPaz.csv", : attempt to set 'sep'
+    ignored
+
+    Warning in write.csv(MeasurementsOrFacts2,
+    "../../otherData/DwC_MeasurementOrFacts_LaPaz.csv", : attempt to set 'dec'
+    ignored
 
 ## Matitas
 
@@ -336,12 +438,12 @@ SELECT project||'_census'|| (campaign_nb -1)::text AS "eventID",
   NULL AS "parentEventID",
   'Parcela permanente' "eventType",
   'Parcela permanente'||ROUND(c.height/10)*10||'m. x '||ROUND(c.width/10)*10||'m.' AS "samplingProtocol",--modified for precision
-  (ROUND(ST_Area(l.pol_geom)/1000)*1000)::int AS sampleSizeValue, 'm2' AS "sampleSizeUnit",--modified for precision
+  (ROUND(ST_Area(l.pol_geom)/1000)*1000)::int AS "sampleSizeValue", 'm2' AS "sampleSizeUnit",--modified for precision
   'census'|| (campaign_nb -1)::text  AS "fieldNumber",
   CASE 
     WHEN ge.date_begin=ge.date_end OR ge.date_end IS NULL THEN TO_CHAR(ge.date_begin,'YYYY-MM-DD')
     WHEN ge.date_end IS NOT NULL AND ge.date_end<>ge.date_begin THEN TO_CHAR(ge.date_begin,'YYYY-MM-DD')||'/'||TO_CHAR(ge.date_end,'YYYY-MM-DD')
-  END "dateEvent",
+  END "eventDate",
   'Bosque seco tropical' AS "habitat",
   'Event' AS "type",
   'Instituto de Investigación de Recursos Biológicos Alexander von Humboldt (IAvH)' AS "institutionCode",
@@ -359,8 +461,10 @@ SELECT project||'_census'|| (campaign_nb -1)::text AS "eventID",
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
-  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
+  ST_Value(dem.rast,ST_Centroid(l.pol_geom)) AS "minimumElevationInMeters",
+  ST_Value(dem.rast,ST_Centroid(l.pol_geom)) AS "maximumElevationInMeters",
+  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
+  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
   ST_AsText(ST_transform(l.pol_geom,srs.srid), 8 ) AS "footprintWKT",
   srs.auth_name||':'||srs.auth_srid AS "footprintSRS"
@@ -369,6 +473,7 @@ LEFT JOIN main.project p USING (cd_project,cd_loc)
 LEFT JOIN main.location l USING (cd_loc)
 LEFT JOIN c USING (cd_project)
 LEFT JOIN d USING (cd_project)
+LEFT JOIN spat.dem ON ST_Intersects(dem.rast,ST_Centroid(l.pol_geom))
 CROSS JOIN srs
 WHERE project='Matitas'
 
@@ -401,8 +506,10 @@ UNION ALL
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
-  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
+  ST_Value(dem.rast,ST_Centroid(l.pol_geom)) AS "minimumElevationInMeters",
+  ST_Value(dem.rast,ST_Centroid(l.pol_geom)) AS "maximumElevationInMeters",
+  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
+  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
   ST_AsText(ST_Transform(l.pol_geom,srs.srid), 8 ) AS "footprintWKT",
   srs.auth_name||':'||srs.auth_srid AS "footprintSRS"
@@ -412,6 +519,7 @@ LEFT JOIN main.gp_event USING (cd_gp_event)
 LEFT JOIN main.project USING (cd_project)
 LEFT JOIN a USING(cd_event)
 LEFT JOIN b USING(cd_event)
+LEFT JOIN spat.dem ON ST_Intersects(dem.rast,ST_Centroid(l.pol_geom))
 CROSS JOIN srs
 WHERE project='Matitas'
 ORDER BY num_replicate)
@@ -420,7 +528,11 @@ ORDER BY num_replicate)
 ### Register
 
 ``` sql
-WITH srs AS(
+WITH default_tax AS(
+  SELECT cd_tax
+  FROM main.taxo
+  WHERE name_tax='Magnoliopsida'
+), srs AS(
 SELECT * 
 FROM spatial_ref_sys  
 WHERE srid=4326
@@ -455,6 +567,16 @@ LEFT JOIN (SELECT cd_person,
               END name
             FROM main.people) p USING (cd_person)
 GROUP BY cd_identif
+), loc_ev AS(
+SELECT DISTINCT ON (cd_event)cd_event, mpio, dpto, ST_Area(ST_intersection(l.pol_geom,m.the_geom))
+FROM main.event e 
+LEFT JOIN main.location l USING (cd_loc)
+LEFT JOIN main.gp_event ge USING (cd_gp_event)
+LEFT JOIN main.project p USING (cd_project)
+LEFT JOIN spat.mpio_dane_2023 m  ON ST_Intersects(l.pol_geom,m.the_geom)
+LEFT JOIN spat.dpto_dane_2023 d USING(dpto_ccdgo)
+WHERE project='Matitas'
+ORDER BY cd_event,ST_Area(ST_intersection(l.pol_geom,m.the_geom)) DESC
 )
 SELECT occurrence_id AS "occurrenceID",
   'HumanObservation' AS "basisOfRecord",
@@ -464,6 +586,7 @@ SELECT occurrence_id AS "occurrenceID",
     ELSE 'Colecta botánica'
   END AS "samplingProtocol",
   'Instituto de Investigación de Recursos Biológicos Alexander von Humboldt (IAvH)' AS "institutionCode",
+  '820.000.142-2' AS "institutionID",
   catalog_id AS "recordNumber",
   recorded_by.recorded_by AS "recordedBy",
   COALESCE(organism_id, ind.tag) AS "organismID",
@@ -472,28 +595,28 @@ SELECT occurrence_id AS "occurrenceID",
   project||'_census'|| (campaign_nb -1)::text  AS "parentEventID",
   event_id AS "eventID",
   CASE
-    WHEN m.mpio IS NOT NULL THEN 'América del Sur'
+    WHEN COALESCE(m.mpio,le.mpio) IS NOT NULL THEN 'América del Sur'
     ELSE NULL
   END AS continent,
   CASE
-    WHEN m.mpio IS NOT NULL THEN 'Colombia'
+    WHEN COALESCE(m.mpio,le.mpio) IS NOT NULL THEN 'Colombia'
     ELSE NULL
   END AS country,
-    CASE
-    WHEN m.mpio IS NOT NULL THEN 'CO'
+  CASE
+    WHEN COALESCE(m.mpio,le.mpio) IS NOT NULL THEN 'CO'
     ELSE NULL
   END AS "countryCode",
-  dpto AS "stateProvince",
-  mpio AS county,
-  ST_X(ST_transform(pt_geom,srs.srid)) AS "decimalLatitude",
-  ST_Y(ST_transform(pt_geom,srs.srid)) AS "decimalLongitude",
+  COALESCE(d.dpto,le.dpto) AS "stateProvince",
+  COALESCE(m.mpio,le.mpio) AS county,
+  ST_Y(ST_transform(pt_geom,srs.srid)) AS "decimalLatitude",
+  ST_X(ST_transform(pt_geom,srs.srid)) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
   identified_by.identified_by AS "identifiedBy",
   TO_CHAR(date_identif,'YYYY-MM-DD') AS "dateIdentified",
   identification_qualifier AS "identificationQualifier",
   t.name_tax AS "ScientificName",
   t.authorship AS "ScientificNameAuthorship",
-  tax_rank_spa AS "taxonRank",
+  INITCAP(tax_rank_spa) AS "taxonRank",
   verbatim_taxon_rank AS "verbatimTaxonRank",
   CASE
     WHEN t.gbifid IS NOT NULL THEN 'gbif.org/species/'||t.gbifid
@@ -510,14 +633,13 @@ FROM main.register r
 LEFT JOIN main.register_location l USING (cd_reg)
 LEFT JOIN main.reg_individual USING (cd_reg)
 LEFT JOIN main.individual ind USING (cd_ind)
-LEFT JOIN last_identif USING (cd_reg)
+LEFT JOIN last_identif li USING (cd_reg)
 LEFT JOIN recorded_by USING (cd_reg)
 LEFT JOIN identified_by USING (cd_identif)
 LEFT JOIN spat.mpio_dane_2023 m  ON ST_Intersects(l.pt_geom,m.the_geom)
 LEFT JOIN spat.dpto_dane_2023 d USING(dpto_ccdgo)
-LEFT JOIN main.taxo t USING (cd_tax)
+LEFT JOIN main.taxo t ON COALESCE(li.cd_tax,(SELECT cd_tax FROM default_tax))=t.cd_tax
 LEFT JOIN main.def_tax_rank USING (cd_rank)
-LEFT JOIN main.morfo_taxo mt USING (cd_tax,cd_morfo)
 LEFT JOIN main.taxo tk ON find_higher_id(t.cd_tax,'KG')=tk.cd_tax
 LEFT JOIN main.taxo tp ON find_higher_id(t.cd_tax,'PHY')=tp.cd_tax
 LEFT JOIN main.taxo tc ON find_higher_id(t.cd_tax,'CL')=tc.cd_tax
@@ -525,12 +647,19 @@ LEFT JOIN main.taxo tor ON find_higher_id(t.cd_tax,'OR')=tor.cd_tax
 LEFT JOIN main.taxo tfam ON find_higher_id(t.cd_tax,'FAM')=tfam.cd_tax
 LEFT JOIN main.taxo tgn ON find_higher_id(t.cd_tax,'GN')=tgn.cd_tax
 LEFT JOIN main.taxo tsp ON find_higher_id(t.cd_tax,'SP')=tsp.cd_tax
+LEFT JOIN main.morfo_taxo mt ON li.cd_morfo=mt.cd_morfo
 LEFT JOIN main.event e USING (cd_event)
+LEFT JOIN loc_ev le USING (cd_event)
 LEFT JOIN main.gp_event USING (cd_gp_event)
 LEFT JOIN main.project USING (cd_project)
 CROSS JOIN srs
 WHERE project='Matitas'
 ORDER BY num_replicate, ind.tag
+```
+
+``` r
+stopifnot(!duplicated(register$occurrenceID))
+stopifnot(!duplicated(register$organismID))
 ```
 
 ### Measurements or facts
@@ -563,6 +692,49 @@ WHERE v1.name_var='dbh_cm' AND v2.name_var='height_m' AND project='Matitas'
 ORDER BY num_replicate, cd_ind, part_number
 ```
 
+``` sql
+WITH tot AS(
+SELECT 
+  occurrence_id "occurrenceID",
+  CASE 
+    WHEN name_var='dbh_cm' THEN 'DBH ramet'
+    WHEN name_var='height_m' THEN 'Altura ramet'
+  END || part_number AS "measurementType",
+  COALESCE(subind_char_double::text,subind_char_int::text, subind_char_text, subind_char_bool::text) AS "measurementValue",
+  abbv_unit "measurementUnit",
+  num_replicate, cd_ind, part_number,cd_var
+FROM main.subindividual_characteristics s
+LEFT JOIN main.def_var v USING (cd_var)
+LEFT JOIN main.def_unit u USING (cd_unit)
+LEFT JOIN main.subindividual si USING (cd_subind)
+LEFT JOIN main.def_subindividual_part USING (cd_part)
+LEFT JOIN main.individual USING (cd_ind)
+LEFT JOIN main.register USING(cd_reg)
+LEFT JOIN main.event USING (cd_event)
+LEFT JOIN main.gp_event USING (cd_gp_event)
+LEFT JOIN main.project USING (cd_project)
+WHERE project='Matitas' AND name_var IN ('dbh_cm', 'height_m')
+UNION ALL
+SELECT occurrence_id "occurrenceID",
+  'tag ramet '|| part_number "measurementType",
+  si.tag "measurementValue",
+  NULL AS "measurementUnit",
+  num_replicate, cd_ind, part_number, NULL
+FROM main.subindividual si
+LEFT JOIN main.def_subindividual_part USING (cd_part)
+LEFT JOIN main.individual USING (cd_ind)
+LEFT JOIN main.reg_individual USING (cd_ind)
+LEFT JOIN main.register USING(cd_reg)
+LEFT JOIN main.event USING (cd_event)
+LEFT JOIN main.gp_event USING (cd_gp_event)
+LEFT JOIN main.project USING (cd_project)
+WHERE project='Matitas'
+)
+SELECT "occurrenceID", "measurementType", "measurementValue","measurementUnit"
+FROM tot
+ORDER BY num_replicate, cd_ind, part_number, cd_var
+```
+
 ### Export
 
 ``` r
@@ -572,6 +744,38 @@ saveInExcel("../../otherData/DwC_Matitas.xlsx",lVar=c("event","register","Measur
 
     Writing sheets: event register MeasurementsOrFacts
     into file:/home/marius/Travail/traitementDonnees/2024_parcelas_permanentes/otherData/DwC_Matitas.xlsx
+
+``` r
+write.csv(event,"../../otherData/DwC_Event_Matitas.csv",sep=";",dec=".")
+```
+
+    Warning in write.csv(event, "../../otherData/DwC_Event_Matitas.csv", sep = ";",
+    : attempt to set 'sep' ignored
+
+    Warning in write.csv(event, "../../otherData/DwC_Event_Matitas.csv", sep = ";",
+    : attempt to set 'dec' ignored
+
+``` r
+write.csv(register,"../../otherData/DwC_Register_Matitas.csv",sep=";",dec=".")
+```
+
+    Warning in write.csv(register, "../../otherData/DwC_Register_Matitas.csv", :
+    attempt to set 'sep' ignored
+
+    Warning in write.csv(register, "../../otherData/DwC_Register_Matitas.csv", :
+    attempt to set 'dec' ignored
+
+``` r
+write.csv(MeasurementsOrFacts2,"../../otherData/DwC_MeasurementOrFacts_Matitas.csv",sep=";",dec=".")
+```
+
+    Warning in write.csv(MeasurementsOrFacts2,
+    "../../otherData/DwC_MeasurementOrFacts_Matitas.csv", : attempt to set 'sep'
+    ignored
+
+    Warning in write.csv(MeasurementsOrFacts2,
+    "../../otherData/DwC_MeasurementOrFacts_Matitas.csv", : attempt to set 'dec'
+    ignored
 
 ## Plato
 
@@ -619,12 +823,12 @@ SELECT project||'_census'|| (campaign_nb -1)::text AS "eventID",
   NULL AS "parentEventID",
   'Parcela permanente' "eventType",
   'Parcela permanente'||ROUND(c.height/10)*10||'m. x '||ROUND(c.width/10)*10||'m.' AS "samplingProtocol",--modified for precision
-  (ROUND(ST_Area(l.pol_geom)/1000)*1000)::int AS sampleSizeValue, 'm2' AS "sampleSizeUnit",--modified for precision
+  (ROUND(ST_Area(l.pol_geom)/1000)*1000)::int AS "sampleSizeValue", 'm2' AS "sampleSizeUnit",--modified for precision
   'census'|| (campaign_nb -1)::text  AS "fieldNumber",
   CASE 
     WHEN ge.date_begin=ge.date_end OR ge.date_end IS NULL THEN TO_CHAR(ge.date_begin,'YYYY-MM-DD')
     WHEN ge.date_end IS NOT NULL AND ge.date_end<>ge.date_begin THEN TO_CHAR(ge.date_begin,'YYYY-MM-DD')||'/'||TO_CHAR(ge.date_end,'YYYY-MM-DD')
-  END "dateEvent",
+  END "eventDate",
   'Bosque seco tropical' AS "habitat",
   'Event' AS "type",
   'Instituto de Investigación de Recursos Biológicos Alexander von Humboldt (IAvH)' AS "institutionCode",
@@ -642,8 +846,10 @@ SELECT project||'_census'|| (campaign_nb -1)::text AS "eventID",
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
-  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
+  ST_Value(dem.rast,ST_Centroid(l.pol_geom)) AS "minimumElevationInMeters",
+  ST_Value(dem.rast,ST_Centroid(l.pol_geom)) AS "maximumElevationInMeters",
+  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
+  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
   ST_AsText(ST_transform(l.pol_geom,srs.srid), 8 ) AS "footprintWKT",
   srs.auth_name||':'||srs.auth_srid AS "footprintSRS"
@@ -652,6 +858,7 @@ LEFT JOIN main.project p USING (cd_project,cd_loc)
 LEFT JOIN main.location l USING (cd_loc)
 LEFT JOIN c USING (cd_project)
 LEFT JOIN d USING (cd_project)
+LEFT JOIN spat.dem ON ST_Intersects(dem.rast,ST_Centroid(l.pol_geom))
 CROSS JOIN srs
 WHERE project='Plato'
 
@@ -684,8 +891,10 @@ UNION ALL
   END AS "countryCode",
   dpto AS "stateProvince",
   mpio AS county,
-  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
-  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
+  ST_Value(dem.rast,ST_Centroid(l.pol_geom)) AS "minimumElevationInMeters",
+  ST_Value(dem.rast,ST_Centroid(l.pol_geom)) AS "maximumElevationInMeters",
+  ST_Y(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLatitude",
+  ST_X(ST_Centroid(ST_transform(l.pol_geom,srs.srid))) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
   ST_AsText(ST_Transform(l.pol_geom,srs.srid), 8 ) AS "footprintWKT",
   srs.auth_name||':'||srs.auth_srid AS "footprintSRS"
@@ -695,6 +904,7 @@ LEFT JOIN main.gp_event USING (cd_gp_event)
 LEFT JOIN main.project USING (cd_project)
 LEFT JOIN a USING(cd_event)
 LEFT JOIN b USING(cd_event)
+LEFT JOIN spat.dem ON ST_Intersects(dem.rast,ST_Centroid(l.pol_geom))
 CROSS JOIN srs
 WHERE project='Plato'
 ORDER BY num_replicate)
@@ -703,7 +913,11 @@ ORDER BY num_replicate)
 ### Register
 
 ``` sql
-WITH srs AS(
+WITH default_tax AS(
+  SELECT cd_tax
+  FROM main.taxo
+  WHERE name_tax='Magnoliopsida'
+), srs AS(
 SELECT * 
 FROM spatial_ref_sys  
 WHERE srid=4326
@@ -738,6 +952,16 @@ LEFT JOIN (SELECT cd_person,
               END name
             FROM main.people) p USING (cd_person)
 GROUP BY cd_identif
+), loc_ev AS(
+SELECT DISTINCT ON (cd_event)cd_event, mpio, dpto, ST_Area(ST_intersection(l.pol_geom,m.the_geom))
+FROM main.event e 
+LEFT JOIN main.location l USING (cd_loc)
+LEFT JOIN main.gp_event ge USING (cd_gp_event)
+LEFT JOIN main.project p USING (cd_project)
+LEFT JOIN spat.mpio_dane_2023 m  ON ST_Intersects(l.pol_geom,m.the_geom)
+LEFT JOIN spat.dpto_dane_2023 d USING(dpto_ccdgo)
+WHERE project='Plato'
+ORDER BY cd_event,ST_Area(ST_intersection(l.pol_geom,m.the_geom)) DESC
 )
 SELECT occurrence_id AS "occurrenceID",
   'HumanObservation' AS "basisOfRecord",
@@ -747,6 +971,7 @@ SELECT occurrence_id AS "occurrenceID",
     ELSE 'Colecta botánica'
   END AS "samplingProtocol",
   'Instituto de Investigación de Recursos Biológicos Alexander von Humboldt (IAvH)' AS "institutionCode",
+  '820.000.142-2' AS "institutionID",
   catalog_id AS "recordNumber",
   recorded_by.recorded_by AS "recordedBy",
   COALESCE(organism_id, ind.tag) AS "organismID",
@@ -755,28 +980,28 @@ SELECT occurrence_id AS "occurrenceID",
   project||'_census'|| (campaign_nb -1)::text  AS "parentEventID",
   event_id AS "eventID",
   CASE
-    WHEN m.mpio IS NOT NULL THEN 'América del Sur'
+    WHEN COALESCE(m.mpio,le.mpio) IS NOT NULL THEN 'América del Sur'
     ELSE NULL
   END AS continent,
   CASE
-    WHEN m.mpio IS NOT NULL THEN 'Colombia'
+    WHEN COALESCE(m.mpio,le.mpio) IS NOT NULL THEN 'Colombia'
     ELSE NULL
   END AS country,
-    CASE
-    WHEN m.mpio IS NOT NULL THEN 'CO'
+  CASE
+    WHEN COALESCE(m.mpio,le.mpio) IS NOT NULL THEN 'CO'
     ELSE NULL
   END AS "countryCode",
-  dpto AS "stateProvince",
-  mpio AS county,
-  ST_X(ST_transform(pt_geom,srs.srid)) AS "decimalLatitude",
-  ST_Y(ST_transform(pt_geom,srs.srid)) AS "decimalLongitude",
+  COALESCE(d.dpto,le.dpto) AS "stateProvince",
+  COALESCE(m.mpio,le.mpio) AS county,
+  ST_Y(ST_transform(pt_geom,srs.srid)) AS "decimalLatitude",
+  ST_X(ST_transform(pt_geom,srs.srid)) AS "decimalLongitude",
   srs.auth_name||':'||srs.auth_srid AS "geodeticDatum",
   identified_by.identified_by AS "identifiedBy",
   TO_CHAR(date_identif,'YYYY-MM-DD') AS "dateIdentified",
   identification_qualifier AS "identificationQualifier",
   t.name_tax AS "ScientificName",
   t.authorship AS "ScientificNameAuthorship",
-  tax_rank_spa AS "taxonRank",
+  INITCAP(tax_rank_spa) AS "taxonRank",
   verbatim_taxon_rank AS "verbatimTaxonRank",
   CASE
     WHEN t.gbifid IS NOT NULL THEN 'gbif.org/species/'||t.gbifid
@@ -793,14 +1018,13 @@ FROM main.register r
 LEFT JOIN main.register_location l USING (cd_reg)
 LEFT JOIN main.reg_individual USING (cd_reg)
 LEFT JOIN main.individual ind USING (cd_ind)
-LEFT JOIN last_identif USING (cd_reg)
+LEFT JOIN last_identif li USING (cd_reg)
 LEFT JOIN recorded_by USING (cd_reg)
 LEFT JOIN identified_by USING (cd_identif)
 LEFT JOIN spat.mpio_dane_2023 m  ON ST_Intersects(l.pt_geom,m.the_geom)
 LEFT JOIN spat.dpto_dane_2023 d USING(dpto_ccdgo)
-LEFT JOIN main.taxo t USING (cd_tax)
+LEFT JOIN main.taxo t ON COALESCE(li.cd_tax,(SELECT cd_tax FROM default_tax))=t.cd_tax
 LEFT JOIN main.def_tax_rank USING (cd_rank)
-LEFT JOIN main.morfo_taxo mt USING (cd_tax,cd_morfo)
 LEFT JOIN main.taxo tk ON find_higher_id(t.cd_tax,'KG')=tk.cd_tax
 LEFT JOIN main.taxo tp ON find_higher_id(t.cd_tax,'PHY')=tp.cd_tax
 LEFT JOIN main.taxo tc ON find_higher_id(t.cd_tax,'CL')=tc.cd_tax
@@ -808,12 +1032,19 @@ LEFT JOIN main.taxo tor ON find_higher_id(t.cd_tax,'OR')=tor.cd_tax
 LEFT JOIN main.taxo tfam ON find_higher_id(t.cd_tax,'FAM')=tfam.cd_tax
 LEFT JOIN main.taxo tgn ON find_higher_id(t.cd_tax,'GN')=tgn.cd_tax
 LEFT JOIN main.taxo tsp ON find_higher_id(t.cd_tax,'SP')=tsp.cd_tax
+LEFT JOIN main.morfo_taxo mt ON li.cd_morfo=mt.cd_morfo
 LEFT JOIN main.event e USING (cd_event)
+LEFT JOIN loc_ev le USING (cd_event)
 LEFT JOIN main.gp_event USING (cd_gp_event)
 LEFT JOIN main.project USING (cd_project)
 CROSS JOIN srs
 WHERE project='Plato'
 ORDER BY num_replicate, ind.tag
+```
+
+``` r
+stopifnot(!duplicated(register$occurrenceID))
+stopifnot(!duplicated(register$organismID))
 ```
 
 ### Measurements or facts
@@ -846,6 +1077,49 @@ WHERE v1.name_var='dbh_cm' AND v2.name_var='height_m' AND project='Plato'
 ORDER BY num_replicate, cd_ind, part_number
 ```
 
+``` sql
+WITH tot AS(
+SELECT 
+  occurrence_id "occurrenceID",
+  CASE 
+    WHEN name_var='dbh_cm' THEN 'DBH ramet'
+    WHEN name_var='height_m' THEN 'Altura ramet'
+  END || part_number AS "measurementType",
+  COALESCE(subind_char_double::text,subind_char_int::text, subind_char_text, subind_char_bool::text) AS "measurementValue",
+  abbv_unit "measurementUnit",
+  num_replicate, cd_ind, part_number,cd_var
+FROM main.subindividual_characteristics s
+LEFT JOIN main.def_var v USING (cd_var)
+LEFT JOIN main.def_unit u USING (cd_unit)
+LEFT JOIN main.subindividual si USING (cd_subind)
+LEFT JOIN main.def_subindividual_part USING (cd_part)
+LEFT JOIN main.individual USING (cd_ind)
+LEFT JOIN main.register USING(cd_reg)
+LEFT JOIN main.event USING (cd_event)
+LEFT JOIN main.gp_event USING (cd_gp_event)
+LEFT JOIN main.project USING (cd_project)
+WHERE project='Plato' AND name_var IN ('dbh_cm', 'height_m')
+UNION ALL
+SELECT occurrence_id "occurrenceID",
+  'tag ramet '|| part_number "measurementType",
+  si.tag "measurementValue",
+  NULL AS "measurementUnit",
+  num_replicate, cd_ind, part_number, NULL
+FROM main.subindividual si
+LEFT JOIN main.def_subindividual_part USING (cd_part)
+LEFT JOIN main.individual USING (cd_ind)
+LEFT JOIN main.reg_individual USING (cd_ind)
+LEFT JOIN main.register USING(cd_reg)
+LEFT JOIN main.event USING (cd_event)
+LEFT JOIN main.gp_event USING (cd_gp_event)
+LEFT JOIN main.project USING (cd_project)
+WHERE project='Plato'
+)
+SELECT "occurrenceID", "measurementType", "measurementValue","measurementUnit"
+FROM tot
+ORDER BY num_replicate, cd_ind, part_number, cd_var
+```
+
 ### Export
 
 ``` r
@@ -855,3 +1129,35 @@ saveInExcel("../../otherData/DwC_Plato.xlsx",lVar=c("event","register","Measurem
 
     Writing sheets: event register MeasurementsOrFacts
     into file:/home/marius/Travail/traitementDonnees/2024_parcelas_permanentes/otherData/DwC_Plato.xlsx
+
+``` r
+write.csv(event,"../../otherData/DwC_Event_Plato.csv",sep=";",dec=".")
+```
+
+    Warning in write.csv(event, "../../otherData/DwC_Event_Plato.csv", sep = ";", :
+    attempt to set 'sep' ignored
+
+    Warning in write.csv(event, "../../otherData/DwC_Event_Plato.csv", sep = ";", :
+    attempt to set 'dec' ignored
+
+``` r
+write.csv(register,"../../otherData/DwC_Register_Plato.csv",sep=";",dec=".")
+```
+
+    Warning in write.csv(register, "../../otherData/DwC_Register_Plato.csv", :
+    attempt to set 'sep' ignored
+
+    Warning in write.csv(register, "../../otherData/DwC_Register_Plato.csv", :
+    attempt to set 'dec' ignored
+
+``` r
+write.csv(MeasurementsOrFacts2,"../../otherData/DwC_MeasurementOrFacts_Plato.csv",sep=";",dec=".")
+```
+
+    Warning in write.csv(MeasurementsOrFacts2,
+    "../../otherData/DwC_MeasurementOrFacts_Plato.csv", : attempt to set 'sep'
+    ignored
+
+    Warning in write.csv(MeasurementsOrFacts2,
+    "../../otherData/DwC_MeasurementOrFacts_Plato.csv", : attempt to set 'dec'
+    ignored

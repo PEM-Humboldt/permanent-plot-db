@@ -13,12 +13,12 @@ knitr:
 Julian Torres gave me the 2014 version (from IGAC) of the SRTM with a 1 arc-grade resolution.
 
 ```{r}
-DIR_DATA <- "/home/marius/Travail/Data/DEM/DEM 30_COMPLETO/"
+DIR_DATA <- "/home/marius/Travail/Data/DEM/dem30mcolo/"
 dir(DIR_DATA)
 require(sf)
 require(rpostgis)
 require(terra)
-dem<-rast(paste(DIR_DATA,"dem_colombia_magna_30m.img",sep="/"))
+dem<-rast(paste(DIR_DATA,"dem30mcolo.tif",sep="/"))
 #crs(dem)<-crs("epsg:4170")
 ```
 
@@ -32,7 +32,8 @@ pp_bst <- RPostgres::dbConnect(RPostgres::Postgres(), dbname = "pp_bst_col")
 
 ```{r}
 (sridDB<-RPostgres::dbGetQuery(pp_bst,"SELECT auth_name||':'||auth_srid srs FROM geometry_columns LEFT JOIN spatial_ref_sys USING(srid) WHERE f_table_schema='main' GROUP BY auth_name,auth_srid ORDER BY count(*) DESC LIMIT 1")$srs)
-dem<-project(dem,crs(sridDB))
+(srsDB<-RPostgres::dbGetQuery(pp_bst,"SELECT srid srs FROM geometry_columns LEFT JOIN spatial_ref_sys USING(srid) WHERE f_table_schema='main' GROUP BY srid ORDER BY count(*) DESC LIMIT 1")$srs)
+#dem<-project(dem,crs(sridDB))
 ```
 
 ## Creating the shemas
@@ -45,11 +46,71 @@ if(!"spat" %in% schemas)
 {RPostgres::dbExecute(pp_bst,"CREATE schema spat")}
 ```
 
-## Importing the DEM
+## Manage the raster extension
 
 ```{r}
+RPostgres::dbExecute(pp_bst,"CREATE EXTENSION IF NOT EXISTS postgis_raster")
+```
+
+
+## Importing the DEM
+
+<!--NB: database need CREATE EXTENSION postgis_raster-->
+
+**not applied**:
+
+```r
 pgWriteRast(pp_bst,c("spat","dem"),raster=dem,overwrite=T)
 ```
+
+## Bash
+
+```{r}
+noData <- -32768L
+file<-"dem30mcolo.tif"
+fileReproject<-"dem30mcolo_3116.tif"
+(commandReproject<-paste0("gdalwarp -t_srs \"",sridDB,"\" -srcnodata \"",noData,"\" ",  paste(DIR_DATA,file,sep="/")," ",paste(DIR_DATA,fileReproject,sep="/")))
+system(commandReproject)
+(commandInsertDb <- paste0("raster2pgsql -s ",srsDB," -I -C -d -Y -t 100x100 -N \"",noData,"\" ", paste(DIR_DATA,fileReproject,sep="/")," spat.dem  | psql pp_bst_col"))
+system(commandInsertDb)
+unlink(paste(DIR_DATA,fileReproject,sep="/"))
+```
+
+
+## test parcelas
+```{sql}
+#| connection: pp_bst
+WITH a AS (
+SELECT cd_event, event_id, (ST_SummaryStats(ST_clip(rast,1,ST_Buffer(pol_geom,20)))).* 
+FROM main.event e
+LEFT JOIN main.location l USING (cd_loc)
+LEFT JOIN main.gp_event ge USING(cd_gp_event)
+LEFT JOIN main.project p USING (cd_project)
+LEFT JOIN spat.dem ON ST_Intersects(rast, pol_geom) 
+WHERE project='Jabiru')
+SELECT cd_event, event_id, * 
+FROM a
+LIMIT 10
+--GROUP BY cd_event, event_id
+```
+
+```{sql}
+#| connection: pp_bst
+SELECT event_id, ST_Value(rast,ST_Centroid(pol_geom))
+FROM main.event e
+LEFT JOIN main.location USING (cd_loc)
+LEFT JOIN main.gp_event USING (cd_gp_event)
+LEFT JOIN main.project USING (cd_project)
+LEFT JOIN spat.dem ON ST_Intersects(ST_Centroid(pol_geom),rast)
+WHERE project='LaPaz'
+LIMIT 10
+```
+
+<!-- TODO:
+* pass very negative values to NoData
+* suppress the rast rows which only have NoData
+-->
+
 
 ## Shutting down light...
 

@@ -6,12 +6,13 @@ DIR_DATA <- "../../otherData/"
 dir(DIR_DATA)
 ```
 
-     [1] "codigos_colecta_jabiru.csv"   "Dryflor_Marius.txt"          
-     [3] "DwC_Jabiru.xlsx"              "DwC_LaPaz.xlsx"              
-     [5] "DwC_Matitas.xlsx"             "DwC_Plato.xlsx"              
-     [7] "Jabiru_str.xlsx"              "LaPaz.csv"                   
-     [9] "Matitas.csv"                  "Plato.csv"                   
-    [11] "TDF_taxonomicReference.RData"
+     [1] "codigos_colecta_jabiru.csv"       "Dryflor_Marius.txt"              
+     [3] "DwC_Event_LaPaz.csv"              "DwC_Jabiru.xlsx"                 
+     [5] "DwC_LaPaz.xlsx"                   "DwC_Matitas.xlsx"                
+     [7] "DwC_MeasurementOrFacts_LaPaz.csv" "DwC_Plato.xlsx"                  
+     [9] "DwC_Register_LaPaz.csv"           "Jabiru_str.xlsx"                 
+    [11] "LaPaz.csv"                        "Matitas.csv"                     
+    [13] "Plato.csv"                        "TDF_taxonomicReference.RData"    
 
 ``` r
 library(openxlsx)
@@ -60,6 +61,40 @@ data_all$Jabiru_str[data_all$Jabiru_str$ind=="2610A",]
 data_all$Jabiru_str$ramet[data_all$Jabiru_str$ind=="2610A"]<-1
 data_all$Jabiru_str$Tag[data_all$Jabiru_str$ind=="2610A"]<-"2610.1"
 data_all$Jabiru_str$ind[data_all$Jabiru_str$ind=="2610A"]<-"2610.1"
+
+data_all$Jabiru_str[data_all$Jabiru_str$Tag==529,]
+```
+
+|     | subplot | Tag | ind  | ramet | family       | height_m | DBH_cm_ini | code    | plot   |
+|:----|--------:|:----|:-----|------:|:-------------|---------:|-----------:|:--------|:-------|
+| 566 |      18 | 529 | 529  |     1 | Polygonaceae |       11 |       10.4 | Coccsp2 | Jabiru |
+| 567 |      18 | 529 | 529A |     2 | Polygonaceae |       12 |       10.1 | Coccsp2 | Jabiru |
+| 568 |      18 | 529 | 529B |     3 | Polygonaceae |       10 |        4.8 | Coccsp2 | Jabiru |
+| 569 |      18 | 529 | 529C |     4 | Polygonaceae |       11 |        8.8 | Coccsp2 | Jabiru |
+| 570 |      18 | 529 | 529D |     5 | Polygonaceae |       13 |       11.4 | Coccsp2 | Jabiru |
+| 571 |      18 | 529 | 529E |     6 | Polygonaceae |       13 |       13.5 | Coccsp2 | Jabiru |
+| 572 |      18 | 529 | 529F |     7 | Polygonaceae |       11 |        9.5 | Coccsp2 | Jabiru |
+| 573 |      19 | 529 | 529G |     8 | Polygonaceae |       13 |       10.9 | Coccsp2 | Jabiru |
+| 574 |      19 | 529 | 529H |     9 | Polygonaceae |       14 |       16.3 | Coccsp2 | Jabiru |
+| 575 |      19 | 529 | 529I |    10 | Polygonaceae |       13 |       10.1 | Coccsp2 | Jabiru |
+| 576 |      19 | 529 | 529J |    11 | Polygonaceae |       14 |       10.7 | Coccsp2 | Jabiru |
+
+``` r
+data_all$Jabiru_str$subplot[data_all$Jabiru_str$Tag==529]<-18
+
+data_all$Jabiru_str[data_all$Jabiru_str$Tag %in% c(2238,2239),]
+```
+
+|      | subplot | Tag  | ind   | ramet | family     | height_m | DBH_cm_ini | code     | plot   |
+|:-----|--------:|:-----|:------|------:|:-----------|---------:|-----------:|:---------|:-------|
+| 2389 |      83 | 2238 | 2238  |     1 | Meliaceae  |     6.75 |        4.1 | Tricolig | Jabiru |
+| 2390 |      88 | 2238 | 2238A |     2 | Annonaceae |       NA |        9.3 | Oxanespi | Jabiru |
+| 2391 |      83 | 2239 | 2239  |     1 | Annonaceae |       NA |        2.8 | Oxanespi | Jabiru |
+
+``` r
+data_all$Jabiru_str$subplot[data_all$Jabiru_str$ind=="2238A"]<-83
+data_all$Jabiru_str$Tag[data_all$Jabiru_str$ind=="2238A"]<-2239
+data_all$Jabiru_str$Ind[data_all$Jabiru_str$ind=="2238A"]<-"2239A"
 ```
 
 ``` r
@@ -999,23 +1034,23 @@ WHERE project IN ('Jabiru')
 
 | cd_reg | project | occurrence_id                              |
 |:-------|:--------|:-------------------------------------------|
-| 6366   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0001 |
-| 6367   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0002 |
-| 6368   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0003 |
-| 6369   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0004 |
-| 6370   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0005 |
-| 6371   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0006 |
-| 6372   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0007 |
-| 6373   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0008 |
-| 6374   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0009 |
-| 6375   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0010 |
+| 6355   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0001 |
+| 6356   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0002 |
+| 6357   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0003 |
+| 6358   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0004 |
+| 6359   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0005 |
+| 6360   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0006 |
+| 6361   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0007 |
+| 6362   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0008 |
+| 6363   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0009 |
+| 6364   | Jabiru  | IAvH:OBSERVACIONHUMANA:JABIRU_CENSUS0:0010 |
 
 Displaying records 1 - 10
 
 ``` r
 reg_occurrenceId<-dbGetQuery(pp_bst,"
 WITH a AS(
-SELECT cd_reg, project, 'IAvH:'||'OBSERVACIONHUMANA'||':'||UPPER(project)||'_CENSUS0:'||LPAD( (ROW_NUMBER() OVER (PARTITION BY cd_project ORDER BY cd_project,cd_reg))::text,4,'0') occurrence_id
+SELECT cd_reg, project, 'IAVH:'||'OBSERVACIONHUMANA'||':'||UPPER(project)||'_CENSUS0:'||LPAD( (ROW_NUMBER() OVER (PARTITION BY cd_project ORDER BY cd_project,cd_reg))::text,4,'0') occurrence_id
 FROM main.register r
 LEFT JOIN main.event e USING (cd_event)
 LEFT JOIN main.gp_event ge USING (cd_gp_event)
