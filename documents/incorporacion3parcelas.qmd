@@ -1,6 +1,5 @@
 ---
-title: "Ejemplo de incorporación de datos a la base de datos: parcelas LaPaz,
-Matitas, Plato"
+title: "Ejemplo de incorporación de datos a la base de datos: parcelas LaPaz, Matitas, Plato"
 author: "Marius Bottin"
 lang: es
 format: 
@@ -686,7 +685,7 @@ ind_tab$cd_project<-cd_projects[unique(ind_idx)]
 ind_tab$cd_identif<-NA
 ind_tab$cd_reg<-NA
 ind_tab$cd_ind<-NA
-dateIdentif<-as.Date("1/10/2025",format="%d/%m/%Y")
+dateIdentif<-as.Date("1/02/2016",format="%d/%m/%Y")
 stopifnot(sum(!is.na(ind_tab$recordNumber)) == sum(!is.na(corrected_parcelas$recordNumber)))
 dbBegin(pp_bst)
 for(i in 1:nrow(ind_tab))

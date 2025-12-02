@@ -230,8 +230,8 @@ SELECT occurrence_id AS "occurrenceID",
   identified_by.identified_by AS "identifiedBy",
   TO_CHAR(date_identif,'YYYY-MM-DD') AS "dateIdentified",
   identification_qualifier AS "identificationQualifier",
-  t.name_tax AS "ScientificName",
-  t.authorship AS "ScientificNameAuthorship",
+  t.name_tax AS "scientificName",
+  t.authorship AS "scientificNameAuthorship",
   INITCAP(tax_rank_spa) AS "taxonRank",
   verbatim_taxon_rank AS "verbatimTaxonRank",
   CASE
@@ -360,36 +360,10 @@ saveInExcel("../../otherData/DwC_Jabiru.xlsx",lVar=c("event","register","Measure
     into file:/home/marius/Travail/traitementDonnees/2024_parcelas_permanentes/otherData/DwC_Jabiru.xlsx
 
 ``` r
-write.csv(event,"../../otherData/DwC_Event_Jabiru.csv",sep=";",dec=".")
+write.csv(event,"../../otherData/DwC_Event_Jabiru.csv", na = "", row.names = F)
+write.csv(register,"../../otherData/DwC_Register_Jabiru.csv", na = "", row.names = F)
+write.csv(MeasurementsOrFacts2,"../../otherData/DwC_MeasurementOrFacts_Jabiru.csv", na = "", row.names = F)
 ```
-
-    Warning in write.csv(event, "../../otherData/DwC_Event_Jabiru.csv", sep = ";",
-    : attempt to set 'sep' ignored
-
-    Warning in write.csv(event, "../../otherData/DwC_Event_Jabiru.csv", sep = ";",
-    : attempt to set 'dec' ignored
-
-``` r
-write.csv(register,"../../otherData/DwC_Register_Jabiru.csv",sep=";",dec=".")
-```
-
-    Warning in write.csv(register, "../../otherData/DwC_Register_Jabiru.csv", :
-    attempt to set 'sep' ignored
-
-    Warning in write.csv(register, "../../otherData/DwC_Register_Jabiru.csv", :
-    attempt to set 'dec' ignored
-
-``` r
-write.csv(MeasurementsOrFacts2,"../../otherData/DwC_MeasurementOrFacts_Jabiru.csv",sep=";",dec=".")
-```
-
-    Warning in write.csv(MeasurementsOrFacts2,
-    "../../otherData/DwC_MeasurementOrFacts_Jabiru.csv", : attempt to set 'sep'
-    ignored
-
-    Warning in write.csv(MeasurementsOrFacts2,
-    "../../otherData/DwC_MeasurementOrFacts_Jabiru.csv", : attempt to set 'dec'
-    ignored
 
 ``` r
 RPostgres::dbDisconnect(pp_bst)

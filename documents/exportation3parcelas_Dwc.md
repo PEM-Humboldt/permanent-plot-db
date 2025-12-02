@@ -229,8 +229,8 @@ SELECT occurrence_id AS "occurrenceID",
   identified_by.identified_by AS "identifiedBy",
   TO_CHAR(date_identif,'YYYY-MM-DD') AS "dateIdentified",
   identification_qualifier AS "identificationQualifier",
-  t.name_tax AS "ScientificName",
-  t.authorship AS "ScientificNameAuthorship",
+  t.name_tax AS "scientificName",
+  t.authorship AS "scientificNameAuthorship",
   INITCAP(tax_rank_spa) AS "taxonRank",
   verbatim_taxon_rank AS "verbatimTaxonRank",
   CASE
@@ -361,36 +361,10 @@ saveInExcel("../../otherData/DwC_LaPaz.xlsx",lVar=c("event","register","Measurem
     into file:/home/marius/Travail/traitementDonnees/2024_parcelas_permanentes/otherData/DwC_LaPaz.xlsx
 
 ``` r
-write.csv(event,"../../otherData/DwC_Event_LaPaz.csv",sep=";",dec=".")
+write.csv(event,"../../otherData/DwC_Event_LaPaz.csv", na = "", row.names = F)
+write.csv(register,"../../otherData/DwC_Register_LaPaz.csv", na = "", row.names = F)
+write.csv(MeasurementsOrFacts2,"../../otherData/DwC_MeasurementOrFacts_LaPaz.csv", na = "", row.names = F)
 ```
-
-    Warning in write.csv(event, "../../otherData/DwC_Event_LaPaz.csv", sep = ";", :
-    attempt to set 'sep' ignored
-
-    Warning in write.csv(event, "../../otherData/DwC_Event_LaPaz.csv", sep = ";", :
-    attempt to set 'dec' ignored
-
-``` r
-write.csv(register,"../../otherData/DwC_Register_LaPaz.csv",sep=";",dec=".")
-```
-
-    Warning in write.csv(register, "../../otherData/DwC_Register_LaPaz.csv", :
-    attempt to set 'sep' ignored
-
-    Warning in write.csv(register, "../../otherData/DwC_Register_LaPaz.csv", :
-    attempt to set 'dec' ignored
-
-``` r
-write.csv(MeasurementsOrFacts2,"../../otherData/DwC_MeasurementOrFacts_LaPaz.csv",sep=";",dec=".")
-```
-
-    Warning in write.csv(MeasurementsOrFacts2,
-    "../../otherData/DwC_MeasurementOrFacts_LaPaz.csv", : attempt to set 'sep'
-    ignored
-
-    Warning in write.csv(MeasurementsOrFacts2,
-    "../../otherData/DwC_MeasurementOrFacts_LaPaz.csv", : attempt to set 'dec'
-    ignored
 
 ## Matitas
 
@@ -614,8 +588,8 @@ SELECT occurrence_id AS "occurrenceID",
   identified_by.identified_by AS "identifiedBy",
   TO_CHAR(date_identif,'YYYY-MM-DD') AS "dateIdentified",
   identification_qualifier AS "identificationQualifier",
-  t.name_tax AS "ScientificName",
-  t.authorship AS "ScientificNameAuthorship",
+  t.name_tax AS "scientificName",
+  t.authorship AS "scientificNameAuthorship",
   INITCAP(tax_rank_spa) AS "taxonRank",
   verbatim_taxon_rank AS "verbatimTaxonRank",
   CASE
@@ -746,36 +720,10 @@ saveInExcel("../../otherData/DwC_Matitas.xlsx",lVar=c("event","register","Measur
     into file:/home/marius/Travail/traitementDonnees/2024_parcelas_permanentes/otherData/DwC_Matitas.xlsx
 
 ``` r
-write.csv(event,"../../otherData/DwC_Event_Matitas.csv",sep=";",dec=".")
+write.csv(event,"../../otherData/DwC_Event_Matitas.csv", na = "", row.names = F)
+write.csv(register,"../../otherData/DwC_Register_Matitas.csv", na = "", row.names = F)
+write.csv(MeasurementsOrFacts2,"../../otherData/DwC_MeasurementOrFacts_Matitas.csv", na = "", row.names = F)
 ```
-
-    Warning in write.csv(event, "../../otherData/DwC_Event_Matitas.csv", sep = ";",
-    : attempt to set 'sep' ignored
-
-    Warning in write.csv(event, "../../otherData/DwC_Event_Matitas.csv", sep = ";",
-    : attempt to set 'dec' ignored
-
-``` r
-write.csv(register,"../../otherData/DwC_Register_Matitas.csv",sep=";",dec=".")
-```
-
-    Warning in write.csv(register, "../../otherData/DwC_Register_Matitas.csv", :
-    attempt to set 'sep' ignored
-
-    Warning in write.csv(register, "../../otherData/DwC_Register_Matitas.csv", :
-    attempt to set 'dec' ignored
-
-``` r
-write.csv(MeasurementsOrFacts2,"../../otherData/DwC_MeasurementOrFacts_Matitas.csv",sep=";",dec=".")
-```
-
-    Warning in write.csv(MeasurementsOrFacts2,
-    "../../otherData/DwC_MeasurementOrFacts_Matitas.csv", : attempt to set 'sep'
-    ignored
-
-    Warning in write.csv(MeasurementsOrFacts2,
-    "../../otherData/DwC_MeasurementOrFacts_Matitas.csv", : attempt to set 'dec'
-    ignored
 
 ## Plato
 
@@ -999,8 +947,8 @@ SELECT occurrence_id AS "occurrenceID",
   identified_by.identified_by AS "identifiedBy",
   TO_CHAR(date_identif,'YYYY-MM-DD') AS "dateIdentified",
   identification_qualifier AS "identificationQualifier",
-  t.name_tax AS "ScientificName",
-  t.authorship AS "ScientificNameAuthorship",
+  t.name_tax AS "scientificName",
+  t.authorship AS "scientificNameAuthorship",
   INITCAP(tax_rank_spa) AS "taxonRank",
   verbatim_taxon_rank AS "verbatimTaxonRank",
   CASE
@@ -1131,33 +1079,7 @@ saveInExcel("../../otherData/DwC_Plato.xlsx",lVar=c("event","register","Measurem
     into file:/home/marius/Travail/traitementDonnees/2024_parcelas_permanentes/otherData/DwC_Plato.xlsx
 
 ``` r
-write.csv(event,"../../otherData/DwC_Event_Plato.csv",sep=";",dec=".")
+write.csv(event,"../../otherData/DwC_Event_Plato.csv", na = "", row.names = F)
+write.csv(register,"../../otherData/DwC_Register_Plato.csv", na = "", row.names = F)
+write.csv(MeasurementsOrFacts2,"../../otherData/DwC_MeasurementOrFacts_Plato.csv", na = "", row.names = F)
 ```
-
-    Warning in write.csv(event, "../../otherData/DwC_Event_Plato.csv", sep = ";", :
-    attempt to set 'sep' ignored
-
-    Warning in write.csv(event, "../../otherData/DwC_Event_Plato.csv", sep = ";", :
-    attempt to set 'dec' ignored
-
-``` r
-write.csv(register,"../../otherData/DwC_Register_Plato.csv",sep=";",dec=".")
-```
-
-    Warning in write.csv(register, "../../otherData/DwC_Register_Plato.csv", :
-    attempt to set 'sep' ignored
-
-    Warning in write.csv(register, "../../otherData/DwC_Register_Plato.csv", :
-    attempt to set 'dec' ignored
-
-``` r
-write.csv(MeasurementsOrFacts2,"../../otherData/DwC_MeasurementOrFacts_Plato.csv",sep=";",dec=".")
-```
-
-    Warning in write.csv(MeasurementsOrFacts2,
-    "../../otherData/DwC_MeasurementOrFacts_Plato.csv", : attempt to set 'sep'
-    ignored
-
-    Warning in write.csv(MeasurementsOrFacts2,
-    "../../otherData/DwC_MeasurementOrFacts_Plato.csv", : attempt to set 'dec'
-    ignored

@@ -6,13 +6,18 @@ DIR_DATA <- "../../otherData/"
 dir(DIR_DATA)
 ```
 
-     [1] "codigos_colecta_jabiru.csv"       "Dryflor_Marius.txt"              
-     [3] "DwC_Event_LaPaz.csv"              "DwC_Jabiru.xlsx"                 
-     [5] "DwC_LaPaz.xlsx"                   "DwC_Matitas.xlsx"                
-     [7] "DwC_MeasurementOrFacts_LaPaz.csv" "DwC_Plato.xlsx"                  
-     [9] "DwC_Register_LaPaz.csv"           "Jabiru_str.xlsx"                 
-    [11] "LaPaz.csv"                        "Matitas.csv"                     
-    [13] "Plato.csv"                        "TDF_taxonomicReference.RData"    
+     [1] "codigos_colecta_jabiru.csv"         "Dryflor_Marius.txt"                
+     [3] "DwC_Event_Jabiru.csv"               "DwC_Event_LaPaz.csv"               
+     [5] "DwC_Event_Matitas.csv"              "DwC_Event_Plato.csv"               
+     [7] "DwC_Jabiru.xlsx"                    "DwC_LaPaz.xlsx"                    
+     [9] "DwC_Matitas.xlsx"                   "DwC_MeasurementOrFacts_Jabiru.csv" 
+    [11] "DwC_MeasurementOrFacts_LaPaz.csv"   "DwC_MeasurementOrFacts_Matitas.csv"
+    [13] "DwC_MeasurementOrFacts_Plato.csv"   "DwC_Plato.xlsx"                    
+    [15] "DwC_Register_Jabiru.csv"            "DwC_Register_LaPaz.csv"            
+    [17] "DwC_Register_Matitas.csv"           "DwC_Register_Plato.csv"            
+    [19] "Jabiru_str.xlsx"                    "LaPaz.csv"                         
+    [21] "Matitas.csv"                        "Plato.csv"                         
+    [23] "TDF_taxonomicReference.RData"      
 
 ``` r
 library(openxlsx)
